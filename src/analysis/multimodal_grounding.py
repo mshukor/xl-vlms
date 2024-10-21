@@ -100,7 +100,8 @@ def get_multimodal_grounding(
             tokenizer=tokenizer,
             num_top_tokens=num_grounded_text_tokens,
         )
-        logger.info(f"grounded_words: {grounded_words}")
+        for i in range(len(grounded_words)):
+            logger.info(f"Concept {i} grounded words: {grounded_words[i]}")
         grounding_dict["text_grounding"] = grounded_words
 
     if image_grounding:
@@ -109,7 +110,7 @@ def get_multimodal_grounding(
             num_images_per_concept=num_most_activating_samples,
         )
         image_paths = metadata.get("image_paths", [])
-        token_of_interest_mask = metadata.get(token_of_interest_mask, None)
+        token_of_interest_mask = metadata.get('token_of_interest_mask', None)
         if token_of_interest_mask is not None:
             image_paths = [
                 image_paths[i]
