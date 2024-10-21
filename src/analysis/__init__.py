@@ -29,9 +29,6 @@ def load_features(
         features_path = [features_path]
     features = {}
     meta_data = {}
-    token_of_interest_mask = None
-    if args.load_matched_features and len(features_path) > 1:
-        token_of_interest_mask = get_matched_token_of_interest_mask(features_path)
 
     for feat_path in features_path:
         data = torch.load(feat_path, map_location="cpu")
@@ -44,12 +41,9 @@ def load_features(
         feat_key = os.path.basename(feat_path)
 
         if keep_only_token_of_interest:
-            if token_of_interest_mask is None:
-                feat = get_token_of_interest_features(
-                    feat, meta.get("token_of_interest_mask", None)
-                )
-            else:
-                feat = get_token_of_interest_features(feat, token_of_interest_mask)
+            feat = get_token_of_interest_features(
+                feat, meta.get("token_of_interest_mask", None)
+            )
         features[feat_key] = feat
         meta_data[feat_key] = meta
         if logger is not None:
