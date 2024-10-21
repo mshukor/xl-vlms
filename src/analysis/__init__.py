@@ -7,8 +7,7 @@ import torch
 from analysis.feature_decomposition import (decompose_activations,
                                             get_feature_matrix)
 from analysis.multimodal_grounding import get_multimodal_grounding
-from analysis.utils import (get_matched_token_of_interest_mask,
-                            get_token_of_interest_features)
+from analysis.utils import get_token_of_interest_features
 
 __all__ = ["load_features", "analyse_features"]
 
