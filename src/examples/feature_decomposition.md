@@ -4,7 +4,7 @@
 ```
 token_of_interest=dog
 modules_to_hook=language_model.model.norm
-# to load the model from local you can set --local_files_only 
+# to load the model from local you can set --local_files_only
 python src/save_features.py \
 --model_name llava-hf/llava-1.5-7b-hf \
 --save_dir /data/mshukor/logs/xl_vlms \
@@ -19,7 +19,7 @@ python src/save_features.py \
 --modules_to_hook $modules_to_hook \
 --token_of_interest $token_of_interest \
 --generation_mode \
---local_files_only 
+--local_files_only
 ```
 
 ## Feature decomposition and multimodal grounding
@@ -35,7 +35,5 @@ python src/analyse_features.py \
 --module_to_decompose $modules_to_hook \
 --num_concepts $num_concepts \
 --decomposition_method $decomposition_method \
---local_files_only 
+--local_files_only
 ```
-
-

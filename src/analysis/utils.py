@@ -1,9 +1,6 @@
-from typing import List
-
 import torch
 
 __all__ = ["get_token_of_interest_features"]
-
 
 
 def get_token_of_interest_features(
@@ -16,5 +13,3 @@ def get_token_of_interest_features(
         features = features[token_of_interest_mask].reshape(-1, features.shape[1])
 
     return features
-
-

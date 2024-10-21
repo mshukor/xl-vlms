@@ -1,12 +1,7 @@
-import json
-import os
-import warnings
 from typing import Any, Callable, Dict
 
 import requests
-import torch
 from PIL import Image
-from safetensors.torch import load_file
 
 __all__ = ["ImageTextModel"]
 

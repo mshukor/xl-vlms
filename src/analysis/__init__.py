@@ -31,7 +31,7 @@ def load_features(
 
     for feat_path in features_path:
         if logger is not None:
-            logger.info(f'Loading features from: {feat_path}')
+            logger.info(f"Loading features from: {feat_path}")
         data = torch.load(feat_path, map_location="cpu")
         assert feature_key in data, f"{feature_key} not found, got {data.keys()}."
         data_ = data[feature_key]

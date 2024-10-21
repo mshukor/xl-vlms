@@ -136,4 +136,3 @@ class COCODataset(ImageTextDataset):
             data = self.rng.choice(data, size=self.dataset_size, replace=False)
 
         self.data = data
-

@@ -10,7 +10,6 @@ from typing import Any, Callable, Dict, List, Tuple, Union
 import numpy as np
 import torch
 
-
 __all__ = [
     "register_hooks",
     "clear_forward_hooks",
@@ -88,7 +87,6 @@ def save_hidden_states(module_name: str = "", **kwargs: Any):
             HIDDEN_STATES[module_name] = [output]
 
     return hook
-
 
 
 def extract_token_of_interest_states(
