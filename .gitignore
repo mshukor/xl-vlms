@@ -1,0 +1,21 @@
+._*
+!__main__.py
+
+.DS_Store
+
+__pycache__/
+
+results/
+.ipynb_checkpoints*
+
+
+annotations.json/
+karpathy/
+logs.log
+
+src/load_lora_model.py
+
+
+# Ignore all .pth files
+*.pth
+*.npy
