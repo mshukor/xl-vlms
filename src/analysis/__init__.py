@@ -81,18 +81,20 @@ def analyse_features(
         if "grounding" in analysis_name:
             text_grounding = "text_grounding" in analysis_name
             image_grounding = "image_grounding" in analysis_name
-            grounding_dict = get_multimodal_grounding(
+            get_multimodal_grounding(
                 concepts=concepts,
                 activations=activations,
                 model_class=model_class,
                 text_grounding=text_grounding,
                 image_grounding=image_grounding,
                 module_to_decompose=args.module_to_decompose,
-                save_mas_dir=args.save_dir,
+                save_dir=args.save_dir,
+                save_name=args.save_filename,
                 num_grounded_text_tokens=args.num_grounded_text_tokens,
                 num_most_activating_samples=args.num_most_activating_samples,
                 metadata=metadata,
                 logger=logger,
+                args=args,
             )
     else:
         raise NotImplementedError(
