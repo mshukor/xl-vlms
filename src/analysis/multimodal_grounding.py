@@ -112,7 +112,8 @@ def get_multimodal_grounding(
             num_top_tokens=num_grounded_text_tokens,
         )
         if logger is not None:
-            logger.info(f"grounded_words: {grounded_words}")
+            for i in range(len(grounded_words)):
+                logger.info(f"Concept {i} grounded words: {grounded_words[i]}")
         results_dict["text_grounding"] = grounded_words
 
     if image_grounding:
