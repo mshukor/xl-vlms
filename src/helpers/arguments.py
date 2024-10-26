@@ -195,4 +195,19 @@ def get_arguments():
         help="Start looking for token of interest from this index.",
     )
 
+    # Evaluation and metrics
+    parser.add_argument(
+        "--evaluation_name",
+        type=str,
+        help="Type of evaluation to perform",
+        default="dictionary_overlap",
+    )
+    parser.add_argument(
+        "--decomposition_path",
+        type=str,
+        help="Path for file storing concept dictionary and grounding details",
+        default=None,
+    )
+    
+
     return parser.parse_args()
