@@ -68,7 +68,7 @@ def analyse_features(
     if "decompose_activations" in analysis_name:
         features = list(features.values())[0]
         metadata = list(metadata.values())[0]
-        concepts, activations, _ = decompose_activations(
+        concepts, activations, decomposition_model = decompose_activations(
             mat=features,
             num_concepts=args.num_concepts,
             decomposition_method=args.decomposition_method,
@@ -81,21 +81,26 @@ def analyse_features(
         if "grounding" in analysis_name:
             text_grounding = "text_grounding" in analysis_name
             image_grounding = "image_grounding" in analysis_name
-            get_multimodal_grounding(
+            results_dict = get_multimodal_grounding(
                 concepts=concepts,
                 activations=activations,
                 model_class=model_class,
                 text_grounding=text_grounding,
                 image_grounding=image_grounding,
                 module_to_decompose=args.module_to_decompose,
-                save_dir=args.save_dir,
-                save_name=args.save_filename,
                 num_grounded_text_tokens=args.num_grounded_text_tokens,
                 num_most_activating_samples=args.num_most_activating_samples,
                 metadata=metadata,
                 logger=logger,
                 args=args,
             )
+            results_dict['analysis_model'] = decomposition_model
+            file_name = os.path.join(args.save_dir, f"{args.decomposition_method}_{args.save_filename}.pth")
+            torch.save(results_dict, file_name)
+            if logger is not None:
+                logger.info(f"Saving decomposition results dictionary to: {file_name}")
+            
+        
     else:
         raise NotImplementedError(
             f"Only the following analysis are supported: {SUPPORTED_ANALYSIS}"

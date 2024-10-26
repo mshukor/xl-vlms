@@ -101,8 +101,8 @@ def decompose_activations(
     return components, comp_activ, model
 
 
-def project_test_sample(
-    sample: torch.Tensor, analysis_model: Callable, decomposition_type: str = "nndl"
+def project_test_samples(
+    sample: torch.Tensor, analysis_model: Callable, decomposition_type: str = "snmf"
 ):
     """
     Input:
@@ -122,3 +122,4 @@ def project_test_sample(
         # Kmeans transforms to cluster distances and not "activations". 1/(1+x) transformation to view distances as activations
         projected_sample = 1 / (1 + projected_sample)
     return projected_sample
+    

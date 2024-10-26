@@ -75,8 +75,6 @@ def get_multimodal_grounding(
     text_grounding: bool = True,
     image_grounding: bool = True,
     module_to_decompose: str = "",
-    save_dir: str = "",
-    save_name: str = "",
     num_grounded_text_tokens: int = 10,
     num_most_activating_samples: int = 5,
     metadata: Dict[str, Any] = {},
@@ -141,8 +139,4 @@ def get_multimodal_grounding(
                 logger.info(f"Concept {i} image paths: {concept_image_paths}")
         results_dict["image_grounding_paths"] = all_concept_image_paths
         
-    file_name = os.path.join(save_dir, f"{args.decomposition_method}_{save_name}.pth")
-    torch.save(results_dict, file_name)
-    if logger is not None:
-        logger.info(f"Saving decomposition results dictionary to: {file_name}")
-    return
+    return results_dict
