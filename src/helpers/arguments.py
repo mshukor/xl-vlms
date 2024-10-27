@@ -214,6 +214,5 @@ def get_arguments():
         action="store_true",
         help="Will replace grounded words by random words of possibly same length",
     )
-    
 
     return parser.parse_args()

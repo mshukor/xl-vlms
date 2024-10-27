@@ -3,7 +3,7 @@ cd /home/parekh/xl-vlms
 
 hook_name=save_hidden_states_for_token_of_interest
 token=train # Can also use other noun that appear in your dataset
-feature_modules=language_model.model.norm 
+feature_modules=language_model.model.norm
 model_name=llava-hf/llava-1.5-7b-hf
 data_dir=/data/mshukor/data/coco/
 split=train
@@ -41,4 +41,3 @@ python src/save_features.py \
 #--save_dir /home/parekh/ \
 #--save_filename llava_train_generation_split_test \
 #--generation_mode
-

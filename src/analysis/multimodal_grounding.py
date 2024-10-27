@@ -1,6 +1,6 @@
 import argparse
-import os
 from typing import Any, Callable, Dict, List
+
 import torch
 from nltk.corpus import words
 
@@ -12,8 +12,8 @@ __all__ = [
     "concept_text_grounding",
     "concept_image_grounding",
     "visualize_multimodal_grounding",
-]               
-    
+]
+
 
 def get_stopwords(gist_file_path: str = GIST_FILE_PATH) -> List[str]:
     gist_file = open(gist_file_path, "r")
@@ -88,12 +88,12 @@ def get_multimodal_grounding(
 
     activations = torch.Tensor(activations)
     concepts = torch.Tensor(concepts)
-    results_dict['concepts'] = concepts
-    results_dict['activations'] = activations
-    results_dict['decomposition_method'] = args.decomposition_method
-    
+    results_dict["concepts"] = concepts
+    results_dict["activations"] = activations
+    results_dict["decomposition_method"] = args.decomposition_method
+
     grounded_words = []
-    
+
     if "lm_head" in module_to_decompose:
         top_tokens = concepts.argmax(axis=1)
         top_words = tokenizer.decode(top_tokens)
@@ -101,7 +101,7 @@ def get_multimodal_grounding(
             logger.info(f"Lm head top_tokens: {top_tokens}, top words: {top_words}")
             logger.info("Lm head only for analysis. Function returning")
         return
-        
+
     if text_grounding:
         grounded_words = concept_text_grounding(
             concepts,
@@ -138,5 +138,5 @@ def get_multimodal_grounding(
             if logger is not None:
                 logger.info(f"Concept {i} image paths: {concept_image_paths}")
         results_dict["image_grounding_paths"] = all_concept_image_paths
-        
+
     return results_dict

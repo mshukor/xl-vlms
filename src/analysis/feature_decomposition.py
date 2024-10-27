@@ -122,4 +122,3 @@ def project_test_samples(
         # Kmeans transforms to cluster distances and not "activations". 1/(1+x) transformation to view distances as activations
         projected_sample = 1 / (1 + projected_sample)
     return projected_sample
-    

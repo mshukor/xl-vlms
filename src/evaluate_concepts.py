@@ -3,9 +3,9 @@ import os
 import torch
 
 from analysis import load_features
-from metrics import concept_dictionary_evaluation
 from helpers.arguments import get_arguments
 from helpers.logger import log_args, setup_logger
+from metrics import concept_dictionary_evaluation
 from models import get_model_class
 
 if __name__ == "__main__":
@@ -25,10 +25,10 @@ if __name__ == "__main__":
             logger=logger,
             args=args,
         )
-        
+
     model_class = None
     if args.model_name is not None:
-        # Don't need model on GPU 
+        # Don't need model on GPU
         model_class = get_model_class(
             args.model_name, device=torch.device("cpu"), logger=logger, args=args
         )
@@ -42,5 +42,3 @@ if __name__ == "__main__":
         args=args,
         device=device,
     )
-
-    

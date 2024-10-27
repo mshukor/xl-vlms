@@ -94,13 +94,14 @@ def analyse_features(
                 logger=logger,
                 args=args,
             )
-            results_dict['analysis_model'] = decomposition_model
-            file_name = os.path.join(args.save_dir, f"{args.decomposition_method}_{args.save_filename}.pth")
+            results_dict["analysis_model"] = decomposition_model
+            file_name = os.path.join(
+                args.save_dir, f"{args.decomposition_method}_{args.save_filename}.pth"
+            )
             torch.save(results_dict, file_name)
             if logger is not None:
                 logger.info(f"Saving decomposition results dictionary to: {file_name}")
-            
-        
+
     else:
         raise NotImplementedError(
             f"Only the following analysis are supported: {SUPPORTED_ANALYSIS}"
