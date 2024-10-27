@@ -75,7 +75,7 @@ def extract_text_features(captions, model, device, batch_size=256):
         batch_size=batch_size, shuffle=False)
     all_text_features = []
     with torch.no_grad():
-        for b in tqdm.tqdm(data):
+        for idx, b in enumerate(data):
             b = b['caption'].to(device)
             all_text_features.append(model.encode_text(b).cpu().numpy())
     all_text_features = np.vstack(all_text_features)
