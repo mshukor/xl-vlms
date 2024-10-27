@@ -3,7 +3,6 @@ import os
 import torch
 
 from analysis import load_features
-from datasets import get_dataset_loader
 from metrics import dictionary_learning_evaluation
 from helpers.arguments import get_arguments
 from helpers.logger import log_args, setup_logger
@@ -17,6 +16,7 @@ if __name__ == "__main__":
     log_args(args, logger)
 
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    # GPU might be needed for CLIPScore/BERTScore
 
     if args.features_path is not None:
         features, metadata = load_features(
@@ -25,11 +25,19 @@ if __name__ == "__main__":
             logger=logger,
             args=args,
         )
+        
+    model_class = None
+    if args.model_name is not None:
+        # Don't need model on GPU 
+        model_class = get_model_class(
+            args.model_name, device=torch.device("cpu"), logger=logger, args=args
+        )
 
     dictionary_learning_evaluation(
         metric_name=args.evaluation_name,
         features=features,
         metadata=metadata,
+        model_class=model_class,
         logger=logger,
         args=args,
         device=device,

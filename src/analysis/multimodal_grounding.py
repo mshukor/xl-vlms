@@ -12,10 +12,10 @@ __all__ = [
     "concept_text_grounding",
     "concept_image_grounding",
     "visualize_multimodal_grounding",
-]
+]               
+    
 
-
-def get_stopwords(gist_file_path: str = "gist_stopwords.txt") -> List[str]:
+def get_stopwords(gist_file_path: str = GIST_FILE_PATH) -> List[str]:
     gist_file = open(gist_file_path, "r")
     content = gist_file.read()
     stopwords = content.split(",")

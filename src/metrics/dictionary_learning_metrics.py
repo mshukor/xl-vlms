@@ -1,8 +1,35 @@
 import torch
 import clip
 import numpy as np
+from nltk.corpus import words
 
 from metrics.clipscore import extract_image_features, img_clipscore
+from analysis.multimodal_grounding import get_stopwords, valid_word
+
+def get_random_words(lm_head, tokenizer, grounding_words):
+    """
+        This function replaces grounding words of each concept by a set of random words, possibly of same length
+    """
+    eng_corpus = words.words()
+    stopwords = get_stopwords()
+    all_random_words = []
+    for k, concept_words in enumerate(grounding_words):
+        # k is concept idx, words is grounded words for concept k
+        desired_length = len(concept_words) 
+        num_top_tokens = min(10*desired_length, lm_head.out_features) # Should be more than enough
+        random_direction = torch.rand(1, lm_head.in_features).float()
+        token_logits = lm_head(random_direction)
+        top_token_idx = token_logits.argsort(dim=-1, descending=True)[:, :num_top_tokens]
+        candidate_words = tokenizer.batch_decode(top_token_idx[0], skip_special_tokens=True)
+        candidate_words = [
+            word.lower().strip()
+            for word in candidate_words
+            if valid_word(word, eng_corpus=eng_corpus, stopwords=stopwords)
+        ]
+        if len(candidate_words) > desired_length:
+            candidate_words = candidate_words[:desired_length]
+        all_random_words.append(candidate_words)
+    return all_random_words
 
 
 def compute_overlap(grounding_words):

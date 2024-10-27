@@ -208,6 +208,12 @@ def get_arguments():
         help="Path for file storing concept dictionary and grounding details",
         default=None,
     )
+    parser.add_argument(
+        "--use_random_words",
+        default=False,
+        action="store_true",
+        help="Will replace grounded words by random words of possibly same length",
+    )
     
 
     return parser.parse_args()
