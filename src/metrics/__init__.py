@@ -9,10 +9,10 @@ from metrics.dictionary_learning_metrics import (compute_test_clipscore,
                                                  compute_overlap)
 from analysis.feature_decomposition import project_test_samples
 
-__all__ = ["dictionary_learning_evaluation"]
+__all__ = ["concept_dictionary_evaluation"]
 
 
-def dictionary_learning_evaluation(
+def concept_dictionary_evaluation(
     metric_name: str,
     features: Dict[str, torch.Tensor] = None,
     metadata: Dict[str, Any] = {},
@@ -59,9 +59,6 @@ def dictionary_learning_evaluation(
     if "overlap" in metric_name:
         grounding_words = concepts_dict['text_grounding']
         overlap_metric, _ = compute_overlap(grounding_words)
-        if args.use_random_words:
-            logger.info("Overlap only computed for meaningful dictionaries, not random words")
-            logger.info(f"Computing overlap for concept dictionary: {args.decomposition_path}")
         logger.info(f"Overlap metric (lower is better): {overlap_metric: .3f}")
         
     

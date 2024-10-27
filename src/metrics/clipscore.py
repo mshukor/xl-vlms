@@ -9,13 +9,7 @@ Code for CLIPScore (https://arxiv.org/abs/2104.08718)
 '''
 
 '''
-This is a modified version of CLIPScore code, used in CoX-LMM (https://arxiv.org/abs/2406.08074) 
-@inproceedings{parekh2024concept,
-  title={A Concept-Based Explainability Framework for Large Multimodal Models},
-  author={Parekh, Jayneel and Khayatan, Pegah and Shukor, Mustafa and Newson, Alasdair and Cord, Matthieu},
-  booktitle={Advances in Neural Information Processing Systems},
-  year={2024}
-} 
+This is a modified version of CLIPScore code we use for CoX-LMM (https://arxiv.org/abs/2406.08074)
 '''
 
 import torch

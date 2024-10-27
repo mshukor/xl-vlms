@@ -9,6 +9,9 @@ from analysis.multimodal_grounding import get_stopwords, valid_word
 def get_random_words(lm_head, tokenizer, grounding_words):
     """
         This function replaces grounding words of each concept by a set of random words, possibly of same length
+        Random words obtained by:
+        (i) Sampling a random direction to decode with lm_head
+        (ii) Decode top tokens which satisfy same valid word filters as grounding words
     """
     eng_corpus = words.words()
     stopwords = get_stopwords()

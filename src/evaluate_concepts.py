@@ -3,7 +3,7 @@ import os
 import torch
 
 from analysis import load_features
-from metrics import dictionary_learning_evaluation
+from metrics import concept_dictionary_evaluation
 from helpers.arguments import get_arguments
 from helpers.logger import log_args, setup_logger
 from models import get_model_class
@@ -33,7 +33,7 @@ if __name__ == "__main__":
             args.model_name, device=torch.device("cpu"), logger=logger, args=args
         )
 
-    dictionary_learning_evaluation(
+    concept_dictionary_evaluation(
         metric_name=args.evaluation_name,
         features=features,
         metadata=metadata,
