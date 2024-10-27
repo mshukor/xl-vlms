@@ -18,10 +18,6 @@ if __name__ == "__main__":
 
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-    loader = get_dataset_loader(
-        dataset_name=args.dataset_name, logger=logger, args=args
-    )
-
     if args.features_path is not None:
         features, metadata = load_features(
             features_path=args.features_path,
@@ -33,7 +29,6 @@ if __name__ == "__main__":
     dictionary_learning_evaluation(
         metric_name=args.evaluation_name,
         features=features,
-        loader=loader,
         metadata=metadata,
         logger=logger,
         args=args,

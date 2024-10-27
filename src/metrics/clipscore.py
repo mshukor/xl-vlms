@@ -1,3 +1,23 @@
+'''
+Code for CLIPScore (https://arxiv.org/abs/2104.08718)
+@inproceedings{hessel2021clipscore,
+  title={{CLIPScore:} A Reference-free Evaluation Metric for Image Captioning},
+  author={Hessel, Jack and Holtzman, Ari and Forbes, Maxwell and Bras, Ronan Le and Choi, Yejin},
+  booktitle={EMNLP},
+  year={2021}
+}
+'''
+
+'''
+This is a modified version of CLIPScore code, used in CoX-LMM (https://arxiv.org/abs/2406.08074) 
+@inproceedings{parekh2024concept,
+  title={A Concept-Based Explainability Framework for Large Multimodal Models},
+  author={Parekh, Jayneel and Khayatan, Pegah and Shukor, Mustafa and Newson, Alasdair and Cord, Matthieu},
+  booktitle={Advances in Neural Information Processing Systems},
+  year={2024}
+} 
+'''
+
 import torch
 import tqdm
 import clip
@@ -7,28 +27,6 @@ from PIL import Image
 from sklearn.preprocessing import normalize
 from packaging import version
 import warnings
-
-
-def compute_overlap(grounding_words):
-    """
-        Function to compute overlap metric given the grounded words of a concept dictionary
-        Input: List of grounded words for concepts: List[List]
-    """
-    num_concepts = len(grounding_words)
-    overlap_matrix = np.zeros([num_concepts, num_concepts])
-    for i in range(num_concepts):
-        words_i = grounding_words[i]
-        if len(words_i) == 0:
-            continue
-        for j in range(num_concepts):
-            words_j = grounding_words[j]
-            overlap_ij = len ( [w for w in words_i if w in words_j] )
-            overlap_matrix[i, j] = overlap_ij*1.0 / len(words_i)
-            
-    overlap_metric = overlap_matrix.sum() - np.diag(overlap_matrix).sum()
-    overlap_metric = overlap_metric / (num_concepts * (num_concepts-1))
-    return overlap_metric, overlap_matrix
-
 
 class CLIPCaptionDataset(torch.utils.data.Dataset):
     def __init__(self, data, prefix='A photo is described by the words '):
@@ -143,59 +141,3 @@ def img_clipscore(model, img_feat, activ, grounding_words, device, top_k=3):
     _, per_instance_image_text, candidate_feats = get_clip_score(model, image_feat, candidates, device)
     score = np.array(per_instance_image_text)
     return score
-
-
-def img_gt_clipscore(model, img_feat, gt_captions, device):
-    image_feat = np.array([img_feat]*len(gt_captions))
-    _, per_instance_image_text, candidate_feats = get_clip_score(model, image_feat, gt_captions, device)
-    score = np.array(per_instance_image_text).mean()
-    return score
-
-
-def compute_clipscore(loader, projections, grounding_words, device, metadata):    
-    scores = []
-    scores_gt = []
-    image_paths = []
-    target_captions = []
-    num_samples = projections.shape[0]
-    clip_model, transform = clip.load("ViT-B/32", device=device, jit=False)
-    clip_model.eval()
-    # Format of grounding words in original evaluation was reversed
-    grounding_words = [words[::-1] for words in grounding_words] 
-
-    if "token_of_interest_mask" in metadata.keys():
-        token_of_interest_mask = metadata.get("token_of_interest_mask", None)
-        
-    for i, item in enumerate(loader):
-        if not token_of_interest_mask[i]:
-            continue
-        image_paths.append(item["image"][0])
-        target_captions.append(item["response"][0])
-
-    image_feats = extract_image_features(
-        image_paths, clip_model, device, batch_size=8)
-    print ("Image feature shape", image_feats.shape)
-    
-    for idx in range(num_samples):
-        samp_activ = projections[idx]
-        img_feat = image_feats[idx]
-        img_score = img_clipscore(clip_model, img_feat, samp_activ, grounding_words, device, top_k=5)
-        scores.append(img_score)        
-    scores = np.array(scores)
-        
-    # Return average_scores_dict
-    scores_dict = {}
-    for k in [1, 3]:
-        key = "top_" + str(k) + "_all"
-        key_mean = "top_" + str(k) + "_mean"
-        key_std = "top_" + str(k) + "_std"
-        all_test_scores = scores[:, -k:].mean(axis=1)
-        mean_topk_score, std_topk = all_test_scores.mean(), all_test_scores.std()
-        scores_dict[key] = all_test_scores
-        scores_dict[key_mean] = mean_topk_score
-        scores_dict[key_std] = std_topk
-        
-    return scores_dict
-
-
-
