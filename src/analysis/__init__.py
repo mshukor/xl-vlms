@@ -14,6 +14,8 @@ __all__ = ["load_features", "analyse_features"]
 SUPPORTED_ANALYSIS = [
     "decompose_activations",
 ]
+
+
 def load_features(
     features_path: Union[str, List[str]],
     logger: Callable = None,

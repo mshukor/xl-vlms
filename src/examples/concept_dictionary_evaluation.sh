@@ -6,7 +6,7 @@ feature_module=language_model.model.layers.28
 features_path=/data/mshukor/logs/xl_vlms/save_hidden_states_for_token_of_interest_llava_yes.pth #/home/parekh/save_hidden_states_for_token_of_interest_llava_train_generation_split_train.pth
 
 
-model_name=llava-hf/llava-1.5-7b-hf 
+model_name=llava-hf/llava-1.5-7b-hf
 analysis_name=concept_dictionary_evaluation_overlap_clipscore_bertscore
 decomposition=kmeans # Current options: snmf, kmeans, pca, simple
 n_concepts=20
@@ -24,4 +24,3 @@ python src/analyse_features.py \
 
 # --local_files_only to load hf models from local
 # Additionally you can use --use_random_grounding_words and specify model_name for random words baseline (CLIPScore/BERTscore)
-
