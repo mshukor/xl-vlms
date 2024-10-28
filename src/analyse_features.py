@@ -33,5 +33,6 @@ if __name__ == "__main__":
         logger=logger,
         model_class=model_class,
         metadata=metadata,
+        device=device,
         args=args,
     )

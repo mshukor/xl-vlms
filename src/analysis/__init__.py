@@ -8,7 +8,7 @@ from analysis.feature_decomposition import (decompose_activations,
                                             get_feature_matrix)
 from analysis.multimodal_grounding import get_multimodal_grounding
 from analysis.utils import get_token_of_interest_features
-
+from metrics import concept_dictionary_evaluation
 __all__ = ["load_features", "analyse_features"]
 
 SUPPORTED_ANALYSIS = [
@@ -62,6 +62,7 @@ def analyse_features(
     model_class: Callable = None,
     logger: Callable = None,
     metadata: Dict[str, Any] = {},
+    device: torch.device = torch.device("cpu"),
     args: argparse.Namespace = None,
     **kwargs: Any,
 ) -> None:
@@ -101,7 +102,16 @@ def analyse_features(
             torch.save(results_dict, file_name)
             if logger is not None:
                 logger.info(f"Saving decomposition results dictionary to: {file_name}")
-
+    elif 'concept_dictionary_evaluation' in analysis_name:
+        concept_dictionary_evaluation(
+            metric_name=analysis_name,
+            features=features,
+            metadata=metadata,
+            model_class=model_class,
+            logger=logger,
+            args=args,
+            device=device,
+        )
     else:
         raise NotImplementedError(
             f"Only the following analysis are supported: {SUPPORTED_ANALYSIS}"

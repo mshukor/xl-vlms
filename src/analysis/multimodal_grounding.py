@@ -34,10 +34,11 @@ def concept_text_grounding(
     lm_head: Callable = None,
     tokenizer: Callable = None,
     num_top_tokens: int = 15,
+    gist_file_path: str = GIST_FILE_PATH,
 ) -> List[List[str]]:
     # components are of shape n_comp x feature_dim
     eng_corpus = words.words()
-    stopwords = get_stopwords(gist_file_path=GIST_FILE_PATH)
+    stopwords = get_stopwords(gist_file_path=gist_file_path)
     num_concepts = concepts.shape[0]
 
     token_logits = lm_head(concepts.float())
@@ -88,10 +89,6 @@ def get_multimodal_grounding(
 
     activations = torch.Tensor(activations)
     concepts = torch.Tensor(concepts)
-    results_dict["concepts"] = concepts
-    results_dict["activations"] = activations
-    results_dict["decomposition_method"] = args.decomposition_method
-
     grounded_words = []
 
     if "lm_head" in module_to_decompose:
@@ -121,8 +118,8 @@ def get_multimodal_grounding(
         )
         image_paths = metadata.get("image_paths", [])
         # Only keep image paths for samples with token_of_interest_mask True
-        if "token_of_interest_mask" in metadata.keys():
-            token_of_interest_mask = metadata.get("token_of_interest_mask", None)
+        token_of_interest_mask = metadata.get("token_of_interest_mask", None)
+        if token_of_interest_mask is not None:
             image_paths = [
                 image_paths[i]
                 for i in range(len(image_paths))
