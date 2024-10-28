@@ -1,15 +1,22 @@
-from typing import Dict, Any, Callable, List
 import argparse
+from typing import Any, Callable, Dict, List
+
 import clip
 import numpy as np
 import torch
 from nltk.corpus import words
 
+from analysis.feature_decomposition import project_test_samples
 from analysis.multimodal_grounding import get_stopwords, valid_word
 from metrics.clipscore import extract_image_features, img_clipscore
-from analysis.feature_decomposition import project_test_samples
 
-__all__ = ['get_clip_score', 'get_random_words', 'compute_grounding_words_overlap', 'compute_test_clipscore']
+__all__ = [
+    "get_clip_score",
+    "get_random_words",
+    "compute_grounding_words_overlap",
+    "compute_test_clipscore",
+]
+
 
 def get_clip_score(
     features: Dict[str, torch.Tensor] = None,
@@ -52,7 +59,9 @@ def get_clip_score(
     return clipscore_dict
 
 
-def get_random_words(lm_head: Callable, tokenizer: Callable, grounding_words: List[List[str]] = []) -> List[List[str]]:
+def get_random_words(
+    lm_head: Callable, tokenizer: Callable, grounding_words: List[List[str]] = []
+) -> List[List[str]]:
     """
     This function replaces grounding words of each concept by a set of random words, possibly of same length
     Random words obtained by:
@@ -87,7 +96,9 @@ def get_random_words(lm_head: Callable, tokenizer: Callable, grounding_words: Li
     return all_random_words
 
 
-def compute_grounding_words_overlap(grounding_words, logger: Callable = None) -> Dict[str, Any]:
+def compute_grounding_words_overlap(
+    grounding_words, logger: Callable = None
+) -> Dict[str, Any]:
     """
     Function to compute overlap metric given the grounded words of a concept dictionary
     Input: List of grounded words for concepts: List[List]
@@ -108,16 +119,20 @@ def compute_grounding_words_overlap(grounding_words, logger: Callable = None) ->
 
     if logger is not None:
         logger.info(f"Overlap metric (lower is better): {overlap_metric: .3f}")
-    
+
     scores = {}
     scores["grounding_words_overlap_metric"] = overlap_metric
     scores["grounding_words_overlap_matrix"] = overlap_matrix
     return scores
 
 
-def compute_test_clipscore(projections: np.ndarray, 
-                           grounding_words: List[List[str]], metadata: Dict[str, Any], 
-                           device: torch.device = torch.device("cpu"), top_k: int = 5) -> Dict[str, Any]:
+def compute_test_clipscore(
+    projections: np.ndarray,
+    grounding_words: List[List[str]],
+    metadata: Dict[str, Any],
+    device: torch.device = torch.device("cpu"),
+    top_k: int = 5,
+) -> Dict[str, Any]:
     scores = []
     image_paths = []
     num_samples = projections.shape[0]

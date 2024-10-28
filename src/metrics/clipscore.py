@@ -7,15 +7,16 @@ Code for CLIPScore (https://arxiv.org/abs/2104.08718)
   year={2021}
 }
 """
+
 import warnings
 
 import clip
 import numpy as np
+import sklearn
 import torch
 import tqdm
 from packaging import version
 from PIL import Image
-import sklearn
 from torchvision.transforms import (CenterCrop, Compose, Normalize, Resize,
                                     ToTensor)
 
@@ -55,6 +56,7 @@ class CLIPImageDataset(torch.utils.data.Dataset):
                 ),
             ]
         )
+
     def __getitem__(self, idx):
         c_data = self.data[idx]
         image = Image.open(c_data)

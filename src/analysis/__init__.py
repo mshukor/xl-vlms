@@ -4,11 +4,11 @@ from typing import Any, Callable, Dict, List, Union
 
 import torch
 
-from analysis.feature_decomposition import (decompose_activations,
-                                            get_feature_matrix, decompose_and_ground_activations)
-from analysis.multimodal_grounding import get_multimodal_grounding
+from analysis.feature_decomposition import (decompose_and_ground_activations,
+                                            get_feature_matrix)
 from analysis.utils import get_token_of_interest_features
 from metrics import concept_dictionary_evaluation
+
 __all__ = ["load_features", "analyse_features"]
 
 SUPPORTED_ANALYSIS = [
@@ -68,14 +68,14 @@ def analyse_features(
 ) -> None:
     if "decompose_activations" in analysis_name:
         results_dict = decompose_and_ground_activations(
-                features,
-                metadata,
-                analysis_name=analysis_name,
-                model_class=model_class,
-                logger=logger,
-                args=args
+            features,
+            metadata,
+            analysis_name=analysis_name,
+            model_class=model_class,
+            logger=logger,
+            args=args,
         )
-    elif 'concept_dictionary_evaluation' in analysis_name:
+    elif "concept_dictionary_evaluation" in analysis_name:
         results_dict = concept_dictionary_evaluation(
             metric_name=analysis_name,
             features=features,

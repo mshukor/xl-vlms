@@ -10,13 +10,14 @@ from analysis.multimodal_grounding import get_multimodal_grounding
 
 __all__ = ["get_feature_matrix", "decompose_activations", "project_test_sample"]
 
+
 def decompose_and_ground_activations(
-        features: Dict[str, torch.Tensor],
-        metadata: Dict[str, Any] = {},
-        analysis_name: str = "decompose_activations",
-        model_class: Callable = None,
-        logger: Callable = None,
-        args: argparse.Namespace = None,
+    features: Dict[str, torch.Tensor],
+    metadata: Dict[str, Any] = {},
+    analysis_name: str = "decompose_activations",
+    model_class: Callable = None,
+    logger: Callable = None,
+    args: argparse.Namespace = None,
 ):
     results_dict = {}
     features = list(features.values())[0]

@@ -3,10 +3,9 @@ from typing import Any, Callable, Dict
 
 import torch
 
-from analysis.feature_decomposition import project_test_samples, decompose_and_ground_activations
-from metrics.dictionary_learning_metrics import (compute_grounding_words_overlap,
-                                                 compute_test_clipscore,
-                                                 get_random_words, get_clip_score)
+from analysis.feature_decomposition import decompose_and_ground_activations
+from metrics.dictionary_learning_metrics import (
+    compute_grounding_words_overlap, get_clip_score)
 
 __all__ = ["concept_dictionary_evaluation"]
 
@@ -25,25 +24,26 @@ def concept_dictionary_evaluation(
     scores = {}
     if concepts_decomposition_path is None:
         concepts_dict = decompose_and_ground_activations(
-                        features,
-                        metadata,
-                        analysis_name='decompose_activations_image_grounding_text_grounding',
-                        model_class=model_class,
-                        logger=logger,
-                        args=args
-                )
+            features,
+            metadata,
+            analysis_name="decompose_activations_image_grounding_text_grounding",
+            model_class=model_class,
+            logger=logger,
+            args=args,
+        )
     else:
         concepts_dict = torch.load(concepts_decomposition_path)
 
     if "clipscore" in metric_name:
-        clipscore_dict = get_clip_score(features,
-                        metadata,
-                        concepts_dict=concepts_dict,
-                        model_class=model_class,
-                        device=device,
-                        logger=logger,
-                        args=args
-                )
+        clipscore_dict = get_clip_score(
+            features,
+            metadata,
+            concepts_dict=concepts_dict,
+            model_class=model_class,
+            device=device,
+            logger=logger,
+            args=args,
+        )
         scores.update(clipscore_dict)
 
     if "bertscore" in metric_name:
