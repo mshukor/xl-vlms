@@ -16,14 +16,14 @@ def concept_dictionary_evaluation(
     features: Dict[str, torch.Tensor] = None,
     metadata: Dict[str, Any] = {},
     model_class: Callable = None,
-    decomposition_path: str = None,
+    concepts_decomposition_path: str = None,
     args: argparse.Namespace = None,
     logger: Callable = None,
     device=torch.device("cpu"),
     **kwargs: Any,
 ) -> None:
     scores = {}
-    if decomposition_path is None:
+    if concepts_decomposition_path is None:
         concepts_dict = decompose_and_ground_activations(
                         features,
                         metadata,
@@ -33,7 +33,7 @@ def concept_dictionary_evaluation(
                         args=args
                 )
     else:
-        concepts_dict = torch.load(decomposition_path)
+        concepts_dict = torch.load(concepts_decomposition_path)
 
     if "clipscore" in metric_name:
         clipscore_dict = get_clip_score(features,

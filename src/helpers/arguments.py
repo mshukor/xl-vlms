@@ -197,13 +197,13 @@ def get_arguments():
 
     # Evaluation and metrics
     parser.add_argument(
-        "--decomposition_path",
+        "--concepts_decomposition_path",
         type=str,
         help="Path for file storing concept dictionary and grounding details",
         default=None,
     )
     parser.add_argument(
-        "--use_random_words",
+        "--use_random_grounding_words",
         default=False,
         action="store_true",
         help="Will replace grounded words by random words of possibly same length",

@@ -30,7 +30,7 @@ def get_clip_score(
         analysis_model=analysis_model,
         decomposition_type=concepts_dict["decomposition_method"],
     )
-    if args.use_random_words:
+    if args.use_random_grounding_words:
         lm_head = model_class.get_lm_head().float()
         tokenizer = model_class.get_tokenizer()
         grounding_words = get_random_words(
@@ -117,37 +117,33 @@ def compute_grounding_words_overlap(grounding_words, logger: Callable = None) ->
 
 def compute_test_clipscore(projections: np.ndarray, 
                            grounding_words: List[List[str]], metadata: Dict[str, Any], 
-                           device: torch.device = torch.device("cpu"),) -> Dict[str, Any]:
+                           device: torch.device = torch.device("cpu"), top_k: int = 5) -> Dict[str, Any]:
     scores = []
     image_paths = []
     num_samples = projections.shape[0]
     clip_model, _ = clip.load("ViT-B/32", device=device, jit=False)
     clip_model.eval()
-    # Format of grounding words in original evaluation was reversed
-    grounding_words = [words[::-1] for words in grounding_words]
 
     image_paths = metadata.get("image_paths", [])
-    if "token_of_interest_mask" in metadata.keys():
-        token_of_interest_mask = metadata.get("token_of_interest_mask", None)
+    token_of_interest_mask = metadata.get("token_of_interest_mask", None)
+    if token_of_interest_mask is not None:
         image_paths = [
             image_paths[i][0]
             for i in range(len(image_paths))
             if token_of_interest_mask[i]
         ]
-
     image_features = extract_image_features(
         image_paths, clip_model, device, batch_size=8
-    )  # image_features of shape (num_images, 512)
+    )  # image_features of shape (num_images, dim)
 
     for idx in range(num_samples):
         img_activations = projections[idx]
         img_feat = image_features[idx]
         img_score = img_clipscore(
-            clip_model, img_feat, img_activations, grounding_words, device, top_k=5
+            clip_model, img_feat, img_activations, grounding_words, device, top_k=top_k
         )
         scores.append(img_score)
     scores = np.array(scores)
-
     # Return dictionary containing all test sample scores, their mean, std
     scores_dict = {}
     for k in [1, 3]:
