@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /home/parekh/xl-vlms
+cd ~/xl-vlms
 
 analysis_name=decompose_activations_text_grounding_image_grounding
 saved_features_path=/home/parekh/save_hidden_states_for_token_of_interest_llava_train_generation_split_train.pth

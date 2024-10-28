@@ -14,8 +14,6 @@ __all__ = ["load_features", "analyse_features"]
 SUPPORTED_ANALYSIS = [
     "decompose_activations",
 ]
-
-
 def load_features(
     features_path: Union[str, List[str]],
     logger: Callable = None,
@@ -91,7 +89,7 @@ def analyse_features(
         )
     if results_dict:
         file_name = os.path.join(
-            args.save_dir, f"{args.decomposition_method}_{args.save_filename}.pth"
+            args.save_dir, f"{analysis_name}_{args.save_filename}.pth"
         )
         torch.save(results_dict, file_name)
         if logger is not None:

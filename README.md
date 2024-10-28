@@ -20,6 +20,7 @@ torch==1.13.1
 transformers==4.45.1
 accelerate==0.34.2
 scikit-learn==1.5.2
+openai-clip==1.0.1
 ```
 
 # Provided Methods

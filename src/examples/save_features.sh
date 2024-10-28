@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /home/parekh/xl-vlms
+cd ~/xl-vlms
 
 hook_name=save_hidden_states_for_token_of_interest
 token=train # Can also use other noun that appear in your dataset
