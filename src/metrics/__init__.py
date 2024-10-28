@@ -3,10 +3,10 @@ from typing import Any, Callable, Dict
 
 import torch
 
-from analysis.feature_decomposition import project_test_samples
+from analysis.feature_decomposition import project_test_samples, decompose_and_ground_activations
 from metrics.dictionary_learning_metrics import (compute_overlap,
                                                  compute_test_clipscore,
-                                                 get_random_words)
+                                                 get_random_words, get_clip_score)
 
 __all__ = ["concept_dictionary_evaluation"]
 
@@ -16,47 +16,41 @@ def concept_dictionary_evaluation(
     features: Dict[str, torch.Tensor] = None,
     metadata: Dict[str, Any] = {},
     model_class: Callable = None,
+    decomposition_path: str = None,
     args: argparse.Namespace = None,
     logger: Callable = None,
     device=torch.device("cpu"),
     **kwargs: Any,
 ) -> None:
-    concepts_dict = torch.load(args.decomposition_path)
+    scores = {}
+    if decomposition_path is None:
+        concepts_dict = decompose_and_ground_activations(
+                        features,
+                        metadata,
+                        analysis_name='decompose_activations_image_grounding_text_grounding',
+                        model_class=model_class,
+                        logger=logger,
+                        args=args
+                )
+    else:
+        concepts_dict = torch.load(decomposition_path)
 
     if "clipscore" in metric_name:
-        features = list(features.values())[0]
-        metadata = list(metadata.values())[0]
-        analysis_model = concepts_dict["analysis_model"]
-        grounding_words = concepts_dict["text_grounding"]
-        projections = project_test_samples(
-            sample=features,
-            analysis_model=analysis_model,
-            decomposition_type=concepts_dict["decomposition_method"],
-        )
-        if args.use_random_words:
-            lm_head = model_class.get_lm_head().float()
-            tokenizer = model_class.get_tokenizer()
-            grounding_words = get_random_words(
-                lm_head=lm_head,
-                tokenizer=tokenizer,
-                grounding_words=grounding_words,
-            )
-            logger.info(f"Random words usage is True. Only for CLIPScore evaluation")
-
-        clipscore_dict = compute_test_clipscore(
-            projections=projections,
-            grounding_words=grounding_words,
-            device=device,
-            metadata=metadata,
-        )
-        logger.info(
-            f"top-1 test CLIPScore (mean, std) {clipscore_dict['top_1_mean']: .3f} +/- {clipscore_dict['top_1_std']: .3f}"
-        )
+        clipscore_dict = get_clip_score(features,
+                        metadata,
+                        concepts_dict=concepts_dict,
+                        model_class=model_class,
+                        device=device,
+                        logger=logger,
+                        args=args
+                )
+        scores.update(clipscore_dict)
 
     if "bertscore" in metric_name:
         logger.info("BERTScore under construction")
 
     if "overlap" in metric_name:
         grounding_words = concepts_dict["text_grounding"]
-        overlap_metric, _ = compute_overlap(grounding_words)
-        logger.info(f"Overlap metric (lower is better): {overlap_metric: .3f}")
+        overlap_scores = compute_overlap(grounding_words, logger=logger)
+        scores.update(overlap_scores)
+    return scores

@@ -1,3 +1,5 @@
+from typing import Dict, Any, Callable
+import argparse
 import clip
 import numpy as np
 import torch
@@ -5,6 +7,50 @@ from nltk.corpus import words
 
 from analysis.multimodal_grounding import get_stopwords, valid_word
 from metrics.clipscore import extract_image_features, img_clipscore
+from analysis.feature_decomposition import project_test_samples
+
+
+
+def get_clip_score(
+    features: Dict[str, torch.Tensor] = None,
+    metadata: Dict[str, Any] = {},
+    concepts_dict: Dict[str, Any] = {},
+    model_class: Callable = None,
+    device: torch.device = torch.device("cpu"),
+    logger: Callable = None,
+    args: argparse.Namespace = None,
+) -> Dict[str, Any]:
+
+    features = list(features.values())[0]
+    metadata = list(metadata.values())[0]
+    analysis_model = concepts_dict["analysis_model"]
+    grounding_words = concepts_dict["text_grounding"]
+    projections = project_test_samples(
+        sample=features,
+        analysis_model=analysis_model,
+        decomposition_type=concepts_dict["decomposition_method"],
+    )
+    if args.use_random_words:
+        lm_head = model_class.get_lm_head().float()
+        tokenizer = model_class.get_tokenizer()
+        grounding_words = get_random_words(
+            lm_head=lm_head,
+            tokenizer=tokenizer,
+            grounding_words=grounding_words,
+        )
+        logger.info(f"Random words usage is True. Only for CLIPScore evaluation")
+
+    clipscore_dict = compute_test_clipscore(
+        projections=projections,
+        grounding_words=grounding_words,
+        device=device,
+        metadata=metadata,
+    )
+    logger.info(
+        f"top-1 test CLIPScore (mean, std) {clipscore_dict['top_1_mean']: .3f} +/- {clipscore_dict['top_1_std']: .3f}"
+    )
+
+    return clipscore_dict
 
 
 def get_random_words(lm_head, tokenizer, grounding_words):
@@ -42,7 +88,7 @@ def get_random_words(lm_head, tokenizer, grounding_words):
     return all_random_words
 
 
-def compute_overlap(grounding_words):
+def compute_overlap(grounding_words, logger: Callable = None) -> Dict[str, Any] :
     """
     Function to compute overlap metric given the grounded words of a concept dictionary
     Input: List of grounded words for concepts: List[List]
@@ -60,7 +106,14 @@ def compute_overlap(grounding_words):
 
     overlap_metric = overlap_matrix.sum() - np.diag(overlap_matrix).sum()
     overlap_metric = overlap_metric / (num_concepts * (num_concepts - 1))
-    return overlap_metric, overlap_matrix
+
+    if logger is not None:
+        logger.info(f"Overlap metric (lower is better): {overlap_metric: .3f}")
+    
+    scores = {}
+    scores["overlap_metric"] = overlap_metric
+    scores["overlap_matrix"] = overlap_matrix
+    return scores
 
 
 def compute_test_clipscore(projections, grounding_words, metadata, device):

@@ -18,6 +18,7 @@ def decompose_and_ground_activations(
         logger: Callable = None,
         args: argparse.Namespace = None,
 ):
+    results_dict = {}
     features = list(features.values())[0]
     metadata = list(metadata.values())[0]
     concepts, activations, decomposition_model = decompose_activations(
@@ -26,6 +27,9 @@ def decompose_and_ground_activations(
         decomposition_method=args.decomposition_method,
         args=args,
     )
+    results_dict["concepts"] = concepts
+    results_dict["activations"] = activations
+    results_dict["decomposition_method"] = args.decomposition_method
     if logger is not None:
         logger.info(
             f"\nDecomposition type {args.decomposition_method}, Components/concepts shape: {concepts.shape}, Activations shape: {activations.shape}"
@@ -33,7 +37,7 @@ def decompose_and_ground_activations(
     if "grounding" in analysis_name:
         text_grounding = "text_grounding" in analysis_name
         image_grounding = "image_grounding" in analysis_name
-        results_dict = get_multimodal_grounding(
+        grounding_dict = get_multimodal_grounding(
             concepts=concepts,
             activations=activations,
             model_class=model_class,
@@ -46,8 +50,9 @@ def decompose_and_ground_activations(
             logger=logger,
             args=args,
         )
-        results_dict["analysis_model"] = decomposition_model
-
+        grounding_dict["analysis_model"] = decomposition_model
+        results_dict.update(grounding_dict)
+    return results_dict
 
 
 def get_feature_matrix(
