@@ -1,4 +1,4 @@
-from typing import Dict, Any, Callable
+from typing import Dict, Any, Callable, List
 import argparse
 import clip
 import numpy as np
@@ -9,7 +9,7 @@ from analysis.multimodal_grounding import get_stopwords, valid_word
 from metrics.clipscore import extract_image_features, img_clipscore
 from analysis.feature_decomposition import project_test_samples
 
-
+__all__ = ['get_clip_score', 'get_random_words', 'compute_grounding_words_overlap', 'compute_test_clipscore']
 
 def get_clip_score(
     features: Dict[str, torch.Tensor] = None,
@@ -49,11 +49,10 @@ def get_clip_score(
     logger.info(
         f"top-1 test CLIPScore (mean, std) {clipscore_dict['top_1_mean']: .3f} +/- {clipscore_dict['top_1_std']: .3f}"
     )
-
     return clipscore_dict
 
 
-def get_random_words(lm_head, tokenizer, grounding_words):
+def get_random_words(lm_head: Callable, tokenizer: Callable, grounding_words: List[List[str]] = []) -> List[List[str]]:
     """
     This function replaces grounding words of each concept by a set of random words, possibly of same length
     Random words obtained by:
@@ -88,7 +87,7 @@ def get_random_words(lm_head, tokenizer, grounding_words):
     return all_random_words
 
 
-def compute_overlap(grounding_words, logger: Callable = None) -> Dict[str, Any] :
+def compute_grounding_words_overlap(grounding_words, logger: Callable = None) -> Dict[str, Any]:
     """
     Function to compute overlap metric given the grounded words of a concept dictionary
     Input: List of grounded words for concepts: List[List]
@@ -111,18 +110,18 @@ def compute_overlap(grounding_words, logger: Callable = None) -> Dict[str, Any] 
         logger.info(f"Overlap metric (lower is better): {overlap_metric: .3f}")
     
     scores = {}
-    scores["overlap_metric"] = overlap_metric
-    scores["overlap_matrix"] = overlap_matrix
+    scores["grounding_words_overlap_metric"] = overlap_metric
+    scores["grounding_words_overlap_matrix"] = overlap_matrix
     return scores
 
 
-def compute_test_clipscore(projections, grounding_words, metadata, device):
+def compute_test_clipscore(projections: np.ndarray, 
+                           grounding_words: List[List[str]], metadata: Dict[str, Any], 
+                           device: torch.device = torch.device("cpu"),) -> Dict[str, Any]:
     scores = []
-    scores_gt = []
     image_paths = []
-    target_captions = []
     num_samples = projections.shape[0]
-    clip_model, transform = clip.load("ViT-B/32", device=device, jit=False)
+    clip_model, _ = clip.load("ViT-B/32", device=device, jit=False)
     clip_model.eval()
     # Format of grounding words in original evaluation was reversed
     grounding_words = [words[::-1] for words in grounding_words]

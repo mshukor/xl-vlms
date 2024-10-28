@@ -4,7 +4,7 @@ from typing import Any, Callable, Dict
 import torch
 
 from analysis.feature_decomposition import project_test_samples, decompose_and_ground_activations
-from metrics.dictionary_learning_metrics import (compute_overlap,
+from metrics.dictionary_learning_metrics import (compute_grounding_words_overlap,
                                                  compute_test_clipscore,
                                                  get_random_words, get_clip_score)
 
@@ -51,6 +51,6 @@ def concept_dictionary_evaluation(
 
     if "overlap" in metric_name:
         grounding_words = concepts_dict["text_grounding"]
-        overlap_scores = compute_overlap(grounding_words, logger=logger)
+        overlap_scores = compute_grounding_words_overlap(grounding_words, logger=logger)
         scores.update(overlap_scores)
     return scores
