@@ -1,6 +1,6 @@
 import argparse
-import os
 from typing import Any, Callable, Dict, List
+
 import torch
 from nltk.corpus import words
 
@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 
-def get_stopwords(gist_file_path: str = "gist_stopwords.txt") -> List[str]:
+def get_stopwords(gist_file_path: str = GIST_FILE_PATH) -> List[str]:
     gist_file = open(gist_file_path, "r")
     content = gist_file.read()
     stopwords = content.split(",")
@@ -34,10 +34,11 @@ def concept_text_grounding(
     lm_head: Callable = None,
     tokenizer: Callable = None,
     num_top_tokens: int = 15,
+    gist_file_path: str = GIST_FILE_PATH,
 ) -> List[List[str]]:
     # components are of shape n_comp x feature_dim
     eng_corpus = words.words()
-    stopwords = get_stopwords(gist_file_path=GIST_FILE_PATH)
+    stopwords = get_stopwords(gist_file_path=gist_file_path)
     num_concepts = concepts.shape[0]
 
     token_logits = lm_head(concepts.float())
@@ -75,8 +76,6 @@ def get_multimodal_grounding(
     text_grounding: bool = True,
     image_grounding: bool = True,
     module_to_decompose: str = "",
-    save_dir: str = "",
-    save_name: str = "",
     num_grounded_text_tokens: int = 10,
     num_most_activating_samples: int = 5,
     metadata: Dict[str, Any] = {},
@@ -90,12 +89,8 @@ def get_multimodal_grounding(
 
     activations = torch.Tensor(activations)
     concepts = torch.Tensor(concepts)
-    results_dict['concepts'] = concepts
-    results_dict['activations'] = activations
-    results_dict['decomposition_method'] = args.decomposition_method
-    
     grounded_words = []
-    
+
     if "lm_head" in module_to_decompose:
         top_tokens = concepts.argmax(axis=1)
         top_words = tokenizer.decode(top_tokens)
@@ -103,7 +98,7 @@ def get_multimodal_grounding(
             logger.info(f"Lm head top_tokens: {top_tokens}, top words: {top_words}")
             logger.info("Lm head only for analysis. Function returning")
         return
-        
+
     if text_grounding:
         grounded_words = concept_text_grounding(
             concepts,
@@ -123,8 +118,8 @@ def get_multimodal_grounding(
         )
         image_paths = metadata.get("image_paths", [])
         # Only keep image paths for samples with token_of_interest_mask True
-        if "token_of_interest_mask" in metadata.keys():
-            token_of_interest_mask = metadata.get("token_of_interest_mask", None)
+        token_of_interest_mask = metadata.get("token_of_interest_mask", None)
+        if token_of_interest_mask is not None:
             image_paths = [
                 image_paths[i]
                 for i in range(len(image_paths))
@@ -140,9 +135,5 @@ def get_multimodal_grounding(
             if logger is not None:
                 logger.info(f"Concept {i} image paths: {concept_image_paths}")
         results_dict["image_grounding_paths"] = all_concept_image_paths
-        
-    file_name = os.path.join(save_dir, f"{args.decomposition_method}_{save_name}.pth")
-    torch.save(results_dict, file_name)
-    if logger is not None:
-        logger.info(f"Saving decomposition results dictionary to: {file_name}")
-    return
+
+    return results_dict

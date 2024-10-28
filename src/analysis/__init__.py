@@ -4,10 +4,10 @@ from typing import Any, Callable, Dict, List, Union
 
 import torch
 
-from analysis.feature_decomposition import (decompose_activations,
+from analysis.feature_decomposition import (decompose_and_ground_activations,
                                             get_feature_matrix)
-from analysis.multimodal_grounding import get_multimodal_grounding
 from analysis.utils import get_token_of_interest_features
+from metrics import concept_dictionary_evaluation
 
 __all__ = ["load_features", "analyse_features"]
 
@@ -58,45 +58,42 @@ def load_features(
 @torch.no_grad()
 def analyse_features(
     features: Dict[str, torch.Tensor],
+    metadata: Dict[str, Any] = {},
     analysis_name: str = "decompose_activations",
     model_class: Callable = None,
     logger: Callable = None,
-    metadata: Dict[str, Any] = {},
+    device: torch.device = torch.device("cpu"),
     args: argparse.Namespace = None,
     **kwargs: Any,
 ) -> None:
     if "decompose_activations" in analysis_name:
-        features = list(features.values())[0]
-        metadata = list(metadata.values())[0]
-        concepts, activations, _ = decompose_activations(
-            mat=features,
-            num_concepts=args.num_concepts,
-            decomposition_method=args.decomposition_method,
+        results_dict = decompose_and_ground_activations(
+            features,
+            metadata,
+            analysis_name=analysis_name,
+            model_class=model_class,
+            logger=logger,
             args=args,
         )
-        if logger is not None:
-            logger.info(
-                f"\nDecomposition type {args.decomposition_method}, Components/concepts shape: {concepts.shape}, Activations shape: {activations.shape}"
-            )
-        if "grounding" in analysis_name:
-            text_grounding = "text_grounding" in analysis_name
-            image_grounding = "image_grounding" in analysis_name
-            get_multimodal_grounding(
-                concepts=concepts,
-                activations=activations,
-                model_class=model_class,
-                text_grounding=text_grounding,
-                image_grounding=image_grounding,
-                module_to_decompose=args.module_to_decompose,
-                save_dir=args.save_dir,
-                save_name=args.save_filename,
-                num_grounded_text_tokens=args.num_grounded_text_tokens,
-                num_most_activating_samples=args.num_most_activating_samples,
-                metadata=metadata,
-                logger=logger,
-                args=args,
-            )
+    elif "concept_dictionary_evaluation" in analysis_name:
+        results_dict = concept_dictionary_evaluation(
+            metric_name=analysis_name,
+            features=features,
+            metadata=metadata,
+            model_class=model_class,
+            concepts_decomposition_path=args.concepts_decomposition_path,
+            logger=logger,
+            args=args,
+            device=device,
+        )
     else:
         raise NotImplementedError(
             f"Only the following analysis are supported: {SUPPORTED_ANALYSIS}"
         )
+    if results_dict:
+        file_name = os.path.join(
+            args.save_dir, f"{analysis_name}_{args.save_filename}.pth"
+        )
+        torch.save(results_dict, file_name)
+        if logger is not None:
+            logger.info(f"Saving analysis results to: {file_name}")
