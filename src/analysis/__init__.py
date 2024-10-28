@@ -93,4 +93,4 @@ def analyse_features(
         )
         torch.save(results_dict, file_name)
         if logger is not None:
-            logger.info(f"Saving decomposition results dictionary to: {file_name}")
+            logger.info(f"Saving analysis results to: {file_name}")
