@@ -34,6 +34,11 @@ def concept_dictionary_evaluation(
     else:
         concepts_dict = torch.load(concepts_decomposition_path)
 
+    if logger is not None:
+        # log info about concept dictionary
+        logger.info(f"Concept dictionary is decomposition type: {concepts_dict['decomposition_method']}")
+        logger.info(f"Number of concepts in given concept dictionary: {concepts_dict['concepts'].shape[0]}")
+
     if "clipscore" in metric_name:
         clipscore_dict = get_clip_score(
             features,

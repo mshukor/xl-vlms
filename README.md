@@ -1,4 +1,4 @@
-# XL-VLMs: General Repository for eXplainable Large Vision Language Models
+# XL-VLMs: General Repository for eXplaining Large Vision Language Models
 
 This repository implements tools to explain internal representations of large vision language models. It is currently built to support models from transformers library. Details about installation and usage are provided below.
 
