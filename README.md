@@ -18,7 +18,6 @@ We support the approaches introduced in the following papers:
 <br> <br>
 
 
-
 ## CoX-LMM (A Concept based Explainability Framework for Large Multimodal Models)
   ### [Paper](https://arxiv.org/abs/2406.08074) | [Project page](https://jayneelparekh.github.io/LMM_Concept_Explainability/)
 
