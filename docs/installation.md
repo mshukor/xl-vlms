@@ -1,6 +1,13 @@
 # Installation
 
-Main dependencies:
+The recommended way to setting up dependencies is as conda environment
+
+```
+conda create --name xl_vlm python=3.9
+conda activate xl_vlm
+```
+
+Inside the conda env, please install the following:
 
 ```
 python==3.9.20
@@ -11,11 +18,6 @@ scikit-learn==1.5.2
 openai-clip==1.0.1
 ```
 
-The recommended way to setting up dependencies is as conda environment
 
-```
-conda create --name xl_vlm python=3.9
-conda activate xl_vlm
-```
 
 
