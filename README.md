@@ -1,18 +1,25 @@
-# XL-VLMs: General Repository for eXplaining Large Vision Language Models
+# XL-VLMs: General Repository for eXplainable Large Vision Language Models
 
-This repository implements tools to explain internal representations of large vision language models. It is currently built to support models from transformers library. Details about installation and usage are provided below.
-
-To initiate this project we provide implementation of our NeurIPS 2024 paper [A Concept based Explainability Framework for Large Multimodal Models](https://arxiv.org/abs/2406.08074). Further details for the implemented methods can be found here
+This repository contains explainability tools for the internal representations of large vision language models. 
 
 # News
 
-* **[2024.11.05]**: XL-VLMs repo is public.
+* **[2024.10.30]**: XL-VLMs repo is public.
 * **[2024.09.25]**: Our paper [A Concept based Explainability Framework for Large Multimodal Models](https://arxiv.org/abs/2406.08074) is accepted in NeurIPS 2024.
+
+
+# Supported methods
+
+We support the approaches introduced in the following papers:
+
+* [CoX-LMM: A Concept based Explainability Framework for Large Multimodal Models](https://arxiv.org/abs/2406.08074)
+
+
 <br> <br>
 
 
 
-# CoX-LMM (A Concept based Explainability Framework for Large Multimodal Models)
+## CoX-LMM (A Concept based Explainability Framework for Large Multimodal Models)
   ### [Paper](https://arxiv.org/abs/2406.08074) | [Project page](https://jayneelparekh.github.io/LMM_Concept_Explainability/)
 
   <p align="center">
@@ -29,15 +36,11 @@ Please refer to ```docs/installation.md``` for installation instructions
 
 # Usage
 
-
-## Datasets
-We support the following datasets:
-* COCO
-
 ## Models
 
 We support models from the `transformers` library. Currently we support the following:
 * LLaVA-1.5
+Extending to other models should be straightforward as in `src/models/llava.py`.
 
 ## How to work with this repo
 Please checkout ```save_features.sh```, ```feature_decomposition.sh```, ```concept_dictionary_evaluation.sh``` in ```src/examples```
@@ -54,7 +57,6 @@ A high-level workflow while working with the repo could consist of three differe
 
 # Contributing
 We welcome contributions to this repo. It could be in form of support for other models, datasets, or other analysis/interpretation methods for multimodal models. However, contributions should only be made via pull requests. Please refer to rules given at ```docs/contributing.md```
-
 
 # Citation
 If you find this repository useful please cite the following paper
