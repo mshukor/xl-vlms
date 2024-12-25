@@ -15,9 +15,7 @@ __all__ = ["get_steering_vector", "get_shift_vector_scores"]
 SUPPORTED_STEERING_METHODS = [
     "shift_of_means",
     "shift_between_intra_clusters",
-    "shift_between_mean_and_clusters",
 ]
-
 
 def get_steering_vector(
     features: Dict[str, torch.Tensor],
@@ -48,9 +46,6 @@ def get_steering_vector(
     meta_data = {}
     if steering_method == "shift_of_means":
         vector = feat2.mean(0) - feat1.mean(0)
-    elif steering_method == "mean_of_shifts":
-        vector = feat2.unsqueeze(1) - feat1.unsqueeze(0)  # (C, C, D)
-        vector = vector.mean(0).mean(0)
     elif "cluster" in steering_method:
         concepts, activations, _ = decompose_activations(
             mat=feat1,
@@ -73,22 +68,6 @@ def get_steering_vector(
                         meta_data[f"steering_vector_concept_{i}_to_{j}"] = vector[i][j]
             meta_data[f"steering_vector_shift_of_means"] = feat2.mean(0) - feat1.mean(0)
             meta_data[f"steering_vector_mean_of_directions"] = vector.mean(0).mean(0)
-        elif steering_method == "shift_between_mean_and_clusters":
-            concepts2, activations2, _ = decompose_activations(
-                mat=feat2,
-                num_concepts=num_concepts[0],
-                decomposition_method=args.decomposition_method,
-                args=args,
-            )
-            concepts2 = torch.tensor(concepts2)
-            meta_data["concepts2"] = concepts2
-            meta_data["activations2"] = torch.tensor(activations2)
-
-            vector = concepts2 - feat1.mean(0)  # (C, D)
-            for i in range(vector.shape[0]):
-                meta_data[f"steering_vector_to_concept2_{i}"] = vector[i]
-            meta_data[f"steering_vector_shift_of_means"] = feat2.mean(0) - feat1.mean(0)
-            meta_data[f"steering_vector_mean_of_directions"] = vector.mean(0)
         else:
             vector = feat2.mean(0) - concepts.mean(0)
 
