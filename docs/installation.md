@@ -17,7 +17,3 @@ accelerate==0.34.2
 scikit-learn==1.5.2
 openai-clip==1.0.1
 ```
-
-
-
-

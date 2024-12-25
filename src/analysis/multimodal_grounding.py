@@ -15,6 +15,7 @@ __all__ = [
     "visualize_multimodal_grounding",
 ]
 
+
 @torch.no_grad()
 def concept_text_grounding(
     concepts: torch.Tensor,

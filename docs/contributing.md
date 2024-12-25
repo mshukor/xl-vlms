@@ -6,4 +6,3 @@
 * Function should include the arguments and return types. It is good to have a small comment explaining its mechanism as well as the passed arguments.
 * After testing your code, please run `pre-commit run --all-files` to clean up your code.
 * Create a PR and assign at least 2 people for reviews.
-

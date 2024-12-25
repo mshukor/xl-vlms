@@ -31,5 +31,3 @@ python src/analyse_features.py \
 --local_files_only \
 --concepts_decomposition_path $decomposition_path \
 #--use_random_grounding_words
-
-

@@ -2,12 +2,13 @@ import argparse
 import os
 from functools import partial
 from typing import Any, Callable, Dict
-import torch 
+
+import torch
 
 from metrics.captioning_metrics import compute_captioning_metrics
-from metrics.vqa_accuracy import compute_vqav2_accuracy
 from metrics.dictionary_learning_metrics import (
     compute_grounding_words_overlap, get_clip_score)
+from metrics.vqa_accuracy import compute_vqav2_accuracy
 
 __all__ = ["get_metric"]
 
@@ -38,8 +39,12 @@ def concept_dictionary_evaluation(
 
     if logger is not None:
         # log info about concept dictionary
-        logger.info(f"Concept dictionary is decomposition type: {concepts_dict['decomposition_method']}")
-        logger.info(f"Number of concepts in given concept dictionary: {concepts_dict['concepts'].shape[0]}")
+        logger.info(
+            f"Concept dictionary is decomposition type: {concepts_dict['decomposition_method']}"
+        )
+        logger.info(
+            f"Number of concepts in given concept dictionary: {concepts_dict['concepts'].shape[0]}"
+        )
 
     if "clipscore" in metric_name:
         clipscore_dict = get_clip_score(
@@ -61,7 +66,6 @@ def concept_dictionary_evaluation(
         overlap_scores = compute_grounding_words_overlap(grounding_words, logger=logger)
         scores.update(overlap_scores)
     return scores
-
 
 
 def get_metric(

@@ -8,7 +8,12 @@ from sklearn.decomposition import PCA, DictionaryLearning
 
 from analysis.multimodal_grounding import get_multimodal_grounding
 
-__all__ = ["get_feature_matrix", "decompose_activations", "project_test_sample", "decompose_and_ground_activations"]
+__all__ = [
+    "get_feature_matrix",
+    "decompose_activations",
+    "project_test_sample",
+    "decompose_and_ground_activations",
+]
 
 
 def decompose_and_ground_activations(

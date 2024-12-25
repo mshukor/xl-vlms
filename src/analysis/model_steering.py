@@ -17,6 +17,7 @@ SUPPORTED_STEERING_METHODS = [
     "shift_between_intra_clusters",
 ]
 
+
 def get_steering_vector(
     features: Dict[str, torch.Tensor],
     steering_method: str = "shift_of_means",

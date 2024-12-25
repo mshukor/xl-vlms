@@ -6,9 +6,9 @@ cd ~/xl-vlms
 # --hook_name controls strategy of feature extraction
 hook_name=save_hidden_states_for_token_of_interest  # Only save features for a token of interest in the output
 #hook_name=save_hidden_states_given_token_start_end_idx   # Save all representations from start to end indices
-#hook_name=save_hidden_states_given_token_idx   # Save representations at specific index 
+#hook_name=save_hidden_states_given_token_idx   # Save representations at specific index
 
-token=train 
+token=train
 #token=dog # Can also use other nouns that appear in your dataset
 
 # Directory and filename to store extracted features
@@ -22,7 +22,7 @@ feature_modules=language_model.model.norm,language_model.model.layers.30
 # Other examples of named modules
 #feature_modules=language_model.model.layers.28.input_layernorm
 #feature_modules=language_model.model.layers.29
- 
+
 # Dataset specifications. Ensure you modify dataset path (--data_dir command) accordingly
 data_dir=/data/mshukor/data/coco/ # Data directory for COCO dataset
 split=train # Which data split to save features for. For COCO: train/val/test options

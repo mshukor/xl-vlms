@@ -1,6 +1,6 @@
 # XL-VLMs: General Repository for eXplainable Large Vision Language Models
 
-This repository contains explainability tools for the internal representations of large vision language models. 
+This repository contains explainability tools for the internal representations of large vision language models.
 
 # News
 
@@ -51,7 +51,7 @@ A high-level workflow while working with the repo could consist of three differe
 
 * **Multimodal concept extraction**: Perform dictionary learning on stored hidden states to obtain your concept dictionary and extract information about visual/text grounding via ```src/analyse_features.py```. See ```src/examples/feature_decomposition.sh``` for details. You can visualize the multimodal concepts from your saved results as illustrated in ```playground/concept_grounding_visualization.ipynb```
 
-* **Evaluation**: Compute the CLIPScore/Overlap metrics to evaluate your concept dictionary and its use to understand test samples via ```src/analyse_features.py```. Please refer to ```src/examples/concept_dictionary_evaluation.sh``` for details. 
+* **Evaluation**: Compute the CLIPScore/Overlap metrics to evaluate your concept dictionary and its use to understand test samples via ```src/analyse_features.py```. Please refer to ```src/examples/concept_dictionary_evaluation.sh``` for details.
 
 
 # Contributing
