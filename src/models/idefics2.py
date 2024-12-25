@@ -1,20 +1,35 @@
 from typing import Any, Callable, Dict, List
 
 import torch
-from transformers import AutoProcessor, LlavaForConditionalGeneration
+from transformers import AutoModelForVision2Seq, AutoProcessor
 
 from .image_text_model import ImageTextModel
 
-__all__ = ["LLaVA"]
+__all__ = ["IDEFICS"]
 
 
-class LLaVA(ImageTextModel):
+class IDEFICS(ImageTextModel):
+
+    def init_lora(
+        self,
+        lora_dir: str,
+    ) -> None:
+
+        self.lora_dir = lora_dir
+        self.language_model_name_prefix = "language_model"
+        self.vision_model_name_prefix = "vision_tower"
+        self.connector_model_name_prefix = "multi_modal_projector"
+        self.model_modules_prefixes = [
+            self.language_model_name_prefix,
+            self.vision_model_name_prefix,
+            self.connector_model_name_prefix,
+        ]
 
     def set_model(
         self,
     ) -> None:
 
-        self.model_ = LlavaForConditionalGeneration.from_pretrained(
+        self.model_ = AutoModelForVision2Seq.from_pretrained(
             self.model_name_or_path,
             torch_dtype=torch.float16,
             low_cpu_mem_usage=True,
@@ -56,8 +71,8 @@ class LLaVA(ImageTextModel):
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": instruction},
                     {"type": "image"},
+                    {"type": "text", "text": instruction},
                 ],
             },
         ]

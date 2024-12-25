@@ -28,21 +28,16 @@ def inference(
     num_iterations = len(loader)
     hook_data = {}
     model = model_class.get_model()
-    preprocessor = model_class.get_preprocessor()
     start_time = time.time()
     for i, item in enumerate(loader):
 
         text = item["text"][0]  # for now we support batch size = 1
-        image = item["image"][0]
-        inputs = (
-            preprocessor(
-                instruction=text,
-                image_file=image,
-                response="",
-                generation_mode=args.generation_mode,
-            )
-            .to(device)
-            .to(model.dtype)
+        image_path = item["image"][0]
+        inputs = model_class.preprocessor(
+            instruction=text,
+            image_file=image_path,
+            response="",
+            generation_mode=args.generation_mode,
         )
 
         if args.generation_mode:
@@ -53,8 +48,14 @@ def inference(
             out = model(**inputs).logits
 
         item["model_output"] = out
+        input_len = (
+            inputs["input_ids"].shape[1]
+            if inputs["input_ids"].ndim > 1
+            else inputs["input_ids"].shape[0]
+        )
+        item["model_generated_output"] = out[:, input_len:]
         item["model_predictions"] = model_class.get_tokenizer().batch_decode(
-            out[:, inputs["input_ids"].shape[1] :], skip_special_tokens=True
+            out[:, input_len:], skip_special_tokens=True
         )
 
         if hook_return_functions is not None:
@@ -66,7 +67,7 @@ def inference(
 
         hook_data = update_dict_of_list(item, hook_data)
         clear_hooks_variables()
-        if (i + 1) % 10 == 0:
+        if (i + 1) % 100 == 0:
             time_left = compute_time_left(start_time, i, num_iterations)
             logger.info(
                 f"Iteration: {i}/{num_iterations},  Estimated time left: {time_left:.2f} mins"
@@ -82,13 +83,17 @@ if __name__ == "__main__":
 
     set_seed(args.seed)
 
-    logger.info(f"Loading model: {args.model_name}")
+    logger.info(f"Loading model: {args.model_name_or_path}")
     log_args(args, logger)
 
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
     model_class = get_model_class(
-        args.model_name, device=device, logger=logger, args=args
+        args.model_name_or_path,
+        args.processor_name,
+        device=device,
+        logger=logger,
+        args=args,
     )
 
     hook_return_functions, hook_postprocessing_functions = setup_hooks(
