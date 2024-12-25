@@ -6,7 +6,54 @@ import torch
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA, DictionaryLearning
 
-__all__ = ["get_feature_matrix", "decompose_activations", "project_test_sample"]
+from analysis.multimodal_grounding import get_multimodal_grounding
+
+__all__ = ["get_feature_matrix", "decompose_activations", "project_test_sample", "decompose_and_ground_activations"]
+
+
+def decompose_and_ground_activations(
+    features: Dict[str, torch.Tensor],
+    metadata: Dict[str, Any] = {},
+    analysis_name: str = "decompose_activations",
+    model_class: Callable = None,
+    logger: Callable = None,
+    args: argparse.Namespace = None,
+):
+    results_dict = {}
+    features = list(features.values())[0]
+    metadata = list(metadata.values())[0]
+    concepts, activations, decomposition_model = decompose_activations(
+        mat=features,
+        num_concepts=args.num_concepts,
+        decomposition_method=args.decomposition_method,
+        args=args,
+    )
+    results_dict["concepts"] = concepts
+    results_dict["activations"] = activations
+    results_dict["decomposition_method"] = args.decomposition_method
+    if logger is not None:
+        logger.info(
+            f"\nDecomposition type {args.decomposition_method}, Components/concepts shape: {concepts.shape}, Activations shape: {activations.shape}"
+        )
+    if "grounding" in analysis_name:
+        text_grounding = "text_grounding" in analysis_name
+        image_grounding = "image_grounding" in analysis_name
+        grounding_dict = get_multimodal_grounding(
+            concepts=concepts,
+            activations=activations,
+            model_class=model_class,
+            text_grounding=text_grounding,
+            image_grounding=image_grounding,
+            module_to_decompose=args.module_to_decompose,
+            num_grounded_text_tokens=args.num_grounded_text_tokens,
+            num_most_activating_samples=args.num_most_activating_samples,
+            metadata=metadata,
+            logger=logger,
+            args=args,
+        )
+        grounding_dict["analysis_model"] = decomposition_model
+        results_dict.update(grounding_dict)
+    return results_dict
 
 
 def get_feature_matrix(
@@ -122,7 +169,7 @@ def decompose_activations(
 
 def project_test_sample(
     sample: torch.Tensor, analysis_model: Callable, decomposition_type: str = "nndl"
-):
+) -> np.ndarray:
     """
     Input:
         sample: torch tensor or numpy array object of shape (N_samples, Representation_dim). Should contain test representations

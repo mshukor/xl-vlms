@@ -7,7 +7,7 @@ import torch
 from nltk.corpus import words
 
 from analysis.feature_decomposition import project_test_samples
-from analysis.multimodal_grounding import get_stopwords, valid_word
+from metrics.utils import get_stopwords, valid_word
 from metrics.clipscore import extract_image_features, img_clipscore
 
 __all__ = [

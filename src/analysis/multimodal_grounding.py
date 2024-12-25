@@ -15,7 +15,6 @@ __all__ = [
     "visualize_multimodal_grounding",
 ]
 
-
 @torch.no_grad()
 def concept_text_grounding(
     concepts: torch.Tensor,
@@ -114,14 +113,14 @@ def get_multimodal_grounding(
         grounding_dict["text_grounding"] = grounded_words
 
     if image_grounding:
-        print("this is the size of the activations ", activations.shape)
+        logger.info("Activations size: ", activations.shape)
 
         image_indices = concept_image_grounding(
             activations=activations,
             num_images_per_concept=num_most_activating_samples,
         )
         image_paths = metadata.get("image", [])
-        print("this is the length of the image paths ", len(image_paths))
+        logger.info("Image paths length: ", len(image_paths))
         # Only keep image paths for samples with token_of_interest_mask True
 
         token_of_interest_mask = metadata.get("token_of_interest_mask", None)
