@@ -14,7 +14,7 @@ __all__ = [
     "get_random_words",
     "compute_grounding_words_overlap",
     "compute_test_clipscore",
-    "project_test_sample"
+    "project_test_sample",
 ]
 
 
@@ -39,7 +39,6 @@ def project_test_sample(
         # Kmeans transforms to cluster distances and not "activations". 1/(1+x) transformation to view distances as activations
         projected_sample = 1 / (1 + projected_sample)
     return projected_sample
-
 
 
 def get_clip_score(

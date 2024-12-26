@@ -33,7 +33,7 @@ dataset_name=coco
 data_dir=/data/mshukor/data/coco/ # Data directory for COCO dataset
 split=train # Which data split to save features for. For COCO: train/val/test options
 annotation_file=karpathy/dataset_coco.json
-# path to the ids of the samples 
+# path to the ids of the samples
 path_to_samples_ids=src/assets/concepts_ids/${finetuning}.pkl
 
 
