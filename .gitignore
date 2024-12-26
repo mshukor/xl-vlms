@@ -13,9 +13,6 @@ annotations.json/
 karpathy/
 logs.log
 
-src/load_lora_model.py
-
 
 # Ignore all .pth files
-*.pth
 *.npy
