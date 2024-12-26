@@ -1,11 +1,12 @@
 # XL-VLMs: General Repository for eXplainable Large Vision Language Models
 
-This repository contains explainability tools for the internal representations of large vision language models.
+This repository contains explainability tools for the internal representations of large vision language models and steering  functionalities for VQA and captioning tasks across various models.
 
 # News
 
 * **[2024.10.30]**: XL-VLMs repo is public.
 * **[2024.09.25]**: Our paper [A Concept based Explainability Framework for Large Multimodal Models](https://arxiv.org/abs/2406.08074) is accepted in NeurIPS 2024.
+* **[2025.01.02]**: Our paper [A Concept based Explainability Framework for Large Multimodal Models](https://arxiv.org/abs/2406.08074).
 
 
 # Supported methods
@@ -14,18 +15,20 @@ We support the approaches introduced in the following papers:
 
 * [CoX-LMM: A Concept based Explainability Framework for Large Multimodal Models](https://arxiv.org/abs/2406.08074)
 
+* [Analyzing Fine-tuning Representation Shift for Multimodal LLMs Steering](https://arxiv.org/abs/2406.08074)
+
 
 <br> <br>
 
 
-## CoX-LMM (A Concept based Explainability Framework for Large Multimodal Models)
-  ### [Paper](https://arxiv.org/abs/2406.08074) | [Project page](https://jayneelparekh.github.io/LMM_Concept_Explainability/)
+## Analyzing Fine-tuning Representation Shift for Multimodal LLMs Steering
 
   <p align="center">
         <br> <img src="docs/assets/CoX_LMM_system.png", width=800 /> <br>
   </p>
 
-  > Large multimodal models (LMMs) combine unimodal encoders and large language models (LLMs) to perform multimodal tasks. Despite recent advancements towards the interpretability of these models, understanding internal representations of LMMs remains largely a mystery. In this paper, we present a novel framework for the interpretation of LMMs. We propose a dictionary learning based approach, applied to the representation of tokens. The elements of the learned dictionary correspond to our proposed concepts. We show that these concepts are well semantically grounded in both vision and text. Thus we refer to these as "multi-modal concepts". We qualitatively and quantitatively evaluate the results of the learnt concepts. We show that the extracted multimodal concepts are useful to interpret representations of test samples. Finally, we evaluate the disentanglement between different concepts and the quality of grounding concepts visually and textually.
+  > Multimodal LLMs have reached remarkable levels of proficiency in understanding multimodal inputs, driving extensive research to develop increasingly powerful models. However, much less attention has been paid to understanding and explaining the underlying mechanisms of these models. Most existing explainability research examines these models only in their final states, overlooking the dynamic representational shifts that occur during training. In this work, we systematically analyze the evolution of hidden state representations to reveal how fine-tuning alters the internal structure of a model to specialize in new multimodal tasks. Using a concept-based approach, we map hidden states to interpretable visual and textual concepts, enabling us to trace changes in encoded concepts across modalities as training progresses. We also demonstrate the use of shift vectors to capture these concepts changes. These shift vectors allow us to recover fine-tuned concepts by shifting those in the original model. Finally, we explore the practical impact of our findings on model steering, showing that we can adjust multimodal LLMs behaviors without any training, such as modifying answer types, captions style, or biasing the model toward specific responses. Our work sheds light on how multimodal representations evolve through fine-tuning and offers a new perspective for interpreting model adaptation in multimodal tasks. The code will be made publicly available.
+
 
   <br> <br>
 
@@ -38,11 +41,13 @@ Please refer to ```docs/installation.md``` for installation instructions
 ## Models
 
 We support models from the `transformers` library. Currently we support the following:
-* LLaVA-1.5
-Extending to other models should be straightforward as in `src/models/llava.py`.
+* **llava-v1.5-7b**
+* **idefics2-8b**
+* **Molmo-7B-D-0924**
+* **Qwen2-VL-7B-Instruct**
 
 ## How to work with this repo
-Please checkout ```save_features.sh```, ```feature_decomposition.sh```, ```concept_dictionary_evaluation.sh``` in ```src/examples```
+Please checkout ```src/examples/concept_dictionary``` for commands related to our previous work [CoX-LMM: A Concept based Explainability Framework for Large Multimodal Models](https://arxiv.org/abs/2406.08074), ```src/examples/shift_analysis/concept_dictionary_evaluation.sh``` for commands related to analyzing the shift of concepts (and visualization of this analysis can be found in ```Playground/shift_analysis.ipynb```), ```concept_dictionary_evaluation.sh``` in ```src/examples```
 for more details about different commands to execute various files.
 
 A high-level workflow while working with the repo could consist of three different steps.
