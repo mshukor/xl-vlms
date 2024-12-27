@@ -64,13 +64,6 @@ Please checkout
 
 A high-level workflow while working with the repo could consist of three different steps.
 
-* **Saving hidden states**: Store hidden states for a model for a particular token of interest ('Dog', 'Cat', 'Train' etc.) from any layer via ```src/save_features.py```. We also have other options/functionalities to save hidden states from various parts. Please see ```src/examples/save_features.sh``` for further details.
-
-* **Multimodal concept extraction**: Perform dictionary learning on stored hidden states to obtain your concept dictionary and extract information about visual/text grounding via ```src/analyse_features.py```. See ```src/examples/feature_decomposition.sh``` for details. You can visualize the multimodal concepts from your saved results as illustrated in ```playground/concept_grounding_visualization.ipynb```
-
-* **Evaluation**: Compute the CLIPScore/Overlap metrics to evaluate your concept dictionary and its use to understand test samples via ```src/analyse_features.py```. Please refer to ```src/examples/concept_dictionary_evaluation.sh``` for details.
-
-
 # Contributing
 We welcome contributions to this repo. It could be in form of support for other models, datasets, or other analysis/interpretation methods for multimodal models. However, contributions should only be made via pull requests. Please refer to rules given at ```docs/contributing.md```
 
