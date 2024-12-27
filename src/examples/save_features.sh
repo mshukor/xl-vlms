@@ -11,24 +11,28 @@ hook_name=save_hidden_states_for_token_of_interest  # Only save features for a t
 token=train
 #token=dog # Can also use other nouns that appear in your dataset
 
+
+#model_name=llava-hf/llava-1.5-7b-hf
+model_name=allenai/Molmo-7B-D-0924
 # Directory and filename to store extracted features
 results_filename=llava_train_generation_split_train
 save_dir=/home/parekh/
 
-#model_name=llava-hf/llava-1.5-7b-hf
-model_name=allenai/Molmo-7B-D-0924
-
 
 # Named modules inside the model for which you want to save the representations
-feature_modules=language_model.model.norm,language_model.model.layers.30
-# Other examples of named modules
+
+# Examples of named modules for LLaVA-v1.5
+#feature_modules=language_model.model.norm,language_model.model.layers.30
 #feature_modules=language_model.model.layers.28.input_layernorm
 #feature_modules=language_model.model.layers.29
+
+# Examples of named modules for Molmo-7B
+feature_modules=model.transformer.blocks.27
 
 # Dataset specifications. Ensure you modify dataset path (--data_dir command) accordingly
 data_dir=/data/mshukor/data/coco/ # Data directory for COCO dataset
 split=train # Which data split to save features for. For COCO: train/val/test options
-size=12783 # How many samples of dataset to consider. karpathy train split for COCO is of size 82783 images. Can't be more than dataset size
+size=783 # How many samples of dataset to consider. karpathy train split for COCO is of size 82783 images. Can't be more than dataset size
 annotation_file=karpathy/dataset_coco.json
 
 
