@@ -16,7 +16,10 @@ saved_features_path=/home/parekh/features/save_hidden_states_for_token_of_intere
 results_filename=results_train
 
 # Specify the specific feature module you want to decompose
+# Molmo
 feature_module=model.transformer.blocks.27
+
+# LLaVA-v1.5
 #feature_module=language_model.model.norm
 #feature_module=language_model.model.layers.30
 

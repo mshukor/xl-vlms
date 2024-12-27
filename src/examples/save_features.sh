@@ -27,7 +27,7 @@ save_dir=/home/parekh/
 #feature_modules=language_model.model.layers.29
 
 # Examples of named modules for Molmo-7B
-feature_modules=model.transformer.blocks.27,model.transformer.blocks.27.ff_out
+feature_modules=model.transformer.blocks.27,model.transformer.ln_f
 
 # Dataset specifications. Ensure you modify dataset path (--data_dir command) accordingly
 data_dir=/data/mshukor/data/coco/ # Data directory for COCO dataset
