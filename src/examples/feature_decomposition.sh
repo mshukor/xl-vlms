@@ -10,7 +10,7 @@ model_name=allenai/Molmo-7B-D-0924
 analysis_name=decompose_activations_text_grounding_image_grounding
 
 # Specify path where you have saved features on training data
-saved_features_path=/home/parekh/features/save_hidden_states_for_token_of_interest_llava_train_generation_split_train.pth
+saved_features_path=/home/parekh/features/save_hidden_states_for_token_of_interest_molmo_train_generation_split_train.pth
 
 # Where to store details about extracted concepts. Default directory is results/
 results_filename=results_train
@@ -21,7 +21,7 @@ feature_module=model.transformer.blocks.27
 #feature_module=language_model.model.layers.30
 
 decomposition=snmf # Current options: snmf, kmeans, pca, simple
-n_concepts=4 # Size of dictionary learnt i.e. number of concepts
+n_concepts=20 # Size of dictionary learnt i.e. number of concepts
 
 python src/analyse_features.py \
 --model_name $model_name \

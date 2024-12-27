@@ -34,13 +34,13 @@ class Molmo(ImageTextModel):
         self,
     ) -> Callable:
 
-        return self.model_.transformer
+        return self.model_.model.transformer
 
     def get_lm_head(
         self,
     ) -> Callable:
 
-        return self.model_.transformer.ff_out
+        return self.model_.model.transformer.ff_out
 
     def set_processor(
         self,

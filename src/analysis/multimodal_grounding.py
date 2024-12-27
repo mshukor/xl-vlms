@@ -114,7 +114,7 @@ def get_multimodal_grounding(
         grounding_dict["text_grounding"] = grounded_words
 
     if image_grounding:
-        logger.info("Activations size: ", activations.shape)
+        logger.info(f"Activations size: {activations.shape}")
 
         image_indices = concept_image_grounding(
             activations=activations,

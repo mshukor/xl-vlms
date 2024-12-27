@@ -15,7 +15,7 @@ token=train
 #model_name=llava-hf/llava-1.5-7b-hf
 model_name=allenai/Molmo-7B-D-0924
 # Directory and filename to store extracted features
-results_filename=llava_train_generation_split_train
+results_filename=molmo_train_generation_split_train
 save_dir=/home/parekh/
 
 
@@ -27,12 +27,12 @@ save_dir=/home/parekh/
 #feature_modules=language_model.model.layers.29
 
 # Examples of named modules for Molmo-7B
-feature_modules=model.transformer.blocks.27
+feature_modules=model.transformer.blocks.27,model.transformer.blocks.27.ff_out
 
 # Dataset specifications. Ensure you modify dataset path (--data_dir command) accordingly
 data_dir=/data/mshukor/data/coco/ # Data directory for COCO dataset
 split=train # Which data split to save features for. For COCO: train/val/test options
-size=783 # How many samples of dataset to consider. karpathy train split for COCO is of size 82783 images. Can't be more than dataset size
+size=82783 # How many samples of dataset to consider. karpathy train split for COCO is of size 82783 images. Can't be more than dataset size
 annotation_file=karpathy/dataset_coco.json
 
 
@@ -56,7 +56,8 @@ python src/save_features.py \
 # We save model representations on both train split (to learn the concepts) and test split (to evaluate)
 split=test
 size=5000
-results_filename=llava_train_generation_split_test
+results_filename=molmo_train_generation_split_test
+
 
 python src/save_features.py \
 --model_name $model_name \
@@ -73,3 +74,5 @@ python src/save_features.py \
 --save_filename $results_filename \
 --generation_mode \
 --exact_match_modules_to_hook
+
+
