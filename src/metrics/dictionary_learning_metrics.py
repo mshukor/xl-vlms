@@ -6,9 +6,9 @@ import numpy as np
 import torch
 from nltk.corpus import words
 
-from analysis.feature_decomposition import project_test_samples
 from metrics.clipscore import extract_image_features, img_clipscore
 from metrics.utils import get_stopwords, valid_word
+import analysis.feature_decomposition as analysis_decomposition
 
 __all__ = [
     "get_clip_score",
@@ -32,7 +32,7 @@ def get_clip_score(
     metadata = list(metadata.values())[0]
     analysis_model = concepts_dict["analysis_model"]
     grounding_words = concepts_dict["text_grounding"]
-    projections = project_test_samples(
+    projections = analysis_decomposition.project_test_samples(
         sample=features,
         analysis_model=analysis_model,
         decomposition_type=concepts_dict["decomposition_method"],

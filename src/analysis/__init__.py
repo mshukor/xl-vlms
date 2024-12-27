@@ -10,7 +10,7 @@ from analysis.feature_decomposition import (decompose_and_ground_activations,
 from analysis.model_steering import get_steering_vector
 from analysis.utils import (get_matched_token_of_interest_mask,
                             get_token_of_interest_features)
-from metrics import concept_dictionary_evaluation
+import metrics
 
 __all__ = ["load_features", "analyse_features"]
 
@@ -120,7 +120,7 @@ def analyse_features(
             args=args,
         )
     elif "concept_dictionary_evaluation" in analysis_name:
-        results_dict = concept_dictionary_evaluation(
+        results_dict = metrics.concept_dictionary_evaluation(
             metric_name=analysis_name,
             features=features,
             metadata=metadata,

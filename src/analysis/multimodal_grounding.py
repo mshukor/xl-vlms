@@ -5,8 +5,8 @@ from typing import Any, Callable, Dict, List
 import torch
 from nltk.corpus import words
 
-from helpers.utils import save_analysis_to_file
 from metrics.utils import GIST_FILE_PATH, get_stopwords, valid_word
+import helpers.utils as helpers_utils
 
 __all__ = [
     "get_multimodal_grounding",
@@ -163,7 +163,7 @@ def get_multimodal_grounding(
                 f"Saving decomposition results dictionary to: {analysis_saving_path}"
             )
 
-        save_analysis_to_file(
+        helpers_utils.save_analysis_to_file(
             grounding_dict, analysis_saving_path, grounding_dict.keys(), logger=logger
         )
 

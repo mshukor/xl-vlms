@@ -15,7 +15,9 @@ token=train
 results_filename=llava_train_generation_split_train
 save_dir=/home/parekh/
 
-model_name=llava-hf/llava-1.5-7b-hf
+#model_name=llava-hf/llava-1.5-7b-hf
+model_name=allenai/Molmo-7B-D-0924
+
 
 # Named modules inside the model for which you want to save the representations
 feature_modules=language_model.model.norm,language_model.model.layers.30
@@ -26,7 +28,7 @@ feature_modules=language_model.model.norm,language_model.model.layers.30
 # Dataset specifications. Ensure you modify dataset path (--data_dir command) accordingly
 data_dir=/data/mshukor/data/coco/ # Data directory for COCO dataset
 split=train # Which data split to save features for. For COCO: train/val/test options
-size=82783 # How many samples of dataset to consider. karpathy train split for COCO is of size 82783 images. Can't be more than dataset size
+size=12783 # How many samples of dataset to consider. karpathy train split for COCO is of size 82783 images. Can't be more than dataset size
 annotation_file=karpathy/dataset_coco.json
 
 
