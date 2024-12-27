@@ -27,13 +27,13 @@ We support the approaches introduced in the following papers:
 
 
   <p align="center">
-        <br> <img src="docs/assets/analyze_shift.pdf", width=800 /> <br>
+        <br> <img src="docs/assets/analyze_shift.png", width=800 /> <br>
   </p>
 
   > In this work, we systematically analyze the evolution of hidden state representations to reveal how fine-tuning alters the internal structure of a model to specialize in new multimodal tasks. Using a concept-based approach, we map hidden states to interpretable visual and textual concepts, enabling us to trace changes in encoded concepts across modalities as training progresses. We also demonstrate the use of shift vectors to capture these concepts changes. These shift vectors allow us to recover fine-tuned concepts by shifting those in the original model. 
   
   <p align="center">
-        <br> <img src="docs/assets/teaser_steering.pdf", width=800 /> <br>
+        <br> <img src="docs/assets/teaser_steering.png", width=800 /> <br>
   </p>
  
   > Finally, we explore the practical impact of our findings on model steering, showing that we can adjust multimodal LLMs behaviors without any training, such as modifying answer types, captions style, or biasing the model toward specific responses. Our work sheds light on how multimodal representations evolve through fine-tuning and offers a new perspective for interpreting model adaptation in multimodal tasks. The code will be made publicly available.
