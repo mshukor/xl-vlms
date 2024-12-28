@@ -32,11 +32,12 @@ def get_clip_score(
     metadata = list(metadata.values())[0]
     analysis_model = concepts_dict["analysis_model"]
     grounding_words = concepts_dict["text_grounding"]
-    projections = analysis_decomposition.project_test_samples(
+    projections = analysis_decomposition.project_test_sample(
         sample=features,
         analysis_model=analysis_model,
         decomposition_type=concepts_dict["decomposition_method"],
     )
+    '''
     if args.use_random_grounding_words:
         lm_head = model_class.get_lm_head().float()
         tokenizer = model_class.get_tokenizer()
@@ -46,6 +47,7 @@ def get_clip_score(
             grounding_words=grounding_words,
         )
         logger.info(f"Random words usage is True. Only for CLIPScore evaluation")
+    '''
 
     clipscore_dict = compute_test_clipscore(
         projections=projections,
@@ -140,6 +142,7 @@ def compute_test_clipscore(
     clip_model.eval()
 
     image_paths = metadata.get("image_paths", [])
+    image_paths = metadata.get("image", [])
     token_of_interest_mask = metadata.get("token_of_interest_mask", None)
     if token_of_interest_mask is not None:
         image_paths = [

@@ -92,6 +92,7 @@ def extract_image_features(images, model, device, batch_size=64):
                 b = b.to(torch.float16)
             all_image_features.append(model.encode_image(b).cpu().numpy())
     all_image_features = np.vstack(all_image_features)
+    
     return all_image_features
 
 

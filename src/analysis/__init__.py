@@ -125,7 +125,7 @@ def analyse_features(
             features=features,
             metadata=metadata,
             model_class=model_class,
-            concepts_decomposition_path=args.concepts_decomposition_path,
+            concepts_decomposition_path=args.analysis_saving_path,
             logger=logger,
             args=args,
             device=device,

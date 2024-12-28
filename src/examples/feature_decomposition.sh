@@ -17,7 +17,8 @@ results_filename=results_train
 
 # Specify the specific feature module you want to decompose
 # Molmo
-feature_module=model.transformer.blocks.27
+#feature_module=model.transformer.blocks.27
+feature_module=model.transformer.ln_f
 
 # LLaVA-v1.5
 #feature_module=language_model.model.norm
