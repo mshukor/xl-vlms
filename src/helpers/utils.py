@@ -11,8 +11,8 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-from datasets.constants import WORDS
 import metrics
+from datasets.constants import WORDS
 
 __all__ = [
     "register_hooks",
