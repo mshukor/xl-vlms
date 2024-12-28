@@ -28,8 +28,6 @@ def inference(
     num_iterations = len(loader)
     hook_data = {}
     model = model_class.get_model()
-    for name, module in model.named_modules():
-        print (name)
     start_time = time.time()
     for i, item in enumerate(loader):
 
