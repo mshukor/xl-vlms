@@ -45,3 +45,16 @@ The `image` key is a list of image data. Each entry represents an image path.
 
 
 ---
+
+## Summary
+
+- **`hidden_states`**:  
+  - List of dictionaries, each containing:  
+    - **`language_model.model.norm`**: Tensor, shape `[1, 1, 4096]`, dtype `torch.float16`.  
+
+- **`token_of_interest_mask`**:  
+  - Single tensor, shape `[N]`, dtype `torch.bool`.  
+  - Indicates if a sample contains the token of interest (`True`/`False`).  
+
+- **`image`**:  
+  - List of image paths, one per sample.  
