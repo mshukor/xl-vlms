@@ -64,21 +64,22 @@ Please checkout
 
 A high-level workflow while working with the repo could consist of three different parts :
 
-1. Discovering multimodal concepts in a multimodal LLM:
+1. **Discovering multimodal concepts**:
       1. Extracting hidden states from the multimodal LLM
       2. Aggregating extracted hidden states across target samples; let's call this aggregation `Z`.
       3. Decomposing `Z` into concept vectors and activations, using a decomposition strategy such as semi-nmf, kmeans, etc ... : `Z = U V`.
       4. Grouding the concepts (columns of `U`) in text and image.
 
-2. Computing shift vectors from the concept space of one model to another, and evaluating how well the concepts in the second model are recovered by this shift:
+2. **Computing shift vectors** from the concept space of one model to another:
       1. Computing concepts from the original and destination models.
       2. Associating each sample with the concept it activates the most.
       3. Computing the shift in the representation of sampels associated with each concept and obtaining a shift vector.
       4. Applying the shift on the concepts of the original model, and comparing the result with concepts of the destination model.
-You can test this feature by providing your own hidden state representations, which should be structured in a file as described in 
+You can test this feature by providing your own hidden state representations, which should be structured in a file as described in [docs/saved_feature_structure.md](docs/saved_feature_structure.md).
 
-3. Steering the model for VQA or captioning tasks, in coarse or fine-grained manner:
-      1. 
+3. **Steering the model** for VQA or captioning tasks, in coarse or fine-grained manner:
+      1. Computing steering vectors from the hidden representations of two sets of samples; one set is associated to what is going to be steered (for example a particular answer in VQA to be changed, or random if all the answers are to be shifted), and the other set is associated to the target of steering (for example a particular answer in VQA, or captions related to a particular concept, such as color or sentiment).
+      2. Applying this steering vector on validation samples, and evaluating the steering (how targeted is steering? how is the accuracy of different answers is affected? how is the quality of generated captions?)
 
 # Contributing
 We welcome contributions to this repo. It could be in form of support for other models, datasets, or other analysis/interpretation methods for multimodal models. However, contributions should only be made via pull requests. Please refer to rules given at ```docs/contributing.md```
