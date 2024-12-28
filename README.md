@@ -6,7 +6,7 @@ This repository contains explainability tools for the internal representations o
 
 * **[2024.10.30]**: XL-VLMs repo is public.
 * **[2024.09.25]**: Our paper [A Concept based Explainability Framework for Large Multimodal Models](https://arxiv.org/abs/2406.08074) is accepted in NeurIPS 2024.
-* **[2025.01.02]**: Our paper [A Concept based Explainability Framework for Large Multimodal Models](https://arxiv.org/abs/2406.08074).
+* **[2025.01.02]**: Our paper [Analyzing Fine-tuning Representation Shift for Multimodal LLMs Steering](https://arxiv.org/abs/2406.08074).
 
 
 # Supported methods
@@ -43,7 +43,7 @@ We support the approaches introduced in the following papers:
 
 # Installation
 
-Please refer to ```docs/installation.md``` for installation instructions
+Please refer to [docs/installation.md](docs/installation.md) for installation instructions
 
 # Usage
 
@@ -62,7 +62,23 @@ Please checkout
 * and ```src/examples/model_steering``` for commands related to steering the model for different tasks, and its evaluation.
 
 
-A high-level workflow while working with the repo could consist of three different steps.
+A high-level workflow while working with the repo could consist of three different parts :
+
+1. Discovering multimodal concepts in a multimodal LLM:
+      1. Extracting hidden states from the multimodal LLM
+      2. Aggregating extracted hidden states across target samples; let's call this aggregation `Z`.
+      3. Decomposing `Z` into concept vectors and activations, using a decomposition strategy such as semi-nmf, kmeans, etc ... : `Z = U V`.
+      4. Grouding the concepts (columns of `U`) in text and image.
+
+2. Computing shift vectors from the concept space of one model to another, and evaluating how well the concepts in the second model are recovered by this shift:
+      1. Computing concepts from the original and destination models.
+      2. Associating each sample with the concept it activates the most.
+      3. Computing the shift in the representation of sampels associated with each concept and obtaining a shift vector.
+      4. Applying the shift on the concepts of the original model, and comparing the result with concepts of the destination model.
+You can test this feature by providing your own hidden state representations, which should be structured in a file as described in 
+
+3. Steering the model for VQA or captioning tasks, in coarse or fine-grained manner:
+      1. 
 
 # Contributing
 We welcome contributions to this repo. It could be in form of support for other models, datasets, or other analysis/interpretation methods for multimodal models. However, contributions should only be made via pull requests. Please refer to rules given at ```docs/contributing.md```
