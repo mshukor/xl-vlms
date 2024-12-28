@@ -10,7 +10,7 @@ This repository contains explainability tools for the internal representations o
     <img alt="Paper URL" src="https://img.shields.io/badge/arxiv-2406.08074-blue">
   </a> </a>
   <a href="https://jayneelparekh.github.io/LMM_Concept_Explainability/">
-    <img alt="Blog Post" src="https://img.shields.io/badge/CoX-LMM-blog-F0529C">
+    <img alt="Blog Post" src="https://img.shields.io/badge/CoXLMM-blog-F0529C">
   </a> is accepted in NeurIPS 2024.
 * **[2025.01.02]**: Our paper [Analyzing Fine-tuning Representation Shift for Multimodal LLMs Steering](https://arxiv.org/abs/2406.08074) is on arxiv.
 
