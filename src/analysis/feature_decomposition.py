@@ -27,7 +27,9 @@ def decompose_and_ground_activations(
     results_dict = {}
     features = list(features.values())[0]
     metadata = list(metadata.values())[0]
-    num_concepts = args.num_concepts[0] if type(args.num_concepts) is list else args.num_concepts
+    num_concepts = (
+        args.num_concepts[0] if type(args.num_concepts) is list else args.num_concepts
+    )
     concepts, activations, decomposition_model = decompose_activations(
         mat=features,
         num_concepts=num_concepts,

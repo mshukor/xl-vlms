@@ -208,7 +208,7 @@ def extract_token_of_interest_states(
         token_of_interest_idx = torch.tensor([token_of_interest_idx])
     token_of_interest_idx = token_of_interest_idx.to(pred_tokens.device)
 
-    #print (f"SPECIAL PRINT {pred_tokens}, token of interest indices: {token_of_interest_idx}", )
+    # print (f"SPECIAL PRINT {pred_tokens}, token of interest indices: {token_of_interest_idx}", )
 
     # Step 1: Find where the tokens of interest exist in the batch (B, L)
     token_of_interest_batch_presence = torch.isin(
@@ -429,7 +429,7 @@ def register_hooks(
                 token_of_interest,
                 token_of_interest.capitalize(),
                 token_of_interest.lower(),
-                ' ' + token_of_interest,
+                " " + token_of_interest,
             ]
         )
         token_of_interest_idx = args.token_of_interest_idx

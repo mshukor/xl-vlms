@@ -58,7 +58,6 @@ def inference(
             out[:, input_len:], skip_special_tokens=True
         )
 
-
         if hook_return_functions is not None:
             for func in hook_return_functions:
                 if func is not None:

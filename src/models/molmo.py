@@ -1,8 +1,8 @@
 from typing import Any, Callable, Dict
 
+import numpy as np
 import torch
 from PIL import Image
-import numpy as np
 from transformers import AutoModelForCausalLM, AutoProcessor, GenerationConfig
 
 from .image_text_model import ImageTextModel
@@ -88,7 +88,6 @@ class Molmo(ImageTextModel):
 
         image = Image.open(image_file).convert("RGB")
         image = np.array(image)
-        
 
         inputs = self.processor_.process(
             text=text,

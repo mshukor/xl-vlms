@@ -5,8 +5,8 @@ from typing import Any, Callable, Dict, List
 import torch
 from nltk.corpus import words
 
-from metrics.utils import GIST_FILE_PATH, get_stopwords, valid_word
 import helpers.utils as helpers_utils
+from metrics.utils import GIST_FILE_PATH, get_stopwords, valid_word
 
 __all__ = [
     "get_multimodal_grounding",

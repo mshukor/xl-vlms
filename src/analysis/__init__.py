@@ -4,13 +4,13 @@ from typing import Any, Callable, Dict, List, Union
 
 import torch
 
+import metrics
 from analysis.cluster_analysis import analyse_clusters
 from analysis.feature_decomposition import (decompose_and_ground_activations,
                                             get_feature_matrix)
 from analysis.model_steering import get_steering_vector
 from analysis.utils import (get_matched_token_of_interest_mask,
                             get_token_of_interest_features)
-import metrics
 
 __all__ = ["load_features", "analyse_features"]
 
