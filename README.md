@@ -2,11 +2,14 @@
 
 This repository contains explainability tools for the internal representations of large vision language models and steering  functionalities for VQA and captioning tasks across various models.
 
+
 # News
 
 * **[2024.10.30]**: XL-VLMs repo is public.
-* **[2024.09.25]**: Our paper [A Concept based Explainability Framework for Large Multimodal Models](https://arxiv.org/abs/2406.08074) is accepted in NeurIPS 2024.
-* **[2025.01.02]**: Our paper [Analyzing Fine-tuning Representation Shift for Multimodal LLMs Steering](https://arxiv.org/abs/2406.08074).
+* **[2024.09.25]**: Our paper **A Concept based Explainability Framework for Large Multimodal Models** <a href="https://arxiv.org/abs/2406.08074">
+    <img alt="Paper URL" src="https://img.shields.io/badge/arxiv-2406.08074-blue">
+  </a> is accepted in NeurIPS 2024.
+* **[2025.01.02]**: Our paper [Analyzing Fine-tuning Representation Shift for Multimodal LLMs Steering](https://arxiv.org/abs/2406.08074) is on arxiv.
 
 
 # Supported methods
@@ -86,7 +89,20 @@ You can test this feature by providing your own hidden state representations, wh
       2. Applying this steering vector on validation samples, and evaluating the steering (how targeted is steering? how is the accuracy of different answers is affected? how is the quality of generated captions?)
 
 
-checkout [src/examples/model_steering](src/examples/model_steering) for commands related to steering the model for different tasks, and its evaluation
+checkout [src/examples/model_steering](src/examples/model_steering) for commands related to steering the model for different tasks and its evaluation.
 
 # Contributing
 We welcome contributions to this repo. It could be in form of support for other models, datasets, or other analysis/interpretation methods for multimodal models. However, contributions should only be made via pull requests. Please refer to rules given at ```docs/contributing.md```
+
+
+
+## Citation
+
+```bibtex
+@article{parekh2024concept,
+  title={A Concept-Based Explainability Framework for Large Multimodal Models},
+  author={Parekh, Jayneel and Khayatan, Pegah and Shukor, Mustafa and Newson, Alasdair and Cord, Matthieu},
+  journal={arXiv preprint arXiv:2406.08074},
+  year={2024}
+}
+```
