@@ -8,6 +8,9 @@ This repository contains explainability tools for the internal representations o
 * **[2024.10.30]**: XL-VLMs repo is public.
 * **[2024.09.25]**: Our paper **A Concept based Explainability Framework for Large Multimodal Models** <a href="https://arxiv.org/abs/2406.08074">
     <img alt="Paper URL" src="https://img.shields.io/badge/arxiv-2406.08074-blue">
+  </a> </a>
+  <a href="https://jayneelparekh.github.io/LMM_Concept_Explainability/">
+    <img alt="Blog Post" src="https://img.shields.io/badge/CoX-LMM-blog-F0529C">
   </a> is accepted in NeurIPS 2024.
 * **[2025.01.02]**: Our paper [Analyzing Fine-tuning Representation Shift for Multimodal LLMs Steering](https://arxiv.org/abs/2406.08074) is on arxiv.
 
