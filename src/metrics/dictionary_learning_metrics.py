@@ -6,9 +6,9 @@ import numpy as np
 import torch
 from nltk.corpus import words
 
-import analysis.feature_decomposition as analysis_decomposition
 from metrics.clipscore import extract_image_features, img_clipscore
 from metrics.utils import get_stopwords, valid_word
+import analysis.feature_decomposition as analysis_decomposition
 
 __all__ = [
     "get_clip_score",
@@ -37,7 +37,7 @@ def get_clip_score(
         analysis_model=analysis_model,
         decomposition_type=concepts_dict["decomposition_method"],
     )
-    """
+    '''
     if args.use_random_grounding_words:
         lm_head = model_class.get_lm_head().float()
         tokenizer = model_class.get_tokenizer()
@@ -47,7 +47,7 @@ def get_clip_score(
             grounding_words=grounding_words,
         )
         logger.info(f"Random words usage is True. Only for CLIPScore evaluation")
-    """
+    '''
 
     clipscore_dict = compute_test_clipscore(
         projections=projections,
