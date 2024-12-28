@@ -16,3 +16,4 @@ logs.log
 
 # Ignore all .pth files
 *.npy
+*.pth
