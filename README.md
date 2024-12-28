@@ -75,6 +75,8 @@ A high-level workflow while working with the repo could consist of three differe
       2. Associating each sample with the concept it activates the most.
       3. Computing the shift in the representation of sampels associated with each concept and obtaining a shift vector.
       4. Applying the shift on the concepts of the original model, and comparing the result with concepts of the destination model.
+
+
 You can test this feature by providing your own hidden state representations, which should be structured in a file as described in [docs/saved_feature_structure.md](docs/saved_feature_structure.md).
 
 3. **Steering the model** for VQA or captioning tasks, in coarse or fine-grained manner:
