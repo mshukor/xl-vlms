@@ -208,8 +208,6 @@ def extract_token_of_interest_states(
         token_of_interest_idx = torch.tensor([token_of_interest_idx])
     token_of_interest_idx = token_of_interest_idx.to(pred_tokens.device)
 
-    # print (f"SPECIAL PRINT {pred_tokens}, token of interest indices: {token_of_interest_idx}", )
-
     # Step 1: Find where the tokens of interest exist in the batch (B, L)
     token_of_interest_batch_presence = torch.isin(
         pred_tokens, token_of_interest_idx
@@ -424,6 +422,9 @@ def register_hooks(
     elif "save_hidden_states_for_token_of_interest" == hook_name:
         # Save the hidden states of tokens between start and end index
         token_of_interest = args.token_of_interest
+
+        # Get index in tokenizer vocabulary for token of interest
+        # Some tokenizers encode/decode space along with token, so include index of whitespace + token_of_interest
         tokens_of_interest = set(
             [
                 token_of_interest,
