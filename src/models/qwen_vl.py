@@ -26,13 +26,13 @@ class QwenVL(ImageTextModel):
         self,
     ) -> Callable:
 
-        return self.model_.language_model
+        return self.model_.model
 
     def get_lm_head(
         self,
     ) -> Callable:
 
-        return self.model_.language_model.lm_head
+        return self.model_.lm_head
 
     def set_processor(
         self,

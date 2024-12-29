@@ -11,8 +11,8 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
+import metrics
 from datasets.constants import WORDS
-from metrics import get_metric
 
 __all__ = [
     "register_hooks",
@@ -422,11 +422,15 @@ def register_hooks(
     elif "save_hidden_states_for_token_of_interest" == hook_name:
         # Save the hidden states of tokens between start and end index
         token_of_interest = args.token_of_interest
+
+        # Get index in tokenizer vocabulary for token of interest
+        # Some tokenizers encode/decode space along with token, so include index of whitespace + token_of_interest
         tokens_of_interest = set(
             [
                 token_of_interest,
                 token_of_interest.capitalize(),
                 token_of_interest.lower(),
+                " " + token_of_interest,
             ]
         )
         token_of_interest_idx = args.token_of_interest_idx
@@ -540,12 +544,12 @@ def hooks_postprocessing(
             hook_name=hook_name,
         )
     elif "vqav2_accuracy" in hook_name:
-        hook_postprocessing_function = get_metric(
+        hook_postprocessing_function = metrics.get_metric(
             metric_name="vqav2_accuracy", args=args
         )
 
     elif "captioning_metrics" in hook_name:
-        hook_postprocessing_function = get_metric(
+        hook_postprocessing_function = metrics.get_metric(
             metric_name="captioning_metrics", args=args
         )
     else:

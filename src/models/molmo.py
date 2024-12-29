@@ -1,5 +1,6 @@
 from typing import Any, Callable, Dict
 
+import numpy as np
 import torch
 from PIL import Image
 from transformers import AutoModelForCausalLM, AutoProcessor, GenerationConfig
@@ -33,13 +34,13 @@ class Molmo(ImageTextModel):
         self,
     ) -> Callable:
 
-        return self.model_.language_model
+        return self.model_.model.transformer
 
     def get_lm_head(
         self,
     ) -> Callable:
 
-        return self.model_.language_model.lm_head
+        return self.model_.model.transformer.ff_out
 
     def set_processor(
         self,
@@ -86,6 +87,7 @@ class Molmo(ImageTextModel):
         )
 
         image = Image.open(image_file).convert("RGB")
+        image = np.array(image)
 
         inputs = self.processor_.process(
             text=text,

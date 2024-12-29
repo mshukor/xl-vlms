@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, List
 import torch
 from nltk.corpus import words
 
-from helpers.utils import save_analysis_to_file
+import helpers.utils as helpers_utils
 from metrics.utils import GIST_FILE_PATH, get_stopwords, valid_word
 
 __all__ = [
@@ -114,14 +114,14 @@ def get_multimodal_grounding(
         grounding_dict["text_grounding"] = grounded_words
 
     if image_grounding:
-        logger.info("Activations size: ", activations.shape)
+        logger.info(f"Activations size: {activations.shape}")
 
         image_indices = concept_image_grounding(
             activations=activations,
             num_images_per_concept=num_most_activating_samples,
         )
         image_paths = metadata.get("image", [])
-        logger.info("Image paths length: ", len(image_paths))
+        logger.info(f"Image paths length: {len(image_paths)}")
         # Only keep image paths for samples with token_of_interest_mask True
 
         token_of_interest_mask = metadata.get("token_of_interest_mask", None)
@@ -163,7 +163,7 @@ def get_multimodal_grounding(
                 f"Saving decomposition results dictionary to: {analysis_saving_path}"
             )
 
-        save_analysis_to_file(
+        helpers_utils.save_analysis_to_file(
             grounding_dict, analysis_saving_path, grounding_dict.keys(), logger=logger
         )
 
