@@ -96,7 +96,7 @@ A high-level workflow while working with the repo could consist of three differe
    - ⚙️ Computing steering vectors from the hidden representations of two sets of samples; one set is associated with what is going to be steered (e.g., a particular answer in VQA to be changed, or random if all answers are to be shifted), and the other set is associated with the target of steering (e.g., a particular answer in VQA, or captions related to a particular concept, such as color or sentiment).  
    - 🎯 Applying this steering vector on validation samples, and evaluating the steering (e.g., how targeted is steering? How is the accuracy of different answers affected? How is the quality of generated captions?).  
 
-   👉 Check out [src/examples/model_steering](src/examples/model_steering) for commands related to steering the model for different tasks and its evaluation.
+   👉 Check out [src/examples/model_steering](src/examples/steering) for commands related to steering the model for different tasks and its evaluation.
 
 # Contributing
 We welcome contributions to this repo. It could be in form of support for other models, datasets, or other analysis/interpretation methods for multimodal models. However, contributions should only be made via pull requests. Please refer to rules given at ```docs/contributing.md```
