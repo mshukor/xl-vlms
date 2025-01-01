@@ -172,5 +172,3 @@ def decompose_activations(
         comp_activ = 1 / (1 + model.transform(mat))
 
     return components, comp_activ, model
-
-
