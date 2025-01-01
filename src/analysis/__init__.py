@@ -107,7 +107,6 @@ def analyse_features(
             args.dest_model_feature_path is not None
         ), "features_path and base_features_key should be provided when analyzing features from a single model"
 
-
         features, metadatas = load_features(
             features_path=[
                 args.origin_model_feature_path,
@@ -151,7 +150,6 @@ def analyse_features(
         )
 
     elif "analyse_clusters" in analysis_name:
-
 
         # Load analysis data for origin model if the path is provided, else pass None
         if args.origin_model_analysis_path:

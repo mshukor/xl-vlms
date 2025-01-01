@@ -5,9 +5,9 @@ The file `saved_hidden_states.pth` is a PyTorch checkpoint file that contains a 
 ### 1. **Top-Level Dictionary Keys**
 The file contains the following top-level keys:
 
-- **`hidden_states`**: A list of dictionaries, each containing hidden state information for the corresponding sample.  
-- **`token_of_interest_mask`**: A single boolean tensor indicating which samples contain the token of interest in their generated captions and should be picked for analysis.  
-- **`image`**: A list of image paths, each corresponding to a sample.  
+- **`hidden_states`**: A list of dictionaries, each containing hidden state information for the corresponding sample.
+- **`token_of_interest_mask`**: A single boolean tensor indicating which samples contain the token of interest in their generated captions and should be picked for analysis.
+- **`image`**: A list of image paths, each corresponding to a sample.
 
 ---
 
@@ -41,20 +41,20 @@ The `image` key is a list of image data. Each entry represents an image path.
 - Type: `list`
 - Each entry is a string representing the image file path, for example:
   - `"/data/mshukor/data/coco/train2014/COCO_train2014_000000225306.jpg"`
-  
+
 
 
 ---
 
 ## Summary
 
-- **`hidden_states`**:  
-  - List of dictionaries, each containing:  
-    - **`language_model.model.norm`**: Tensor, shape `[1, 1, 4096]`, dtype `torch.float16`.  
+- **`hidden_states`**:
+  - List of dictionaries, each containing:
+    - **`language_model.model.norm`**: Tensor, shape `[1, 1, 4096]`, dtype `torch.float16`.
 
-- **`token_of_interest_mask`**:  
-  - Single tensor, shape `[N]`, dtype `torch.bool`.  
-  - Indicates if a sample contains the token of interest (`True`/`False`).  
+- **`token_of_interest_mask`**:
+  - Single tensor, shape `[N]`, dtype `torch.bool`.
+  - Indicates if a sample contains the token of interest (`True`/`False`).
 
-- **`image`**:  
-  - List of image paths, one per sample.  
+- **`image`**:
+  - List of image paths, one per sample.
