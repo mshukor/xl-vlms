@@ -1,8 +1,11 @@
 #!/bin/bash
 
 YOUR_XL_VLM_DIR=YOUR_XL_VLM_DIR
+YOUR_XL_VLM_DIR=/home/khayatan/xl_vlms_cvpr/xl-vlms
 YOUR_VQA_DIR=YOUR_VQA_DIR
+YOUR_VQA_DIR=/data/mshukor/data/coco/
 YOUR_ANSWER_TYPE_TO_ANSWER_FILE=YOUR_ANSWER_TYPE_TO_ANSWER_FILE
+YOUR_ANSWER_TYPE_TO_ANSWER_FILE=/data/mshukor/data/coco/type_to_answer_dict.json
 
 
 save_dir=${YOUR_XL_VLM_DIR}/results

@@ -1,9 +1,11 @@
 #!/bin/bash
 
 YOUR_XL_VLM_DIR=YOUR_XL_VLM_DIR
+YOUR_XL_VLM_DIR=/home/khayatan/xl_vlms_cvpr/xl-vlms
 YOUR_COCO_DIR=YOUR_COCO_DIR
+YOUR_COCO_DIR=/data/mshukor/data/coco/
 YOUR_COCO_ANNOTATION_FILE=YOUR_COCO_ANNOTATION_FILE
-
+YOUR_COCO_ANNOTATION_FILE=karpathy/dataset_coco.j
 
 model_name_or_path=llava-hf/llava-1.5-7b-hf
 
