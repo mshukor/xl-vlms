@@ -1,15 +1,28 @@
 #!/bin/bash
 
+YOUR_XL_VLM_DIR=YOUR_XL_VLM_DIR
+YOUR_VQA_DIR=YOUR_VQA_DIR
+YOUR_ANSWER_TYPE_TO_ANSWER_FILE=YOUR_ANSWER_TYPE_TO_ANSWER_FILE
 
 model_name_or_path=llava-hf/llava-1.5-7b-hf
 model=llava
 
+# model_name_or_path=HuggingFaceM4/idefics2-8b
+# model=idefics2
+
+# model_name_or_path=Qwen/Qwen2-VL-7B-Instruct
+# model=qwen2vlinstruct
+
+# model_name_or_path=allenai/Molmo-7B-D-0924
+# model=molmo
+
+
 dataset_name=vqav2
-data_dir=/data/mshukor/data/coco/
-answer_type_to_answer=/data/mshukor/data/coco/type_to_answer_dict.json
+data_dir=YOUR_VQA_DIR
+answer_type_to_answer=${YOUR_ANSWER_TYPE_TO_ANSWER_FILE}
 dataset_size=5000
-predictions_path=/home/khayatan/xl_vlms_cvpr/xl-vlms/results/features/vqav2_accuracy_${model}_vqav2_val_baseline_datasize_${dataset_size}_model_prediction.json
-save_steer_dir=/home/khayatan/xl_vlms_cvpr/xl-vlms/results/steering
+save_steer_dir=${YOUR_XL_VLM_DIR}/results/steering
+save_dir=${YOUR_XL_VLM_DIR}/results
 max_new_tokens=5
 
 steering_method=shift_of_means
@@ -28,7 +41,6 @@ token_of_interest=""
 layers=(31)
 
 
-save_dataset_size=2000
 category_of_interest=no
 token_of_interests=("yes" "no")
 
@@ -69,7 +81,7 @@ for i in "${!layers[@]}"; do
     --predictions_token_of_interest ${token_of_interests[1]} \
     --targets_token_of_interest ${token_of_interests[0]} \
     --generation_mode \
-    --save_dir $save_steer_dir \
+    --save_dir $save_dir \
     --save_filename ${steering_method}_${model}_${layer}_${token_of_interests[0]}_to_${token_of_interests[1]}_${shift_vector_key}_${steering_hook_name} \
     --local_files_only \
     --exact_match_modules_to_hook \
@@ -78,6 +90,5 @@ for i in "${!layers[@]}"; do
     --steering_alpha $steering_alpha \
     --category_of_interest $category_of_interest \
     --max_new_tokens $max_new_tokens \
-    --predictions_path $predictions_path \
     --start_prompt_token_idx_steering $start_prompt_token_idx_steering
 done
