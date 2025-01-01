@@ -214,6 +214,7 @@ def analyse_clusters(
             stats["dot_prod_scores"],
             stats["average_cosine_sim_w_mean_scores"],
             stats["average_dot_product_w_mean_scores"],
+            stats["mag_mean_shift_score"],
         ) = process_shift_vectors(per_sample_shift_original_to_finetune)
 
         save_data["shift_stats"] = stats
@@ -226,10 +227,10 @@ def analyse_clusters(
         save_data["shifted_components_text_grounding"] = shifted_grounding_dict[
             "text_grounding"
         ]
+        analysis_dir = os.path.join(save_dir, "analysis")
+        os.makedirs(analysis_dir, exist_ok=True)
+        file_name = os.path.join(analysis_dir, f"analyse_clusters_{save_name}.pth")
 
-        file_name = os.path.join(
-            save_dir, "analysis", f"analyse_clusters_{save_name}.pth"
-        )
         torch.save(save_data, file_name)
         if logger is not None:
             logger.info(f"Saving cluster analysis to: {file_name}")
@@ -700,11 +701,13 @@ def process_shift_vectors(per_samples_shifts: List[torch.Tensor]) -> Any:
         )
 
     (
+        mag_mean_shift_scores,  # this is the magnitude of each global shift vector
         cosine_sim_scores,  # this is the pairwise average
         average_cosine_sim_w_mean_scores,  # this is the average of cosine sim btw the shift vector and the mean of shift vectors
         dot_prod_scores,  # this is the pairwise average
         average_dot_product_w_mean_scores,  # this is the average of the dot prod btw the shift vector and the mean of shift vectors
     ) = (
+        [],
         [],
         [],
         [],
@@ -716,15 +719,16 @@ def process_shift_vectors(per_samples_shifts: List[torch.Tensor]) -> Any:
         (
             cosine_sim_score,
             dot_prod_score,
-            mag_mean_shift_score,  # Ignoring for now, but may be useful
+            mag_mean_shift_score,
             mean_mag_shift_score,  # Ignoring for now, but may be useful
             mag_std_shift_score,  # Ignoring for now, but may be useful
             std_mag_shift_score,  # Ignoring for now, but may be useful
             average_cosine_sim_w_mean,
             average_dot_product_w_mean,
-            std_shift,
+            std_shift,  # Ignoring for now, but may be useful
         ) = process_one_concept_shifts(directions)
 
+        mag_mean_shift_scores.append(mag_mean_shift_score)
         cosine_sim_scores.append(cosine_sim_score)
         dot_prod_scores.append(dot_prod_score)
         average_cosine_sim_w_mean_scores.append(average_cosine_sim_w_mean)
@@ -735,4 +739,5 @@ def process_shift_vectors(per_samples_shifts: List[torch.Tensor]) -> Any:
         dot_prod_scores,
         average_cosine_sim_w_mean_scores,
         average_dot_product_w_mean_scores,
+        mag_mean_shift_scores,
     )

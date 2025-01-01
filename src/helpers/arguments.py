@@ -171,6 +171,7 @@ def get_arguments():
     )
     parser.add_argument(
         "--num_concepts",
+        type=int,
         nargs="+",
         help="Number of concepts for dictionary learning.",
         default=None,

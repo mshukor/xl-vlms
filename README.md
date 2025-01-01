@@ -1,11 +1,15 @@
 # XL-VLMs: General Repository for eXplainable Large Vision Language Models
 
 This repository contains explainability tools for the internal representations of large vision language models and steering  functionalities for VQA and captioning tasks across various models.
+<<<<<<< HEAD
 
+=======
+>>>>>>> research/model_steering
 
 # News
 
 * **[2024.10.30]**: XL-VLMs repo is public.
+<<<<<<< HEAD
 * **[2024.09.25]**: Our paper **A Concept based Explainability Framework for Large Multimodal Models** <a href="https://arxiv.org/abs/2406.08074">
     <img alt="Paper URL" src="https://img.shields.io/badge/arxiv-2406.08074-blue">
   </a> </a>
@@ -13,6 +17,10 @@ This repository contains explainability tools for the internal representations o
     <img alt="Blog Post" src="https://img.shields.io/badge/CoXLMM-blog-F0529C">
   </a> is accepted in NeurIPS 2024.
 * **[2025.01.02]**: Our paper [Analyzing Fine-tuning Representation Shift for Multimodal LLMs Steering](https://arxiv.org/abs/2406.08074) is on arxiv.
+=======
+* **[2024.09.25]**: Our paper [A Concept based Explainability Framework for Large Multimodal Models](https://arxiv.org/abs/2406.08074) is accepted in NeurIPS 2024.
+* **[2025.01.02]**: Our paper [A Concept based Explainability Framework for Large Multimodal Models](https://arxiv.org/abs/2406.08074).
+>>>>>>> research/model_steering
 
 
 # Supported methods
@@ -29,6 +37,7 @@ We support the approaches introduced in the following papers:
 
 ## Analyzing Fine-tuning Representation Shift for Multimodal LLMs Steering
 
+
   > Multimodal LLMs have reached remarkable levels of proficiency in understanding multimodal inputs, driving extensive research to develop increasingly powerful models. However, much less attention has been paid to understanding and explaining the underlying mechanisms of these models. Most existing explainability research examines these models only in their final states, overlooking the dynamic representational shifts that occur during training. In our previous work ([CoX-LMM: A Concept based Explainability Framework for Large Multimodal Models](https://arxiv.org/abs/2406.08074)) we proposed a dictionary learning based approach, applied to the representation of tokens where the elements of the learned dictionary correspond to our proposed concepts, semantically grounded in both vision and text.
 
 
@@ -43,7 +52,6 @@ We support the approaches introduced in the following papers:
   </p>
 
   > Finally, we explore the practical impact of our findings on model steering, showing that we can adjust multimodal LLMs behaviors without any training, such as modifying answer types, captions style, or biasing the model toward specific responses. Our work sheds light on how multimodal representations evolve through fine-tuning and offers a new perspective for interpreting model adaptation in multimodal tasks. The code will be made publicly available.
-
 
   <br> <br>
 
@@ -63,6 +71,8 @@ We support models from the `transformers` library. Currently we support the foll
 
 ## How to work with this repo
 
+Please checkout ```src/examples/concept_dictionary``` for commands related to our previous work [CoX-LMM: A Concept based Explainability Framework for Large Multimodal Models](https://arxiv.org/abs/2406.08074), ```src/examples/shift_analysis/concept_dictionary_evaluation.sh``` for commands related to analyzing the shift of concepts (and visualization of this analysis can be found in ```Playground/shift_analysis.ipynb```), ```concept_dictionary_evaluation.sh``` in ```src/examples```
+for more details about different commands to execute various files.
 
 A high-level workflow while working with the repo could consist of three different parts :
 

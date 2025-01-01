@@ -11,7 +11,6 @@ from analysis.multimodal_grounding import get_multimodal_grounding
 __all__ = [
     "get_feature_matrix",
     "decompose_activations",
-    "project_test_sample",
     "decompose_and_ground_activations",
 ]
 
@@ -27,9 +26,12 @@ def decompose_and_ground_activations(
     results_dict = {}
     features = list(features.values())[0]
     metadata = list(metadata.values())[0]
+    num_concepts = (
+        args.num_concepts[0] if type(args.num_concepts) is list else args.num_concepts
+    )
     concepts, activations, decomposition_model = decompose_activations(
         mat=features,
-        num_concepts=args.num_concepts,
+        num_concepts=num_concepts,
         decomposition_method=args.decomposition_method,
         args=args,
     )
@@ -170,26 +172,3 @@ def decompose_activations(
         comp_activ = 1 / (1 + model.transform(mat))
 
     return components, comp_activ, model
-
-
-def project_test_sample(
-    sample: torch.Tensor, analysis_model: Callable, decomposition_type: str = "nndl"
-) -> np.ndarray:
-    """
-    Input:
-        sample: torch tensor or numpy array object of shape (N_samples, Representation_dim). Should contain test representations
-        analysis_model: Already learnt sklearn dictionary learning / clustering object.
-        decomposition_type: Dictionary learning model type (Options: PCA, KMeans, Semi-NMF/Non-negative dict learning, Simple)
-    Output:
-        proj: numpy array of shape (N_samples, # components of analysis_model)
-    """
-    if isinstance(sample, torch.Tensor):
-        sample = sample.cpu().numpy()
-
-    assert isinstance(sample, np.ndarray), "sample should be of type np.ndarray"
-
-    projected_sample = analysis_model.transform(sample)
-    if decomposition_type in ["kmeans", "simple"]:
-        # Kmeans transforms to cluster distances and not "activations". 1/(1+x) transformation to view distances as activations
-        projected_sample = 1 / (1 + projected_sample)
-    return projected_sample
