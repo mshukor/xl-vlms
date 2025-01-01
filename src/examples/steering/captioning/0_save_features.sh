@@ -1,7 +1,11 @@
 #!/bin/bash
 
+
 YOUR_COCO_DIR=YOUR_COCO_DIR
+YOUR_COCO_DIR=/data/mshukor/data/coco/
 YOUR_COCO_ANNOTATION_FILE=YOUR_COCO_ANNOTATION_FILE
+YOUR_COCO_ANNOTATION_FILE=karpathy/dataset_coco.json
+
 
 model_name_or_path=llava-hf/llava-1.5-7b-hf
 model=llava

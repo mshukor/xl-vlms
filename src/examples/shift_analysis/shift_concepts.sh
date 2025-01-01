@@ -3,6 +3,11 @@
 # Path to your xl-vlms repository
 cd ~/xl-vlms
 
+YOUR_COCO_DIR=YOUR_COCO_DIR
+YOUR_COCO_DIR=/data/mshukor/data/coco/
+YOUR_COCO_ANNOTATION_FILE=YOUR_COCO_ANNOTATION_FILE
+YOUR_COCO_ANNOTATION_FILE=karpathy/dataset_coco.json
+
 finetuning=color # CHANGE TO PLACE OR SENTIMENT OR COLOR ACCORDING TO THE EXPERIMENT
 TOI=dog
 
@@ -15,7 +20,8 @@ save_filename="${finetuning}_${TOI}_analysis"
 model_name_or_path=llava-hf/llava-1.5-7b-hf
 cache_dir=/data/khayatan/llava/
 
-# Extracted hidden states from llava model
+# REPLACE WITH THE PATH TO YOUR OWN EXTRACTED HIDDEN STATES
+# AS STRUCTURED IN docs/saved_feature_structure.md
 origin_model_feature_path=src/assets/llava_converted_hidden_states/save_hidden_states_original_${finetuning}.pth
 dest_model_feature_path=src/assets/llava_converted_hidden_states/save_hidden_states_${finetuning}.pth
 module_to_decompose=language_model.model.norm
@@ -30,9 +36,9 @@ decomposition_method=kmeans
 
 # Dataset specifications. Ensure you modify dataset path (--data_dir command) accordingly
 dataset_name=coco
-data_dir=/data/mshukor/data/coco/ # Data directory for COCO dataset
+data_dir=${YOUR_COCO_DIR} # Data directory for COCO dataset
 split=train # Which data split to save features for. For COCO: train/val/test options
-annotation_file=karpathy/dataset_coco.json
+annotation_file=${YOUR_COCO_ANNOTATION_FILE}
 # path to the ids of the samples
 path_to_samples_ids=src/assets/concepts_ids/${finetuning}.pkl
 

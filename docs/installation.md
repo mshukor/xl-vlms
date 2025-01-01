@@ -12,5 +12,3 @@ conda create --name xl_vlm python=3.9
 conda activate xl_vlm
 pip install -e .
 ```
-
-

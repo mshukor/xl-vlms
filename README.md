@@ -5,6 +5,13 @@ This repository contains explainability tools for the internal representations o
 # News
 
 * **[2024.10.30]**: XL-VLMs repo is public.
+* **[2024.09.25]**: Our paper **A Concept based Explainability Framework for Large Multimodal Models** <a href="https://arxiv.org/abs/2406.08074">
+    <img alt="Paper URL" src="https://img.shields.io/badge/arxiv-2406.08074-blue">
+  </a> </a>
+  <a href="https://jayneelparekh.github.io/LMM_Concept_Explainability/">
+    <img alt="Blog Post" src="https://img.shields.io/badge/CoXLMM-blog-F0529C">
+  </a> is accepted in NeurIPS 2024.
+* **[2025.01.02]**: Our paper [Analyzing Fine-tuning Representation Shift for Multimodal LLMs Steering](https://arxiv.org/abs/2406.08074) is on arxiv.
 * **[2024.09.25]**: Our paper [A Concept based Explainability Framework for Large Multimodal Models](https://arxiv.org/abs/2406.08074) is accepted in NeurIPS 2024.
 * **[2025.01.02]**: Our paper [A Concept based Explainability Framework for Large Multimodal Models](https://arxiv.org/abs/2406.08074).
 
@@ -23,18 +30,27 @@ We support the approaches introduced in the following papers:
 
 ## Analyzing Fine-tuning Representation Shift for Multimodal LLMs Steering
 
+
+  > Multimodal LLMs have reached remarkable levels of proficiency in understanding multimodal inputs, driving extensive research to develop increasingly powerful models. However, much less attention has been paid to understanding and explaining the underlying mechanisms of these models. Most existing explainability research examines these models only in their final states, overlooking the dynamic representational shifts that occur during training. In our previous work ([CoX-LMM: A Concept based Explainability Framework for Large Multimodal Models](https://arxiv.org/abs/2406.08074)) we proposed a dictionary learning based approach, applied to the representation of tokens where the elements of the learned dictionary correspond to our proposed concepts, semantically grounded in both vision and text.
+
+
   <p align="center">
-        <br> <img src="docs/assets/CoX_LMM_system.png", width=800 /> <br>
+        <br> <img src="docs/assets/analyze_shift.png", width=800 /> <br>
   </p>
 
-  > Multimodal LLMs have reached remarkable levels of proficiency in understanding multimodal inputs, driving extensive research to develop increasingly powerful models. However, much less attention has been paid to understanding and explaining the underlying mechanisms of these models. Most existing explainability research examines these models only in their final states, overlooking the dynamic representational shifts that occur during training. In this work, we systematically analyze the evolution of hidden state representations to reveal how fine-tuning alters the internal structure of a model to specialize in new multimodal tasks. Using a concept-based approach, we map hidden states to interpretable visual and textual concepts, enabling us to trace changes in encoded concepts across modalities as training progresses. We also demonstrate the use of shift vectors to capture these concepts changes. These shift vectors allow us to recover fine-tuned concepts by shifting those in the original model. Finally, we explore the practical impact of our findings on model steering, showing that we can adjust multimodal LLMs behaviors without any training, such as modifying answer types, captions style, or biasing the model toward specific responses. Our work sheds light on how multimodal representations evolve through fine-tuning and offers a new perspective for interpreting model adaptation in multimodal tasks. The code will be made publicly available.
+  > In this work, we systematically analyze the evolution of hidden state representations to reveal how fine-tuning alters the internal structure of a model to specialize in new multimodal tasks. Using a concept-based approach, we map hidden states to interpretable visual and textual concepts, enabling us to trace changes in encoded concepts across modalities as training progresses. We also demonstrate the use of shift vectors to capture these concepts changes. These shift vectors allow us to recover fine-tuned concepts by shifting those in the original model.
 
+  <p align="center">
+        <br> <img src="docs/assets/teaser_steering.png", width=800 /> <br>
+  </p>
+
+  > Finally, we explore the practical impact of our findings on model steering, showing that we can adjust multimodal LLMs behaviors without any training, such as modifying answer types, captions style, or biasing the model toward specific responses. Our work sheds light on how multimodal representations evolve through fine-tuning and offers a new perspective for interpreting model adaptation in multimodal tasks. The code will be made publicly available.
 
   <br> <br>
 
 # Installation
 
-Please refer to ```docs/installation.md``` for installation instructions
+Please refer to [docs/installation.md](docs/installation.md) for installation instructions
 
 # Usage
 
@@ -47,29 +63,53 @@ We support models from the `transformers` library. Currently we support the foll
 * **Qwen2-VL-7B-Instruct**
 
 ## How to work with this repo
-Please checkout ```src/examples/concept_dictionary``` for commands related to our previous work [CoX-LMM: A Concept based Explainability Framework for Large Multimodal Models](https://arxiv.org/abs/2406.08074), ```src/examples/shift_analysis/concept_dictionary_evaluation.sh``` for commands related to analyzing the shift of concepts (and visualization of this analysis can be found in ```Playground/shift_analysis.ipynb```), ```concept_dictionary_evaluation.sh``` in ```src/examples```
-for more details about different commands to execute various files.
 
-A high-level workflow while working with the repo could consist of three different steps.
+<!-- Please checkout ```src/examples/concept_dictionary``` for commands related to our previous work [CoX-LMM: A Concept based Explainability Framework for Large Multimodal Models](https://arxiv.org/abs/2406.08074), ```src/examples/shift_analysis/concept_dictionary_evaluation.sh``` for commands related to analyzing the shift of concepts (and visualization of this analysis can be found in ```Playground/shift_analysis.ipynb```), ```concept_dictionary_evaluation.sh``` in ```src/examples```
+for more details about different commands to execute various files. -->
 
-* **Saving hidden states**: Store hidden states for a model for a particular token of interest ('Dog', 'Cat', 'Train' etc.) from any layer via ```src/save_features.py```. We also have other options/functionalities to save hidden states from various parts. Please see ```src/examples/save_features.sh``` for further details.
+A high-level workflow while working with the repo could consist of three different parts :
 
-* **Multimodal concept extraction**: Perform dictionary learning on stored hidden states to obtain your concept dictionary and extract information about visual/text grounding via ```src/analyse_features.py```. See ```src/examples/feature_decomposition.sh``` for details. You can visualize the multimodal concepts from your saved results as illustrated in ```playground/concept_grounding_visualization.ipynb```
 
-* **Evaluation**: Compute the CLIPScore/Overlap metrics to evaluate your concept dictionary and its use to understand test samples via ```src/analyse_features.py```. Please refer to ```src/examples/concept_dictionary_evaluation.sh``` for details.
+### 1. **Discovering Multimodal Concepts** 🌌  
+   - 🚀 Extracting hidden states from the multimodal LLM.  
+   - 🧩 Aggregating extracted hidden states across target samples; let's call this aggregation `Z`.  
+   - 🔍 Decomposing `Z` into concept vectors and activations, using a decomposition strategy such as semi-NMF, k-means, etc.: `Z = U V`.  
+   - 🖼️ Grounding the concepts (columns of `U`) in text and image.  
 
+   👉 Check out [src/examples/concept_dictionary](src/examples/concept_dictionary) for commands related to this part (described in our previous work [CoX-LMM: A Concept-based Explainability Framework for Large Multimodal Models](https://arxiv.org/abs/2406.08074)).  
+
+---
+
+### 2. **Computing Shift Vectors** 🔄  
+   - 📊 Computing concepts from the original and destination models.  
+   - 🧠 Associating each sample with the concept it activates the most.  
+   - ✨ Computing the shift in the representation of samples associated with each concept and obtaining a shift vector.  
+   - 🔧 Applying the shift on the concepts of the original model, and comparing the result with concepts of the destination model.  
+
+   👉 Check out [src/examples/shift_analysis/concept_dictionary_evaluation.sh](src/examples/shift_analysis/concept_dictionary_evaluation.sh) for commands related to this part (and visualization of this analysis can be found in [Playground/shift_analysis.ipynb](Playground/shift_analysis.ipynb)).  
+
+   🧪 You can test this feature by providing your own hidden state representations, which should be structured in a file as described in [docs/saved_feature_structure.md](docs/saved_feature_structure.md).  
+
+---
+
+### 3. **Steering the Model** 🎛️  
+   - ⚙️ Computing steering vectors from the hidden representations of two sets of samples; one set is associated with what is going to be steered (e.g., a particular answer in VQA to be changed, or random if all answers are to be shifted), and the other set is associated with the target of steering (e.g., a particular answer in VQA, or captions related to a particular concept, such as color or sentiment).  
+   - 🎯 Applying this steering vector on validation samples, and evaluating the steering (e.g., how targeted is steering? How is the accuracy of different answers affected? How is the quality of generated captions?).  
+
+   👉 Check out [src/examples/steering](src/examples/steering) for commands related to steering the model for different tasks and its evaluation.
 
 # Contributing
 We welcome contributions to this repo. It could be in form of support for other models, datasets, or other analysis/interpretation methods for multimodal models. However, contributions should only be made via pull requests. Please refer to rules given at ```docs/contributing.md```
 
-# Citation
-If you find this repository useful please cite the following paper
-```
+
+
+## Citation
+
+```bibtex
 @article{parekh2024concept,
   title={A Concept-Based Explainability Framework for Large Multimodal Models},
   author={Parekh, Jayneel and Khayatan, Pegah and Shukor, Mustafa and Newson, Alasdair and Cord, Matthieu},
-  journal={Advances in Neural Information Processing Systems},
-  volume={37},
+  journal={arXiv preprint arXiv:2406.08074},
   year={2024}
 }
 ```

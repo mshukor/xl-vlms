@@ -1,7 +1,11 @@
 #!/bin/bash
 
-YOUR_VQA_DIR=YOUR_VQA_DIR
+
+
 YOUR_XL_VLM_DIR=YOUR_XL_VLM_DIR
+YOUR_XL_VLM_DIR=/home/khayatan/xl_vlms_cvpr/xl-vlms
+YOUR_VQA_DIR=YOUR_VQA_DIR
+YOUR_VQA_DIR=/data/mshukor/data/coco/
 
 
 model_name_or_path=llava-hf/llava-1.5-7b-hf
