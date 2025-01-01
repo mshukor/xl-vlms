@@ -1,3 +1,23 @@
+Metadata-Version: 2.1
+Name: xl-vlm
+Version: 1.1
+Summary: Analyzing Fine-tuning Representation Shift for Multimodal LLMs Steering
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: Apache Software License
+Requires-Python: >=3.9.20
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: torch==2.3.1
+Requires-Dist: torchvision==0.18.1
+Requires-Dist: torchaudio==2.3.1
+Requires-Dist: transformers==4.47.1
+Requires-Dist: accelerate==0.29.3
+Requires-Dist: scikit-learn==1.5.2
+Requires-Dist: openai-clip==1.0.1
+Requires-Dist: numpy
+Requires-Dist: einops
+Requires-Dist: qwen_vl_utils
+
 # XL-VLMs: General Repository for eXplainable Large Vision Language Models
 
 This repository contains explainability tools for the internal representations of large vision language models and steering  functionalities for VQA and captioning tasks across various models.

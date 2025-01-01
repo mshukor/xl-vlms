@@ -1,14 +1,16 @@
 # Functions used in the notebooks for simple evaluation and visualization
-from typing import Tuple, Dict, Any, List
 import json
 import os
+import warnings
+from typing import Any, Dict, List, Tuple
+
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.cluster import KMeans
-from IPython.display import display
 import pandas as pd
+from IPython.display import display
+from sklearn.cluster import KMeans
 from tqdm import tqdm
-import warnings
+
 warnings.filterwarnings("ignore")
 
 COCO_COLORS_WORDS = [
@@ -379,11 +381,12 @@ WORDS = {
 }
 
 
-import os
 import json
+import os
 from typing import Any
-from torch.utils.data import Dataset
+
 from PIL import Image
+from torch.utils.data import Dataset
 
 
 class MinimalCOCODataset(Dataset):
@@ -442,8 +445,6 @@ class MinimalCOCODataset(Dataset):
         return len(self.data)
 
 
-
-
 def get_dict_of_top_k_items(
     input_dict: Dict[str, Any], topk: int, reference_dict: Dict[str, Any] = {}
 ) -> Dict[str, Any]:
@@ -486,7 +487,7 @@ def get_shift_vector_scores(
     else:
         answer_counts = results["answer_counts"]
         ref_dict = reference_dict.get("answer_counts", {})
-    
+
     ref_dict_ = {}
     answer_counts = {k: v for k, v in answer_counts.items() if k}
     if keep_first_word:
@@ -610,10 +611,19 @@ def csv_print(data, keys=[]):
     for key in keys:
         dict_[key] = [data[key]]
     df = pd.DataFrame(dict_)
-    df.index = [''] * len(df)
+    df.index = [""] * len(df)
     display(df)
 
-def visualize_bars(data_list: list, keys_list: list, titles=[], y_min=None, y_max=None, save_path='', figsize=[5, 6]):
+
+def visualize_bars(
+    data_list: list,
+    keys_list: list,
+    titles=[],
+    y_min=None,
+    y_max=None,
+    save_path="",
+    figsize=[5, 6],
+):
     """
     Visualize magnitudes from a list of dictionaries as horizontal bars in multiple subplots.
 
@@ -626,8 +636,9 @@ def visualize_bars(data_list: list, keys_list: list, titles=[], y_min=None, y_ma
     num_subplots = len(data_list)
 
     # Create a figure with subplots
-    fig, axes = plt.subplots(1, num_subplots, figsize=(figsize[0] * num_subplots, figsize[1]))
-
+    fig, axes = plt.subplots(
+        1, num_subplots, figsize=(figsize[0] * num_subplots, figsize[1])
+    )
 
     # Ensure axes is iterable even if there's only one subplot
     if num_subplots == 1:
@@ -639,13 +650,20 @@ def visualize_bars(data_list: list, keys_list: list, titles=[], y_min=None, y_ma
         magnitudes = [data[key] for key in keys_]
 
         # Plot the horizontal bar chart
-        bars = ax.bar(keys_, magnitudes, color=['green' if val > 0 else 'red' for val in magnitudes], alpha=0.7)
+        bars = ax.bar(
+            keys_,
+            magnitudes,
+            color=["green" if val > 0 else "red" for val in magnitudes],
+            alpha=0.7,
+        )
         for bar in bars:
             yval = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), ha='center')
-                        
-        ax.set_xticklabels(keys, rotation=30, ha='right')
-        ax.grid(axis='x', linestyle='--', alpha=0.7)
+            ax.text(
+                bar.get_x() + bar.get_width() / 2, yval, round(yval, 2), ha="center"
+            )
+
+        ax.set_xticklabels(keys, rotation=30, ha="right")
+        ax.grid(axis="x", linestyle="--", alpha=0.7)
         if y_min is not None and y_max is not None:
             plt.ylim(y_min, y_max)
         if i < len(titles):
@@ -654,28 +672,39 @@ def visualize_bars(data_list: list, keys_list: list, titles=[], y_min=None, y_ma
     # Adjust layout to ensure everything fits
     plt.tight_layout()
     if save_path:
-        plt.savefig(save_path+'.pdf', format="pdf", bbox_inches="tight")
-        print(f'Saved to: {save_path}')
+        plt.savefig(save_path + ".pdf", format="pdf", bbox_inches="tight")
+        print(f"Saved to: {save_path}")
     plt.show()
 
-def plot_shift_results(results_paths=[], results_paths_dict={}, reference_dict_path='', score_keys=[], answer_types=[], print_keys=[], 
-                       keep_first_word=False, keys_answer_type=[], save_dir='', save_name=''):
+
+def plot_shift_results(
+    results_paths=[],
+    results_paths_dict={},
+    reference_dict_path="",
+    score_keys=[],
+    answer_types=[],
+    print_keys=[],
+    keep_first_word=False,
+    keys_answer_type=[],
+    save_dir="",
+    save_name="",
+):
     if reference_dict_path:
-        reference_dict = json.load(open(reference_dict_path)) 
+        reference_dict = json.load(open(reference_dict_path))
     else:
         reference_dict = {}
-    
-    save_path = ''
+
+    save_path = ""
     if save_dir:
-        save_name_ = reference_dict_path.split('/')[-1].split('.')[0]
+        save_name_ = reference_dict_path.split("/")[-1].split(".")[0]
         if save_name:
             save_name_ = f"{save_name_}_{save_name}"
-        save_path = os.path.join(save_dir, f'steering_vector_{save_name_}')
-    print(f'\nBaseline:')
-    datas, keys, titles = get_answer_types_and_count_dicts(reference_dict, topk=5, print_keys=print_keys, keys_answer_type=keys_answer_type)                        
+        save_path = os.path.join(save_dir, f"steering_vector_{save_name_}")
+    print(f"\nBaseline:")
+    datas, keys, titles = get_answer_types_and_count_dicts(
+        reference_dict, topk=5, print_keys=print_keys, keys_answer_type=keys_answer_type
+    )
     visualize_bars(datas, keys, titles, save_path=save_path)
-
-
 
     if not answer_types:
         if results_paths_dict:
@@ -683,9 +712,9 @@ def plot_shift_results(results_paths=[], results_paths_dict={}, reference_dict_p
             answer_types = []
             for k, v in results_paths_dict.items():
                 results_paths.append(k)
-                answer_types.append(v['answer_type'])
+                answer_types.append(v["answer_type"])
         else:
-            answer_types = ['other']*len(results_paths)
+            answer_types = ["other"] * len(results_paths)
     for k, results_path in enumerate(results_paths):
         answer_type = answer_types[k]
         print_keys_ = print_keys
@@ -693,56 +722,100 @@ def plot_shift_results(results_paths=[], results_paths_dict={}, reference_dict_p
 
         if os.path.exists(results_path):
             results = json.load(open(results_path))
-            print(f'\n{answer_type} {results_path}:')
+            print(f"\n{answer_type} {results_path}:")
 
-            main_answers, counts_difference_to_main = get_shift_vector_scores(results, topk=5, score_key=score_keys[answer_type], reference_dict=reference_dict, keep_first_word=keep_first_word)
-            print(f'main_answers: {main_answers} counts_difference_to_main: {counts_difference_to_main}:')
-            main_answers, counts_difference_to_main = get_shift_vector_scores(results, topk=5, score_key='overall', reference_dict=reference_dict, keep_first_word=keep_first_word)
-            print(f'Overall: main_answers: {main_answers} counts_difference_to_main: {counts_difference_to_main}:')
+            main_answers, counts_difference_to_main = get_shift_vector_scores(
+                results,
+                topk=5,
+                score_key=score_keys[answer_type],
+                reference_dict=reference_dict,
+                keep_first_word=keep_first_word,
+            )
+            print(
+                f"main_answers: {main_answers} counts_difference_to_main: {counts_difference_to_main}:"
+            )
+            main_answers, counts_difference_to_main = get_shift_vector_scores(
+                results,
+                topk=5,
+                score_key="overall",
+                reference_dict=reference_dict,
+                keep_first_word=keep_first_word,
+            )
+            print(
+                f"Overall: main_answers: {main_answers} counts_difference_to_main: {counts_difference_to_main}:"
+            )
 
-            datas, keys, titles = get_answer_types_and_count_dicts(results, topk=5, print_keys=print_keys_, reference_dict=reference_dict, 
-                                                                   keep_first_word=keep_first_word, keys_answer_type=keys_answer_type) 
+            datas, keys, titles = get_answer_types_and_count_dicts(
+                results,
+                topk=5,
+                print_keys=print_keys_,
+                reference_dict=reference_dict,
+                keep_first_word=keep_first_word,
+                keys_answer_type=keys_answer_type,
+            )
             if save_dir:
-                save_name_ = results_path.split('/')[-1].split('.')[0]
+                save_name_ = results_path.split("/")[-1].split(".")[0]
                 if save_name:
                     save_name_ = f"{save_name_}_{save_name}"
-                save_path = os.path.join(save_dir, f'steering_vector_{save_name_}')        
+                save_path = os.path.join(save_dir, f"steering_vector_{save_name_}")
             visualize_bars(datas, keys, titles, save_path=save_path)
-            
-def get_answer_types_and_count_dicts(results, topk=5, print_keys=[], reference_dict={}, keep_first_word=False, keys_answer_type=[]):
-    
+
+
+def get_answer_types_and_count_dicts(
+    results,
+    topk=5,
+    print_keys=[],
+    reference_dict={},
+    keep_first_word=False,
+    keys_answer_type=[],
+):
+
     if reference_dict:
-        answer_types_count = {k: results['answer_types_count'][k] - reference_dict.get('answer_types_count', {}).get(k, 0) for k in results['answer_types_count']}
+        answer_types_count = {
+            k: results["answer_types_count"][k]
+            - reference_dict.get("answer_types_count", {}).get(k, 0)
+            for k in results["answer_types_count"]
+        }
     else:
-        answer_types_count = results['answer_types_count']
-        
-    answer_types_count = {k: v for k, v in answer_types_count.items() if 'unrecog' not in k}
-        
+        answer_types_count = results["answer_types_count"]
+
+    answer_types_count = {
+        k: v for k, v in answer_types_count.items() if "unrecog" not in k
+    }
+
     datas = []
     keys = []
     titles = []
-    if 'accuracy' in print_keys:
+    if "accuracy" in print_keys:
         if reference_dict:
-            acc = {k: results['global_accuracy'][k] - reference_dict.get('global_accuracy', {}).get(k, 0) for k in results['global_accuracy']}
+            acc = {
+                k: results["global_accuracy"][k]
+                - reference_dict.get("global_accuracy", {}).get(k, 0)
+                for k in results["global_accuracy"]
+            }
         else:
-            acc = results['global_accuracy']
-        acc_keys = ['yes/no', 'number', 'other'] #[k for k in acc if 'category' not in k and 'overall' not in k]
+            acc = results["global_accuracy"]
+        acc_keys = [
+            "yes/no",
+            "number",
+            "other",
+        ]  # [k for k in acc if 'category' not in k and 'overall' not in k]
         acc = {k: acc[k] for k in acc_keys}
         datas.append(acc)
         keys.append(acc_keys)
         titles.append("Accuracy")
-        
+
     datas.append(answer_types_count)
     keys.append(keys_answer_type)
     titles.append("Answers type")
     for key in print_keys:
-        if key in results['answer_counts']:
-            counts = results['answer_counts'][key]
-            ref_dict = reference_dict.get('answer_counts', {}).get(key, {})
-                
+        if key in results["answer_counts"]:
+            counts = results["answer_counts"][key]
+            ref_dict = reference_dict.get("answer_counts", {}).get(key, {})
+
             if keep_first_word:
                 counts, ref_dict = keep_first_word_keys(counts, ref_dict)
-        
+
             top_k_items = get_dict_of_top_k_items(counts, topk, reference_dict=ref_dict)
             datas.append(top_k_items)
             keys.append(list(top_k_items.keys()))
@@ -750,87 +823,113 @@ def get_answer_types_and_count_dicts(results, topk=5, print_keys=[], reference_d
     return datas, keys, titles
 
 
+def get_plot_coco_results(
+    results,
+    topk=3,
+    plot_results={},
+    target_answers=[],
+    label="",
+    dataset_size=3000,
+    words_dict=None,
+):
 
-def get_plot_coco_results(results, topk=3, plot_results={}, target_answers=[], 
-                          label='', dataset_size=3000, words_dict=None):
+    cider_scores = [results["scores"]["CIDEr"] * 100.0]
+    cider_titles = [
+        "",
+    ]
 
-    cider_scores = [results['scores']['CIDEr']*100.]
-    cider_titles = ['',]
-    
     words_type_count_titles = []
     words_type_count_scores = []
     if words_dict is not None:
         words_type_count = get_words_type_count(results, words_dict=words_dict)
         words_type_count_titles = list(words_type_count.keys())
         words_type_count_scores = [words_type_count[k] for k in words_type_count_titles]
-    
+
     answer_count_scores = []
     answer_count_titles = []
-    answer_count_scores.extend([get_values_for_matched_keys(results['answer_counts'], t) for t in target_answers])
-    answer_count_titles.extend([f'{t}' for t in target_answers])
-        
-    
-    dataset_size = results.get('dataset_size', dataset_size)
-    valid_steered_captions_scores = [100.*(results['num_preds_with_toi'] / dataset_size), 
-                               100.*(results['num_preds_and_targets_with_toi'] / dataset_size), 
-                               100.*(results['num_preds_and_baseline_preds_with_toi'] / dataset_size)]
-    valid_steered_captions_titles = [f'--/generated', 'gt/generated', 'original/generated']
-    
-    steered_captions_scores = [100.*(results['num_preds_changed'] / dataset_size)]
-    steered_captions_titles = ['',]
-    
-        
+    answer_count_scores.extend(
+        [
+            get_values_for_matched_keys(results["answer_counts"], t)
+            for t in target_answers
+        ]
+    )
+    answer_count_titles.extend([f"{t}" for t in target_answers])
+
+    dataset_size = results.get("dataset_size", dataset_size)
+    valid_steered_captions_scores = [
+        100.0 * (results["num_preds_with_toi"] / dataset_size),
+        100.0 * (results["num_preds_and_targets_with_toi"] / dataset_size),
+        100.0 * (results["num_preds_and_baseline_preds_with_toi"] / dataset_size),
+    ]
+    valid_steered_captions_titles = [
+        f"--/generated",
+        "gt/generated",
+        "original/generated",
+    ]
+
+    steered_captions_scores = [100.0 * (results["num_preds_changed"] / dataset_size)]
+    steered_captions_titles = [
+        "",
+    ]
+
     if not plot_results:
-        plot_results['CIDEr'] = {
-            'scores': [cider_scores],
-            'titles': [cider_titles],
-            'x_labels': [[label]],
+        plot_results["CIDEr"] = {
+            "scores": [cider_scores],
+            "titles": [cider_titles],
+            "x_labels": [[label]],
         }
-        plot_results['Captions affected (%)'] = {
-            'scores': [steered_captions_scores],
-            'titles': [steered_captions_titles],
-            'x_labels': [[label]],
+        plot_results["Captions affected (%)"] = {
+            "scores": [steered_captions_scores],
+            "titles": [steered_captions_titles],
+            "x_labels": [[label]],
         }
-        plot_results[f'Captions with {target_answers[0]}/{target_answers[1]} in (%)'] = {
-            'scores': [valid_steered_captions_scores],
-            'titles': [valid_steered_captions_titles],
-            'x_labels': [[label]],
+        plot_results[
+            f"Captions with {target_answers[0]}/{target_answers[1]} in (%)"
+        ] = {
+            "scores": [valid_steered_captions_scores],
+            "titles": [valid_steered_captions_titles],
+            "x_labels": [[label]],
         }
-        plot_results['Words count'] = {
-            'scores': [answer_count_scores],
-            'titles': [answer_count_titles],
-            'x_labels': [[label]],
+        plot_results["Words count"] = {
+            "scores": [answer_count_scores],
+            "titles": [answer_count_titles],
+            "x_labels": [[label]],
         }
         if words_dict is not None:
-            plot_results['Words type count'] = {
-                'scores': [words_type_count_scores],
-                'titles': [words_type_count_titles],
-                'x_labels': [[label]],
+            plot_results["Words type count"] = {
+                "scores": [words_type_count_scores],
+                "titles": [words_type_count_titles],
+                "x_labels": [[label]],
             }
     else:
-        plot_results['CIDEr']['scores'].append(cider_scores) 
-        plot_results['CIDEr']['titles'].append(cider_titles) 
-        plot_results['CIDEr']['x_labels'].append([label]) 
-        
-        plot_results['Captions affected (%)']['scores'].append(steered_captions_scores) 
-        plot_results['Captions affected (%)']['titles'].append(steered_captions_titles) 
-        plot_results['Captions affected (%)']['x_labels'].append([label]) 
+        plot_results["CIDEr"]["scores"].append(cider_scores)
+        plot_results["CIDEr"]["titles"].append(cider_titles)
+        plot_results["CIDEr"]["x_labels"].append([label])
 
-        plot_results[f'Captions with {target_answers[0]}/{target_answers[1]} in (%)']['scores'].append(valid_steered_captions_scores) 
-        plot_results[f'Captions with {target_answers[0]}/{target_answers[1]} in (%)']['titles'].append(valid_steered_captions_titles) 
-        plot_results[f'Captions with {target_answers[0]}/{target_answers[1]} in (%)']['x_labels'].append([label]) 
-        
-        plot_results['Words count']['scores'].append(answer_count_scores) 
-        plot_results['Words count']['titles'].append(answer_count_titles) 
-        plot_results['Words count']['x_labels'].append([label]) 
-        
+        plot_results["Captions affected (%)"]["scores"].append(steered_captions_scores)
+        plot_results["Captions affected (%)"]["titles"].append(steered_captions_titles)
+        plot_results["Captions affected (%)"]["x_labels"].append([label])
+
+        plot_results[f"Captions with {target_answers[0]}/{target_answers[1]} in (%)"][
+            "scores"
+        ].append(valid_steered_captions_scores)
+        plot_results[f"Captions with {target_answers[0]}/{target_answers[1]} in (%)"][
+            "titles"
+        ].append(valid_steered_captions_titles)
+        plot_results[f"Captions with {target_answers[0]}/{target_answers[1]} in (%)"][
+            "x_labels"
+        ].append([label])
+
+        plot_results["Words count"]["scores"].append(answer_count_scores)
+        plot_results["Words count"]["titles"].append(answer_count_titles)
+        plot_results["Words count"]["x_labels"].append([label])
+
         if words_dict is not None:
-            plot_results['Words type count']['scores'].append(words_type_count_scores) 
-            plot_results['Words type count']['titles'].append(words_type_count_titles) 
-            plot_results['Words type count']['x_labels'].append([label]) 
-        
-    return plot_results
+            plot_results["Words type count"]["scores"].append(words_type_count_scores)
+            plot_results["Words type count"]["titles"].append(words_type_count_titles)
+            plot_results["Words type count"]["x_labels"].append([label])
 
+    return plot_results
 
 
 def get_words_type_count(data, words_dict=None, add_other=False):
@@ -839,7 +938,7 @@ def get_words_type_count(data, words_dict=None, add_other=False):
     all_words_list = []
     for v in words_dict.values():
         all_words_list.extend(v)
-    for ans_key, ans_count in tqdm(data['answer_counts'].items()):
+    for ans_key, ans_count in tqdm(data["answer_counts"].items()):
         valid = False
         for words_type, words_list in words_dict.items():
             if ans_key.lower().strip() in words_list:
@@ -847,66 +946,96 @@ def get_words_type_count(data, words_dict=None, add_other=False):
                 valid = True
                 break
         if not valid and ans_key.lower().strip() not in all_words_list:
-            other+=ans_count
+            other += ans_count
     if add_other:
-        words_type_count['other'] = other
+        words_type_count["other"] = other
     return words_type_count
 
 
-def plot_shift_results_coco(results_paths=[], results_paths_dict={}, reference_dict_path='', score_keys=[], answer_types=[], print_keys=[], 
-                       keep_first_word=False, save_dir='', save_name='', words_dict={}, words_type_keys=[''], topk=5, 
-                            figsize=[5, 6], save_names=[]):
-                            
+def plot_shift_results_coco(
+    results_paths=[],
+    results_paths_dict={},
+    reference_dict_path="",
+    score_keys=[],
+    answer_types=[],
+    print_keys=[],
+    keep_first_word=False,
+    save_dir="",
+    save_name="",
+    words_dict={},
+    words_type_keys=[""],
+    topk=5,
+    figsize=[5, 6],
+    save_names=[],
+):
+
     if reference_dict_path:
-        reference_dict = json.load(open(reference_dict_path)) 
+        reference_dict = json.load(open(reference_dict_path))
     else:
         reference_dict = {}
-    
-    save_path = ''
+
+    save_path = ""
     if save_dir:
-        save_name_ = reference_dict_path.split('/')[-1].split('.')[0]
+        save_name_ = reference_dict_path.split("/")[-1].split(".")[0]
         if save_name:
             save_name_ = f"{save_name_}_{save_name}"
-        save_path = os.path.join(save_dir, f'{save_name_}')
-    print(f'\nBaseline:')
-    
-    datas, keys, titles = get_count_dicts_coco(reference_dict, topk=topk, words_dict=words_dict, print_keys=print_keys, 
-                                               words_type_keys=words_type_keys, keep_first_word=keep_first_word)                        
+        save_path = os.path.join(save_dir, f"{save_name_}")
+    print(f"\nBaseline:")
+
+    datas, keys, titles = get_count_dicts_coco(
+        reference_dict,
+        topk=topk,
+        words_dict=words_dict,
+        print_keys=print_keys,
+        words_type_keys=words_type_keys,
+        keep_first_word=keep_first_word,
+    )
     visualize_bars(datas, keys, titles, save_path=save_path, figsize=figsize)
-            
-        
+
     if not results_paths:
         if results_paths_dict:
             results_paths = []
             for k, v in results_paths_dict.items():
                 results_paths.append(k)
-            
+
     for k, results_path in enumerate(results_paths):
         print(os.path.exists(results_path))
         if os.path.exists(results_path):
             results = json.load(open(results_path))
-            print(f'\n{results_path}:')
+            print(f"\n{results_path}:")
 
-            main_answers, counts_difference_to_main = get_shift_vector_scores(results, topk=topk, reference_dict=reference_dict, 
-                                                                              keep_first_word=keep_first_word)
-            print(f'main_answers: {main_answers} counts_difference_to_main: {counts_difference_to_main}:')
+            main_answers, counts_difference_to_main = get_shift_vector_scores(
+                results,
+                topk=topk,
+                reference_dict=reference_dict,
+                keep_first_word=keep_first_word,
+            )
+            print(
+                f"main_answers: {main_answers} counts_difference_to_main: {counts_difference_to_main}:"
+            )
 
-            datas, keys, titles = get_count_dicts_coco(results, topk=topk, reference_dict=reference_dict, 
-                                                                   keep_first_word=keep_first_word, words_dict=words_dict, 
-                                                       print_keys=print_keys, words_type_keys=words_type_keys) 
+            datas, keys, titles = get_count_dicts_coco(
+                results,
+                topk=topk,
+                reference_dict=reference_dict,
+                keep_first_word=keep_first_word,
+                words_dict=words_dict,
+                print_keys=print_keys,
+                words_type_keys=words_type_keys,
+            )
             if save_dir:
-                save_name_ = results_path.split('/')[-1].split('.')[0]
+                save_name_ = results_path.split("/")[-1].split(".")[0]
                 if save_names:
                     save_name_ = save_names[k]
-                    save_path = os.path.join(save_dir, f'{save_name_}')   
+                    save_path = os.path.join(save_dir, f"{save_name_}")
                 elif save_name:
                     save_name_ = f"{save_name_}_{save_name}"
-                    save_path = os.path.join(save_dir, f'{save_name_}')   
+                    save_path = os.path.join(save_dir, f"{save_name_}")
                 else:
-                    save_path = os.path.join(save_dir, f'{save_name_}')        
+                    save_path = os.path.join(save_dir, f"{save_name_}")
             visualize_bars(datas, keys, titles, save_path=save_path, figsize=figsize)
-            
-            
+
+
 def keep_first_word_keys(dict1, dict2):
     dict1_ = {}
     dict2_ = {}
@@ -922,33 +1051,52 @@ def keep_first_word_keys(dict1, dict2):
                 dict2_[k_] += dict2[k]
             else:
                 dict2_[k_] = dict2[k]
-                
+
     return dict1_, dict2_
-                    
-def get_count_dicts_coco(results, topk=5, reference_dict={}, keep_first_word=False, words_dict={}, print_keys=[''], 
-                         words_type_keys=[''], add_other=True):
-    
+
+
+def get_count_dicts_coco(
+    results,
+    topk=5,
+    reference_dict={},
+    keep_first_word=False,
+    words_dict={},
+    print_keys=[""],
+    words_type_keys=[""],
+    add_other=True,
+):
+
     datas = []
     keys = []
     titles = []
 
-    
     if "type" in print_keys:
         if words_dict:
-            words_type_count = get_words_type_count(results, words_dict=words_dict, add_other=add_other)
+            words_type_count = get_words_type_count(
+                results, words_dict=words_dict, add_other=add_other
+            )
             if reference_dict:
-                ref_words_type_count = get_words_type_count(reference_dict, words_dict=words_dict, add_other=add_other)
-                words_type_count = {k: words_type_count[k] - ref_words_type_count[k] for k in ref_words_type_count}
-                
-            words_type_count = {k: v for k, v in words_type_count.items() if k in words_type_keys or ('other' in k and add_other)}
+                ref_words_type_count = get_words_type_count(
+                    reference_dict, words_dict=words_dict, add_other=add_other
+                )
+                words_type_count = {
+                    k: words_type_count[k] - ref_words_type_count[k]
+                    for k in ref_words_type_count
+                }
+
+            words_type_count = {
+                k: v
+                for k, v in words_type_count.items()
+                if k in words_type_keys or ("other" in k and add_other)
+            }
             words_type_count_titles = list(words_type_count.keys())
 
             datas.append(words_type_count)
             keys.append(words_type_count_titles)
             titles.append(f"Words type count")
-    
-    counts = results['answer_counts']
-    ref_dict = reference_dict.get('answer_counts', {})
+
+    counts = results["answer_counts"]
+    ref_dict = reference_dict.get("answer_counts", {})
 
     if keep_first_word:
         counts, ref_dict = keep_first_word_keys(counts, ref_dict)
@@ -957,22 +1105,23 @@ def get_count_dicts_coco(results, topk=5, reference_dict={}, keep_first_word=Fal
     datas.append(top_k_items)
     keys.append(list(top_k_items.keys()))
     titles.append(f"Words count")
-    
+
     print(top_k_items)
     return datas, keys, titles
 
 
 def get_values_for_matched_keys(data, word):
     values = []
-    
+
     word = word.lower().strip()
     for k, v in data.items():
         k_ = k.lower().strip()
         if word in k_:
             values.append(v)
-            
+
     return sum(values)
-    
+
+
 def format_large_number(num):
     # Check if number is above 1000, and if so, format in scientific notation
     if num >= 1000:
@@ -980,108 +1129,141 @@ def format_large_number(num):
     return num  # Otherwise, return the number as a regular string
 
 
-def get_plot_results(results, topk=3, plot_results={}, target_answers=[], target_print_keys='yes/no', 
-                     print_keys='overall', accuracy_keys=['other', 'overall', 'yes/no', 'number'], x_label='', label='', dataset_size=5000):
+def get_plot_results(
+    results,
+    topk=3,
+    plot_results={},
+    target_answers=[],
+    target_print_keys="yes/no",
+    print_keys="overall",
+    accuracy_keys=["other", "overall", "yes/no", "number"],
+    x_label="",
+    label="",
+    dataset_size=5000,
+):
 
-    label_ = label+': ' if label else label
-    
+    label_ = label + ": " if label else label
+
     accuracy_scores = []
     accuracy_titles = []
     for key in accuracy_keys:
-        accuracy_scores.append(results['global_accuracy'][key])
-        accuracy_titles.append(f'{label_}{key}')
-        
-    
+        accuracy_scores.append(results["global_accuracy"][key])
+        accuracy_titles.append(f"{label_}{key}")
+
     answer_types_count_scores = []
     answer_types_count_titles = []
     for k in accuracy_keys:
-    # for k, v in results['answer_types_count'].items():
-        v =  results['answer_types_count'].get(k, 0)
+        # for k, v in results['answer_types_count'].items():
+        v = results["answer_types_count"].get(k, 0)
         answer_types_count_scores.append(v)
-        answer_types_count_titles.append(f'{label_}{k}')
+        answer_types_count_titles.append(f"{label_}{k}")
 
-        
     answer_count_scores = []
     answer_count_titles = []
-    answer_count_scores.extend([get_values_for_matched_keys(results['answer_counts'][print_keys], t) for t in target_answers])
-    answer_count_titles.extend([f'{label_}{t}' for t in target_answers])
-        
+    answer_count_scores.extend(
+        [
+            get_values_for_matched_keys(results["answer_counts"][print_keys], t)
+            for t in target_answers
+        ]
+    )
+    answer_count_titles.extend([f"{label_}{t}" for t in target_answers])
+
     answer_count_scores_target = []
     answer_count_titles_target = []
-    answer_count_scores_target.extend([get_values_for_matched_keys(results['answer_counts'][target_print_keys], t) for t in target_answers])
-    answer_count_titles_target.extend([f'{label_}{t}' for t in target_answers])
-        
-    
-    dataset_size = results.get('dataset_size', dataset_size)
-    valid_steered_answers_scores = [100.*(results['num_preds_with_toi'] / dataset_size), 
-                               100.*(results['num_preds_and_targets_with_toi'] / dataset_size)]
-    valid_steered_answers_titles = [f'{label_}--/generated', f'{label_}gt/generated']
-    
-    steered_answers_scores = [100.*(results['num_preds_changed'] / dataset_size)]
-    steered_answers_titles = [f'{label}',]
-    
+    answer_count_scores_target.extend(
+        [
+            get_values_for_matched_keys(results["answer_counts"][target_print_keys], t)
+            for t in target_answers
+        ]
+    )
+    answer_count_titles_target.extend([f"{label_}{t}" for t in target_answers])
+
+    dataset_size = results.get("dataset_size", dataset_size)
+    valid_steered_answers_scores = [
+        100.0 * (results["num_preds_with_toi"] / dataset_size),
+        100.0 * (results["num_preds_and_targets_with_toi"] / dataset_size),
+    ]
+    valid_steered_answers_titles = [f"{label_}--/generated", f"{label_}gt/generated"]
+
+    steered_answers_scores = [100.0 * (results["num_preds_changed"] / dataset_size)]
+    steered_answers_titles = [
+        f"{label}",
+    ]
+
     if not plot_results:
-        plot_results['Accuracy'] = {
-            'scores': [accuracy_scores],
-            'titles': [accuracy_titles],
-            'x_labels': [[x_label]],
+        plot_results["Accuracy"] = {
+            "scores": [accuracy_scores],
+            "titles": [accuracy_titles],
+            "x_labels": [[x_label]],
         }
-        plot_results['Answer types count'] = {
-            'scores': [answer_types_count_scores],
-            'titles': [answer_types_count_titles],
-            'x_labels': [[x_label]],
+        plot_results["Answer types count"] = {
+            "scores": [answer_types_count_scores],
+            "titles": [answer_types_count_titles],
+            "x_labels": [[x_label]],
         }
         # plot_results['Answers count'] = {
         #     'scores': [answer_count_scores],
         #     'titles': [answer_count_titles],
         #     'x_labels': [[x_label]],
         # }
-        plot_results['Answers count (target)'] = {
-            'scores': [answer_count_scores_target],
-            'titles': [answer_count_titles_target],
-            'x_labels': [[x_label]],
+        plot_results["Answers count (target)"] = {
+            "scores": [answer_count_scores_target],
+            "titles": [answer_count_titles_target],
+            "x_labels": [[x_label]],
         }
-        
-        plot_results['Answers affected (%)'] = {
-            'scores': [steered_answers_scores],
-            'titles': [steered_answers_titles],
-            'x_labels': [[x_label]],
+
+        plot_results["Answers affected (%)"] = {
+            "scores": [steered_answers_scores],
+            "titles": [steered_answers_titles],
+            "x_labels": [[x_label]],
         }
-        plot_results[f'Answers with {target_answers[0]}/{target_answers[1]} in (%)'] = {
-            'scores': [valid_steered_answers_scores],
-            'titles': [valid_steered_answers_titles],
-            'x_labels': [[x_label]],
+        plot_results[f"Answers with {target_answers[0]}/{target_answers[1]} in (%)"] = {
+            "scores": [valid_steered_answers_scores],
+            "titles": [valid_steered_answers_titles],
+            "x_labels": [[x_label]],
         }
-        
+
     else:
-        plot_results['Accuracy']['scores'].append(accuracy_scores) 
-        plot_results['Accuracy']['titles'].append(accuracy_titles) 
-        plot_results['Accuracy']['x_labels'].append([x_label]) 
-        
-        plot_results['Answer types count']['scores'].append(answer_types_count_scores) 
-        plot_results['Answer types count']['titles'].append(answer_types_count_titles) 
-        plot_results['Answer types count']['x_labels'].append([x_label]) 
-        
-        # plot_results['Answers count']['scores'].append(answer_count_scores) 
-        # plot_results['Answers count']['titles'].append(answer_count_titles) 
-        # plot_results['Answers count']['x_labels'].append([x_label]) 
+        plot_results["Accuracy"]["scores"].append(accuracy_scores)
+        plot_results["Accuracy"]["titles"].append(accuracy_titles)
+        plot_results["Accuracy"]["x_labels"].append([x_label])
 
-        plot_results['Answers count (target)']['scores'].append(answer_count_scores_target) 
-        plot_results['Answers count (target)']['titles'].append(answer_count_titles_target) 
-        plot_results['Answers count (target)']['x_labels'].append([x_label]) 
-        
-        plot_results['Answers affected (%)']['scores'].append(steered_answers_scores) 
-        plot_results['Answers affected (%)']['titles'].append(steered_answers_titles) 
-        plot_results['Answers affected (%)']['x_labels'].append([x_label]) 
+        plot_results["Answer types count"]["scores"].append(answer_types_count_scores)
+        plot_results["Answer types count"]["titles"].append(answer_types_count_titles)
+        plot_results["Answer types count"]["x_labels"].append([x_label])
 
-        plot_results[f'Answers with {target_answers[0]}/{target_answers[1]} in (%)']['scores'].append(valid_steered_answers_scores) 
-        plot_results[f'Answers with {target_answers[0]}/{target_answers[1]} in (%)']['titles'].append(valid_steered_answers_titles) 
-        plot_results[f'Answers with {target_answers[0]}/{target_answers[1]} in (%)']['x_labels'].append([x_label]) 
-        
+        # plot_results['Answers count']['scores'].append(answer_count_scores)
+        # plot_results['Answers count']['titles'].append(answer_count_titles)
+        # plot_results['Answers count']['x_labels'].append([x_label])
+
+        plot_results["Answers count (target)"]["scores"].append(
+            answer_count_scores_target
+        )
+        plot_results["Answers count (target)"]["titles"].append(
+            answer_count_titles_target
+        )
+        plot_results["Answers count (target)"]["x_labels"].append([x_label])
+
+        plot_results["Answers affected (%)"]["scores"].append(steered_answers_scores)
+        plot_results["Answers affected (%)"]["titles"].append(steered_answers_titles)
+        plot_results["Answers affected (%)"]["x_labels"].append([x_label])
+
+        plot_results[f"Answers with {target_answers[0]}/{target_answers[1]} in (%)"][
+            "scores"
+        ].append(valid_steered_answers_scores)
+        plot_results[f"Answers with {target_answers[0]}/{target_answers[1]} in (%)"][
+            "titles"
+        ].append(valid_steered_answers_titles)
+        plot_results[f"Answers with {target_answers[0]}/{target_answers[1]} in (%)"][
+            "x_labels"
+        ].append([x_label])
+
     return plot_results
 
-    
-def plot_curve_results(plot_data, x_axis, save_path='', x_axis_label='Layer', figsize=(7, 6)):
+
+def plot_curve_results(
+    plot_data, x_axis, save_path="", x_axis_label="Layer", figsize=(7, 6)
+):
     """
     Plot results in a structured manner with each main key from `plot_data` as a separate subplot row.
 
@@ -1089,19 +1271,26 @@ def plot_curve_results(plot_data, x_axis, save_path='', x_axis_label='Layer', fi
     - plot_data: Dictionary containing the plot data organized as returned by `get_plot_results`.
                  Each score entry is expected to correspond to a data point on the curve.
     """
-    num_categories = len(plot_data.keys())  # Number of main categories (e.g., Accuracy, Answer types count)
-    fig, axes = plt.subplots(1, num_categories, figsize=(figsize[0] * num_categories, figsize[1]), sharey=False)
+    num_categories = len(
+        plot_data.keys()
+    )  # Number of main categories (e.g., Accuracy, Answer types count)
+    fig, axes = plt.subplots(
+        1,
+        num_categories,
+        figsize=(figsize[0] * num_categories, figsize[1]),
+        sharey=False,
+    )
 
     # Flatten axes if only one row or column
     if num_categories == 1:
         axes = [axes]
-    
+
     # Iterate over each category (Accuracy, Answer types count, etc.)
     for idx, (category, details) in enumerate(plot_data.items()):
         ax = axes[idx]
-        scores = details['scores']  # List of lists; each inner list represents a curve
-        titles = details['titles']  # List of titles for each curve
-        x_labels = details['x_labels']
+        scores = details["scores"]  # List of lists; each inner list represents a curve
+        titles = details["titles"]  # List of titles for each curve
+        x_labels = details["x_labels"]
         # Plot each score curve
         curves = {}
         curves_to_x_labels = {}
@@ -1114,21 +1303,27 @@ def plot_curve_results(plot_data, x_axis, save_path='', x_axis_label='Layer', fi
                     curves[t] = [s]
                     curves_to_x_labels[t] = [x_label[0]]
         for k, v in curves.items():
-            ax.plot(curves_to_x_labels[k], v, marker='o', label=k, linestyle='--')  # Plot with markers on each point
+            ax.plot(
+                curves_to_x_labels[k], v, marker="o", label=k, linestyle="--"
+            )  # Plot with markers on each point
 
         # Set plot details
-        ax.set_title(category, )
-        ax.set_xlabel(x_axis_label,)
+        ax.set_title(
+            category,
+        )
+        ax.set_xlabel(
+            x_axis_label,
+        )
         # ax.set_ylabel("Value", )
-        ax.legend(loc='upper left', framealpha=0.3)
-        ax.grid(True, linestyle='--', alpha=0.5)
+        ax.legend(loc="upper left", framealpha=0.3)
+        ax.grid(True, linestyle="--", alpha=0.5)
 
     # Adjust layout to ensure everything fits
     plt.tight_layout()
     plt.subplots_adjust(wspace=0.25)
-    
+
     if save_path:
-        plt.savefig(save_path+'.pdf', format="pdf", bbox_inches="tight")
-        print(f'Saved to: {save_path}')
-        
+        plt.savefig(save_path + ".pdf", format="pdf", bbox_inches="tight")
+        print(f"Saved to: {save_path}")
+
     plt.show()

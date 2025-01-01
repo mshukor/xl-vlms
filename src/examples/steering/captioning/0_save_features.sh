@@ -105,4 +105,3 @@ for j in "${!token_of_interest_classes[@]}"; do
         --end_special_tokens "</s>"
     done
 done
-

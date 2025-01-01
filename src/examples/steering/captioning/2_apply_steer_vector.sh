@@ -42,7 +42,7 @@ for j in "${!token_of_interest_classes[@]}"; do
         layer=${layers[$i]}
         modules_to_hook=language_model.model.layers.${layer}
 
-  
+
         ## steering
         split=val
         shift_vector_path=${save_steer_dir}/${steering_method}_llava_coco_${layer}_class_all_to_${token_of_interest_class}_onlytoi.pth

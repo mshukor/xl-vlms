@@ -48,7 +48,7 @@ for j in "${!token_of_interest_classes[@]}"; do
         layer=${layers[$i]}
         modules_to_hook=language_model.model.layers.${layer}
         hook_names=save_hidden_states_for_token_of_interest_class
-     
+
         ## compute steering vector
         target_features_path=${save_feats_dir}/${hook_names}_${model}_coco_${layer}_onlytoi_class_${token_of_interest_class}.pth
         save_filename=${model}_coco_${layer}_class_all_to_${token_of_interest_class}_onlytoi
@@ -66,4 +66,3 @@ for j in "${!token_of_interest_classes[@]}"; do
 
     done
 done
-
