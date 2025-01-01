@@ -81,7 +81,7 @@ def get_steering_vector(
         )
 
     meta_data["steering_vector"] = vector
-    file_name = os.path.join(save_dir, f"{steering_method}_{save_name}.pth")
+    file_name = os.path.join(save_dir, "steering", f"{steering_method}_{save_name}.pth")
     torch.save(meta_data, file_name)
     if logger is not None:
         logger.info(f"Saving steering vector to: {file_name}")

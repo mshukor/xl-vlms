@@ -96,10 +96,9 @@ def analyse_features(
     **kwargs: Any,
 ) -> None:
 
-    if args.features_path is not None and args.base_features_key is not None:
+    if args.features_path is not None:
         features, metadata = load_features(
             features_path=args.features_path,
-            feature_key=args.base_features_key,
             logger=logger,
             args=args,
         )
@@ -107,6 +106,15 @@ def analyse_features(
         assert (args.origin_model_feature_path is not None) and (
             args.dest_model_feature_path is not None
         ), "features_path and base_features_key should be provided when analyzing features from a single model"
+
+
+        features, metadatas = load_features(
+            features_path=[
+                args.origin_model_feature_path,
+                args.dest_model_feature_path,
+            ],
+            args=args,
+        )
 
     num_concepts = [int(n) for n in args.num_concepts] if args.num_concepts else None
     results_dict = {}
@@ -144,14 +152,6 @@ def analyse_features(
 
     elif "analyse_clusters" in analysis_name:
 
-        features, metadatas = load_features(
-            features_path=[
-                args.origin_model_feature_path,
-                args.dest_model_feature_path,
-            ],
-            feature_key=args.base_features_key,
-            args=args,
-        )
 
         # Load analysis data for origin model if the path is provided, else pass None
         if args.origin_model_analysis_path:
