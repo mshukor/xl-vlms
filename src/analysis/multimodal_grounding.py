@@ -1,11 +1,12 @@
 import argparse
+import os
 from typing import Any, Callable, Dict, List
 
 import torch
 from nltk.corpus import words
 
-GIST_FILE_PATH = "src/assets/gist_stopwords.txt"
-
+import helpers.utils as helpers_utils
+from metrics.utils import GIST_FILE_PATH, get_stopwords, valid_word
 
 __all__ = [
     "get_multimodal_grounding",
@@ -15,19 +16,6 @@ __all__ = [
 ]
 
 
-def get_stopwords(gist_file_path: str = GIST_FILE_PATH) -> List[str]:
-    gist_file = open(gist_file_path, "r")
-    content = gist_file.read()
-    stopwords = content.split(",")
-    gist_file.close()
-    return stopwords
-
-
-def valid_word(word, eng_corpus: List[str], stopwords: List[str]) -> bool:
-    word = word.lower().strip()
-    return word in eng_corpus and len(word) > 2 and word not in stopwords
-
-
 @torch.no_grad()
 def concept_text_grounding(
     concepts: torch.Tensor,
@@ -35,6 +23,8 @@ def concept_text_grounding(
     tokenizer: Callable = None,
     num_top_tokens: int = 15,
     gist_file_path: str = GIST_FILE_PATH,
+    pre_num_top_tokens: int = 50,
+    keep_unique_words: bool = False,
 ) -> List[List[str]]:
     # components are of shape n_comp x feature_dim
     eng_corpus = words.words()
@@ -42,18 +32,23 @@ def concept_text_grounding(
     num_concepts = concepts.shape[0]
 
     token_logits = lm_head(concepts.float())
-    top_token_idx = token_logits.argsort(dim=-1, descending=True)[:, :num_top_tokens]
+    assert (
+        pre_num_top_tokens > num_top_tokens
+    ), f"pre_num_top_tokens {pre_num_top_tokens} <= num_top_tokens {num_top_tokens}"
+    top_token_idx = token_logits.argsort(dim=-1, descending=True)[
+        :, :pre_num_top_tokens
+    ]
     grounded_words_list = []
     for k in range(num_concepts):
-        comp_words = tokenizer.batch_decode(
-            top_token_idx[k, :num_top_tokens], skip_special_tokens=True
-        )
+        comp_words = tokenizer.batch_decode(top_token_idx[k], skip_special_tokens=True)
         comp_words = [
             word.lower().strip()
             for word in comp_words
             if valid_word(word, eng_corpus=eng_corpus, stopwords=stopwords)
         ]
-        grounded_words_list.append(comp_words)
+        if keep_unique_words:
+            comp_words = list(set(comp_words))
+        grounded_words_list.append(comp_words[:num_top_tokens])
     return grounded_words_list
 
 
@@ -76,19 +71,25 @@ def get_multimodal_grounding(
     text_grounding: bool = True,
     image_grounding: bool = True,
     module_to_decompose: str = "",
+    save_dir: str = "",
+    save_name: str = "",
     num_grounded_text_tokens: int = 10,
     num_most_activating_samples: int = 5,
     metadata: Dict[str, Any] = {},
+    save_analysis: bool = False,
     logger: Callable = None,
     args: argparse.Namespace = None,
 ) -> None:
-
     lm_head = model_class.get_lm_head().float()
     tokenizer = model_class.get_tokenizer()
-    results_dict = {}
+    grounding_dict = {}
 
     activations = torch.Tensor(activations)
     concepts = torch.Tensor(concepts)
+    grounding_dict["concepts"] = concepts
+    grounding_dict["activations"] = activations
+    grounding_dict["decomposition_method"] = args.decomposition_method
+
     grounded_words = []
 
     if "lm_head" in module_to_decompose:
@@ -105,19 +106,24 @@ def get_multimodal_grounding(
             lm_head=lm_head,
             tokenizer=tokenizer,
             num_top_tokens=num_grounded_text_tokens,
+            pre_num_top_tokens=args.pre_num_top_tokens,
         )
         if logger is not None:
             for i in range(len(grounded_words)):
                 logger.info(f"Concept {i} grounded words: {grounded_words[i]}")
-        results_dict["text_grounding"] = grounded_words
+        grounding_dict["text_grounding"] = grounded_words
 
     if image_grounding:
+        logger.info(f"Activations size: {activations.shape}")
+
         image_indices = concept_image_grounding(
             activations=activations,
             num_images_per_concept=num_most_activating_samples,
         )
-        image_paths = metadata.get("image_paths", [])
+        image_paths = metadata.get("image", [])
+        logger.info(f"Image paths length: {len(image_paths)}")
         # Only keep image paths for samples with token_of_interest_mask True
+
         token_of_interest_mask = metadata.get("token_of_interest_mask", None)
         if token_of_interest_mask is not None:
             image_paths = [
@@ -134,6 +140,31 @@ def get_multimodal_grounding(
             all_concept_image_paths.append(concept_image_paths)
             if logger is not None:
                 logger.info(f"Concept {i} image paths: {concept_image_paths}")
-        results_dict["image_grounding_paths"] = all_concept_image_paths
 
-    return results_dict
+        grounding_dict["image_grounding_paths"] = all_concept_image_paths
+
+    grounding_dict["concepts"] = concepts
+    grounding_dict["activations"] = activations
+
+    if save_analysis:
+
+        assert (
+            save_name is not None
+        ), "save_name should not be None when save_analysis is set to True."
+        analysis_saving_name = (
+            f"decompose_activations_{args.decomposition_method}_{save_name}"
+        )
+        analysis_saving_path = os.path.join(
+            save_dir, "analysis", f"{analysis_saving_name}"
+        )
+
+        if logger is not None:
+            logger.info(
+                f"Saving decomposition results dictionary to: {analysis_saving_path}"
+            )
+
+        helpers_utils.save_analysis_to_file(
+            grounding_dict, analysis_saving_path, grounding_dict.keys(), logger=logger
+        )
+
+    return grounding_dict

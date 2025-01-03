@@ -9,17 +9,19 @@ __all__ = ["ImageTextModel"]
 class ImageTextModel:
     def __init__(
         self,
-        model_name: str = "llava-hf/llava-1.5-7b-hf",
+        model_name_or_path: str = "llava-hf/llava-1.5-7b-hf",
         processor_name: str = "llava-hf/llava-1.5-7b-hf",
         local_files_only: bool = False,
         **kwargs: Any,
     ):
-        self.model_name = model_name
+
+        self.model_name_or_path = model_name_or_path
+
         self.processor_name = processor_name
         self.local_files_only = local_files_only
 
-        if processor_name == None:
-            self.processor_name = model_name
+        if processor_name is None:
+            self.processor_name = model_name_or_path
 
         self.set_model()
         self.set_processor()
@@ -29,7 +31,7 @@ class ImageTextModel:
         self,
     ) -> None:
         raise NotImplementedError(
-            f"set_model() is not defined for the model: {self.model_name}"
+            f"set_model() is not defined for the model: {self.model_name_or_path}"
         )
 
     def set_processor(
@@ -51,12 +53,17 @@ class ImageTextModel:
         instruction: str = "What are these?",
         response: str = "",
         generation_mode: bool = False,
+        **kwargs: Any,
     ) -> str:
         raise NotImplementedError(
-            f"preprocess_text() is not defined for the model: {self.model_name}"
+            f"preprocess_text() is not defined for the model: {self.model_name_or_path}"
         )
 
-    def preprocess_images(self, image_file: str):
+    def preprocess_images(
+        self,
+        image_file: str,
+        **kwargs: Any,
+    ):
         if "http" in image_file:
             image = Image.open(requests.get(image_file, stream=True).raw)
         else:
@@ -69,6 +76,7 @@ class ImageTextModel:
         image_file: str = None,
         response: str = "",
         generation_mode: bool = False,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
 
         image = self.preprocess_images(image_file)
@@ -79,6 +87,28 @@ class ImageTextModel:
         )
 
         inputs = self.processor_(images=image, text=text, return_tensors="pt")
+
+        return inputs
+
+    def preprocessor(
+        self,
+        instruction: str = "What are these?",
+        image_file: str = "",
+        response: str = "",
+        generation_mode: bool = False,
+        **kwargs: Any,
+    ):
+        preprocessor = self.get_preprocessor()
+        inputs = (
+            preprocessor(
+                instruction=instruction,
+                image_file=image_file,
+                response=response,
+                generation_mode=generation_mode,
+            )
+            .to(self.get_model().device)
+            .to(self.get_model().dtype)
+        )
 
         return inputs
 

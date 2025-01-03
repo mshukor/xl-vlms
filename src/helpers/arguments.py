@@ -1,4 +1,5 @@
 import argparse
+from typing import List
 
 __all__ = ["get_arguments"]
 
@@ -16,17 +17,27 @@ def get_arguments():
 
     # Model
     parser.add_argument(
-        "--model_name",
+        "--model_name_or_path",
         type=str,
-        default="llava-hf/llava-1.5-7b-hf",
-        help="Name of the model as defined in the transformers library",
+        default="facebook/opt-125m",
+        help="The path or name of the pre-trained model.",
     )
+
+    parser.add_argument(
+        "--processor_name",
+        type=str,
+        default=None,
+        help="Name of the processor, if different from the model_name_or_path; to be loaded from HF.",
+    )
+
     parser.add_argument(
         "--local_files_only",
-        default=False,
         action="store_true",
+        default=False,
         help="Load HF models from local.",
     )
+    parser.add_argument("--cache_dir", type=str, help="Where to load the model from.")
+
     parser.add_argument(
         "--prompt_template",
         type=str,
@@ -44,7 +55,20 @@ def get_arguments():
         default="annotations.json",
         help="Path to the annotation file.",
     )
+    parser.add_argument(
+        "--questions_file",
+        type=str,
+        default="annotations.json",
+        help="Path to the questions file.",
+    )
+    parser.add_argument(
+        "--answer_type_to_answer",
+        type=str,
+        default=None,
+        help="Path to the answer_type_to_answer file.",
+    )
     parser.add_argument("--split", type=str, default="train", help="Dataset split.")
+
     parser.add_argument(
         "--dataset_size",
         type=int,
@@ -95,7 +119,11 @@ def get_arguments():
         default=None,
     )
     parser.add_argument("--save_dir", type=str, default="results")
+
     parser.add_argument("--save_filename", type=str, default="results")
+
+    parser.add_argument("--save_analysis", type=bool, default=True)
+
     parser.add_argument(
         "--features_path",
         nargs="+",
@@ -103,6 +131,14 @@ def get_arguments():
         default=None,
     )
     # Feature decomposition
+
+    parser.add_argument(
+        "--analysis_saving_path",
+        type=str,
+        help="Path to save the analysis (components, decompositions, grounding words, MAS images).",
+        default="results/analysis.pth",
+    )
+
     parser.add_argument(
         "--analysis_name",
         type=str,
@@ -136,8 +172,9 @@ def get_arguments():
     parser.add_argument(
         "--num_concepts",
         type=int,
-        default=None,
+        nargs="+",
         help="Number of concepts for dictionary learning.",
+        default=None,
     )
     parser.add_argument(
         "--dl_max_iter",
@@ -151,6 +188,14 @@ def get_arguments():
         default=10,
         help="Number of concepts for dictionary learning.",
     )
+
+    parser.add_argument(
+        "--pre_num_top_tokens",
+        type=int,
+        default=50,
+        help="Number of words to try to ground before filtering the top num_grounded_text_tokens.",
+    )
+
     parser.add_argument(
         "--num_most_activating_samples",
         type=int,
@@ -171,16 +216,40 @@ def get_arguments():
 
     # Saving hidden states for token of interest
     parser.add_argument(
+        "--token_of_interest_num_samples",
+        type=int,
+        default=-1,
+        help="Number of samples to save.",
+    )
+    parser.add_argument(
         "--select_token_of_interest_samples",
         default=False,
         action="store_true",
-        help="Load HF models from local.",
+        help="Filtering samples containing the token of interest.",
+    )
+    parser.add_argument(
+        "--allow_different_variations_of_token_of_interest",
+        default=False,
+        action="store_true",
+        help="Relaxation for finding the token of interest.",
     )
     parser.add_argument(
         "--token_of_interest",
         type=str,
         default=None,
         help="The entity that you want to extract the representation of from hidden states.",
+    )
+    parser.add_argument(
+        "--token_of_interest_key",
+        type=str,
+        default="response",
+        help="Search for token of interest in the value of this sample key.",
+    )
+    parser.add_argument(
+        "--token_of_interest_class",
+        type=str,
+        default=None,
+        help="Select samples containing the words in this toi class.",
     )
     parser.add_argument(
         "--token_of_interest_idx",
@@ -194,19 +263,162 @@ def get_arguments():
         default=0,
         help="Start looking for token of interest from this index.",
     )
-
-    # Evaluation and metrics
     parser.add_argument(
-        "--concepts_decomposition_path",
+        "--end_special_tokens",
+        nargs="+",
+        help="Extract hidden states before this token.",
+        default="",
+    )
+    parser.add_argument(
+        "--save_only_generated_tokens",
+        default=False,
+        action="store_true",
+        help="Consider only generated tokens when saving hidden states.",
+    )
+    ## Steering methods and cluster analysis
+    parser.add_argument(
+        "--load_matched_features",
+        default=False,
+        action="store_true",
+        help="Load features of the same examples.",
+    )
+    parser.add_argument(
+        "--steering_method",
         type=str,
-        help="Path for file storing concept dictionary and grounding details",
+        default="shift_of_means",
+        help="Name of the steering method.",
+    )
+    parser.add_argument(
+        "--steering_alpha",
+        type=float,
+        default=1,
+        help="Intervention strength.",
+    )
+    parser.add_argument(
+        "--category_of_interest",
+        type=str,
+        default="",
+        help="Target category to intervene on.",
+    )
+    parser.add_argument(
+        "--base_features_key",
+        type=str,
+        default="hidden_states",
+        help="Name of base features used to compute the steering vector.",
+    )
+    parser.add_argument(
+        "--shift_vector_path",
+        type=str,
+        default="",
+        help="Path to steering vector.",
+    )
+    parser.add_argument(
+        "--shift_vector_key",
+        type=str,
+        default="steering_vector",
+        help="Path to steering vector.",
+    )
+    parser.add_argument(
+        "--start_prompt_token_idx_steering",
+        type=int,
+        default=0,
+        help="Apply steering starting from this token idx of the prompt.",
+    )
+    # Evaluation
+    parser.add_argument(
+        "--captioning_metrics",
+        type=List[str],
+        default=["CIDEr"],
+        help='The cpationing metrics to compute when "captioning_metrics" is in the hook_name (CIDEr, Bleu, etc ...).',
+    )
+    parser.add_argument(
+        "--predictions_token_of_interest",
+        nargs="+",
+        help="token of interests expected in the model prediction.",
         default=None,
     )
     parser.add_argument(
-        "--use_random_grounding_words",
+        "--targets_token_of_interest",
+        nargs="+",
+        help="token of interest expected to be in the ground truth.",
+        default=None,
+    )
+    parser.add_argument(
+        "--save_predictions",
+        action="store_true",
+        default=False,
+        help="Save model predictions.",
+    )
+    parser.add_argument(
+        "--predictions_path",
+        type=str,
+        default=None,
+        help="Path to model predictions.",
+    )
+
+    # Clusters analysis
+    parser.add_argument(
+        "--origin_model_analysis_path",
+        type=str,
+        help="Path where the analysis corresponding to the original model (starting point model) is saved.",
+        default=None,
+    )
+
+    parser.add_argument(
+        "--origin_model_feature_path",
+        type=str,
+        help="Path where the features corresponding to the original model (starting point model) is saved.",
+        default=None,
+    )
+
+    parser.add_argument(
+        "--dest_model_analysis_path",
+        type=str,
+        help="Path where the analysis corresponding to the destination model (starting point model) is saved.",
+        default=None,
+    )
+
+    parser.add_argument(
+        "--dest_model_feature_path",
+        type=str,
+        help="Path where the features corresponding to the destination model (starting point model) is saved.",
+        default=None,
+    )
+
+    parser.add_argument(
+        "--visualize_concepts",
         default=False,
         action="store_true",
-        help="Will replace grounded words by random words of possibly same length",
+        help="To visualize grounding of original, shifted, and fine-tuned concepts by their grounding.",
+    )
+
+    parser.add_argument(
+        "--compute_recovery_metrics",
+        default=False,
+        action="store_true",
+        help="Whether to compute the word and mas recovery when shifting the original concepts using the extracted shift vectors.",
+    )
+
+    parser.add_argument(
+        "--compute_stat_shift_vectors",
+        default=False,
+        action="store_true",
+        help="Whether to compute the shift vectors statistics or not.",
+    )
+
+    # Samples selected from a set of ids in a file
+    parser.add_argument(
+        "--select_samples_from_ids",
+        default=False,
+        action="store_true",
+        help="Filtering samples using a given set of ids for images.",
+    )
+
+    parser.add_argument(
+        "--path_to_samples_ids",
+        type=str,
+        default=None,
+        help="Path to the file with ids of samples to be filtered.",
     )
 
     return parser.parse_args()

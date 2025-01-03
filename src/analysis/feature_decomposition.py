@@ -1,5 +1,5 @@
 import argparse
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List
 
 import numpy as np
 import torch
@@ -8,7 +8,11 @@ from sklearn.decomposition import PCA, DictionaryLearning
 
 from analysis.multimodal_grounding import get_multimodal_grounding
 
-__all__ = ["get_feature_matrix", "decompose_activations", "project_test_sample"]
+__all__ = [
+    "get_feature_matrix",
+    "decompose_activations",
+    "decompose_and_ground_activations",
+]
 
 
 def decompose_and_ground_activations(
@@ -22,9 +26,12 @@ def decompose_and_ground_activations(
     results_dict = {}
     features = list(features.values())[0]
     metadata = list(metadata.values())[0]
+    num_concepts = (
+        args.num_concepts[0] if type(args.num_concepts) is list else args.num_concepts
+    )
     concepts, activations, decomposition_model = decompose_activations(
         mat=features,
-        num_concepts=args.num_concepts,
+        num_concepts=num_concepts,
         decomposition_method=args.decomposition_method,
         args=args,
     )
@@ -59,14 +66,13 @@ def decompose_and_ground_activations(
 def get_feature_matrix(
     features: List[Dict[str, Any]],
     module_name: str,
-    args: argparse.Namespace = None,
+    token_idx: int = None,
 ) -> torch.Tensor:
     assert (
         module_name in features[0].keys()
     ), f"Given module name {module_name} not found among stored modules: {features[0].keys()}"
 
     feat_dim = features[0][module_name].ndim
-    token_idx = args.decomposition_extract_pos
     if feat_dim == 2:
         # Assuming feat shape [Num_token_positions, Representation_size]
         for feat in features:
@@ -91,13 +97,15 @@ def decompose_activations(
     mat,
     num_concepts: int,
     decomposition_method: str = "snmf",
+    concepts: torch.tensor = None,
     args: argparse.Namespace = None,
-) -> Tuple:
+):
     """
     Input:
         mat: torch tensor or numpy array object of shape (N_samples, Representation_dim).
         num_concepts: Number of components/concepts
         decomposition_method: Decomposition/Dictionary learning model type (Options: PCA, KMeans, Semi-NMF/Non-negative dict learning, Simple)
+        concepts: if not None, concepts will be considered to handle the decomposition.
     Output:
         components: Numpy array of shape (num_concepts, Representation_dim). Stores underlying dictionary elements / concept vectors
         comp_activ: Numpy array of shape (N_samples, num_concepts). Activations/Coefficients matrix.
@@ -119,13 +127,23 @@ def decompose_activations(
 
     if decomposition_method == "pca":
         model = PCA(n_components=num_concepts)
-        comp_activ = model.fit_transform(mat)
-        components = model.components_
+        if concepts is not None:
+            model.components_ = concepts
+            comp_activ = model.transform(mat)
+            components = concepts
+        else:
+            comp_activ = model.fit_transform(mat)
+            components = model.components_
     elif decomposition_method == "kmeans":
         model = KMeans(n_clusters=num_concepts, max_iter=args.dl_max_iter)
         # Kmeans transforms to cluster distances and not "activations". 1/(1+x) transformation to view distances as activations
-        comp_activ = 1 / (1 + model.fit_transform(mat))
-        components = model.cluster_centers_
+        if concepts is not None:
+            model.cluster_centers_ = concepts
+            comp_activ = 1 / (1 + model.transform(mat))
+            components = concepts
+        else:
+            comp_activ = 1 / (1 + model.fit_transform(mat))
+            components = model.cluster_centers_
     elif decomposition_method in ["nndl", "snmf"]:
         model = DictionaryLearning(
             n_components=num_concepts,
@@ -134,9 +152,17 @@ def decompose_activations(
             transform_algorithm="lasso_cd",
             max_iter=args.dl_max_iter,
         )
-        comp_activ = model.fit_transform(mat)
-        components = model.components_
+        if concepts is not None:
+            model.components_ = concepts
+            comp_activ = model.transform(mat)
+            components = concepts
+        else:
+            comp_activ = model.fit_transform(mat)
+            components = model.components_
     elif decomposition_method == "simple":
+        if concepts is not None:
+            raise NotImplementedError
+
         model = KMeans(n_clusters=num_concepts, max_iter=args.dl_max_iter)
         norms = np.linalg.norm(mat, axis=1)
         indices = norms.argsort()[-num_concepts:]
@@ -146,26 +172,3 @@ def decompose_activations(
         comp_activ = 1 / (1 + model.transform(mat))
 
     return components, comp_activ, model
-
-
-def project_test_samples(
-    sample: torch.Tensor, analysis_model: Callable, decomposition_type: str = "snmf"
-) -> np.ndarray:
-    """
-    Input:
-        sample: torch tensor or numpy array object of shape (N_samples, Representation_dim). Should contain test representations
-        analysis_model: Already learnt sklearn dictionary learning / clustering object.
-        decomposition_type: Dictionary learning model type (Options: PCA, KMeans, Semi-NMF/Non-negative dict learning, Simple)
-    Output:
-        proj: numpy array of shape (N_samples, # components of analysis_model)
-    """
-    if isinstance(sample, torch.Tensor):
-        sample = sample.cpu().numpy()
-
-    assert isinstance(sample, np.ndarray), "sample should be of type np.ndarray"
-
-    projected_sample = analysis_model.transform(sample)
-    if decomposition_type in ["kmeans", "simple"]:
-        # Kmeans transforms to cluster distances and not "activations". 1/(1+x) transformation to view distances as activations
-        projected_sample = 1 / (1 + projected_sample)
-    return projected_sample
