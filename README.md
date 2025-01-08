@@ -5,7 +5,7 @@
 # News
 
 * **[2024.01.03]**: 🔥 We release the code related to MLLMs steering.
-* **[2025.01.02]**: 📜 Our paper [Analyzing Fine-tuning Representation Shift for Multimodal LLMs Steering](https://arxiv.org/abs/2406.08074) is on arxiv.
+* **[2025.01.02]**: 📜 Our paper [Analyzing Fine-tuning Representation Shift for Multimodal LLMs Steering](https://arxiv.org/abs/2501.03012) is on arxiv.
 * **[2024.10.30]**: 🔥 XL-VLMs repo is public.
 * **[2024.09.25]**: 🎉 Our paper **A Concept based Explainability Framework for Large Multimodal Models** <a href="https://arxiv.org/abs/2406.08074">
     <img alt="Paper URL" src="https://img.shields.io/badge/arxiv-2406.08074-blue">
@@ -19,7 +19,7 @@
 With this repo you can reproduce the results introduced in these papers:
 
 ## Analyzing Fine-tuning Representation Shift for Multimodal LLMs Steering
-
+### [Paper]([https://arxiv.org/abs/2406.08074)
 <p align="center">
   <table>
     <tr>
