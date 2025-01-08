@@ -19,7 +19,7 @@
 With this repo you can reproduce the results introduced in these papers:
 
 ## Analyzing Fine-tuning Representation Shift for Multimodal LLMs Steering
-### [Paper](https://arxiv.org/abs/2406.08074)
+### [Paper](https://arxiv.org/abs/2501.03012) 
 <p align="center">
   <table>
     <tr>
