@@ -120,11 +120,11 @@ We welcome contributions to this repo. It could be in form of support for other 
 If you find this repo useful, you can cite our works as follows:
 
 ```bibtex
-@article{parekh2024concept,
-  title={A Concept-Based Explainability Framework for Large Multimodal Models},
-  author={Parekh, Jayneel and Khayatan, Pegah and Shukor, Mustafa and Newson, Alasdair and Cord, Matthieu},
-  journal={arXiv preprint arXiv:2406.08074},
-  year={2024}
+@article{khayatan2025analyzing,
+  title={Analyzing Fine-tuning Representation Shift for Multimodal LLMs Steering alignment},
+  author={Khayatan, Pegah and Shukor, Mustafa and Parekh, Jayneel and Cord, Matthieu},
+  journal={arXiv preprint arXiv:2501.03012},
+  year={2025}
 }
 
 @article{parekh2024concept,
