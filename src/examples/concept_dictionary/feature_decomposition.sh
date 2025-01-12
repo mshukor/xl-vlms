@@ -12,7 +12,7 @@ model_name=Qwen/Qwen2-VL-7B-Instruct
 analysis_name=decompose_activations_text_grounding_image_grounding
 
 # Specify path where you have saved features on training data
-saved_features_path=/home/parekh/features/save_hidden_states_for_token_of_interest_qwen2_train_generation_split_train.pth
+saved_features_path=/home/parekh/features/save_hidden_states_for_token_of_interest_molmo_train_generation_split_train.pth
 
 # Where to store details about extracted concepts. Default directory is results/
 results_filename=results_train

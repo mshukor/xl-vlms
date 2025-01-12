@@ -32,7 +32,7 @@ def get_clip_score(
     metadata = list(metadata.values())[0]
     analysis_model = concepts_dict["analysis_model"]
     grounding_words = concepts_dict["text_grounding"]
-    projections = analysis_decomposition.project_test_sample(
+    projections = analysis_decomposition.project_representations(
         sample=features,
         analysis_model=analysis_model,
         decomposition_type=concepts_dict["decomposition_method"],
