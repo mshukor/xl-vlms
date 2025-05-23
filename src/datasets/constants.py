@@ -364,3 +364,9 @@ WORDS = {
     "positive_sentiments": COCO_POSITIVE_SENTIMENTS_WORDS,
     "negative_sentiments": COCO_NEGATIVE_SENTIMENTS_WORDS,
 }
+
+
+
+OPPOSITE_ANSWERS = {"yes":"No", "no":"Yes"}
+SAME_ANSWERS = {"yes":"Yes", "no":"No"}
+

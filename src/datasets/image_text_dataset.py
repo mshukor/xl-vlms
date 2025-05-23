@@ -259,3 +259,188 @@ class VQAv2Dataset(ImageTextDataset):
             data = self.rng.choice(data, size=self.dataset_size, replace=False)
 
         self.data = data
+
+
+
+
+class POPE_test_Dataset(ImageTextDataset):
+    def create_dataset(
+        self,
+    ) -> None:
+        
+
+        annotations = json.load(
+            open(os.path.join(self.data_dir, self.annotation_file))
+        )
+        splits = self.split.split(",")
+
+
+        for split in splits:
+            assert split in [
+                "adversarial",
+                "popular",
+                "random",
+            ], f"{self.split} split is not supported."
+
+
+        assert len(splits)==1
+        split = splits[0]     
+
+        data = []
+        for datum in annotations:
+
+            image_name = datum["filename"]
+
+            source = "images"
+            
+            image_path = os.path.join(self.data_dir, source, image_name)
+
+            instruction = datum["instruction"].split("Answer with just one word.")[0].strip()
+            response = datum["response"].strip()
+            sample_subset = datum["subset"].strip()
+
+
+            if response=="yes" or (response=="no" and sample_subset==split):
+
+
+                item = {
+                    "instruction": instruction,
+                    "response": response,
+                    "image": image_path,
+                    "targets": "$$".join([datum["response"]]),
+                }
+                data.append(item)
+
+        if self.dataset_size > 0:
+            data = data[:self.dataset_size]
+
+            # data = self.rng.choice(data, size=self.dataset_size, replace=False)
+
+        self.data = data
+
+
+
+
+
+class POPE_train_Dataset(ImageTextDataset):
+    def create_dataset(
+        self,
+    ) -> None:
+        
+
+        annotations = json.load(
+            open(os.path.join(self.data_dir, self.annotation_file))
+        )
+
+        data = []
+
+        dataset_size = 0
+        if self.split=="all":
+            if self.dataset_size > 0:
+                dataset_size = self.dataset_size
+                positive_answers = dataset_size//2
+                remaining = dataset_size - positive_answers
+                adversarial_num_samples_negative = remaining//3
+                popular_num_samples_negative = remaining//3
+                random_num_samples_negative = remaining - (adversarial_num_samples_negative+popular_num_samples_negative)
+
+
+
+            positive_samples_picked = 0
+            negative_adversarial_samples_picked = 0
+            negative_popular_samples_picked = 0
+            negative_random_samples_picked = 0
+
+
+            for datum in annotations:
+
+                image_name = datum["filename"]
+
+                source = "images"
+                
+                image_path = os.path.join(self.data_dir, source, image_name)
+
+                instruction = datum["instruction"].split("Answer with just one word.")[0].strip()
+                response = datum["response"].strip()
+                sample_subset = datum["subset"].strip()
+
+                item = {
+                    "instruction": instruction,
+                    "response": response,
+                    "image": image_path,
+                    "targets": "$$".join([datum["response"]]),
+                }
+
+                if dataset_size>0:
+                    if response=="yes" and positive_samples_picked<positive_answers:
+                    
+                        data.append(item)
+                        positive_samples_picked += 1
+
+                    elif sample_subset=="adversarial" and negative_adversarial_samples_picked<adversarial_num_samples_negative:
+                        data.append(item)
+                        negative_adversarial_samples_picked += 1
+                    
+                    elif sample_subset=="popular" and negative_popular_samples_picked<popular_num_samples_negative:
+                        data.append(item)
+                        negative_popular_samples_picked += 1
+
+                    elif sample_subset=="random" and negative_random_samples_picked<random_num_samples_negative:
+                        data.append(item)
+                        negative_random_samples_picked += 1
+                else:
+                    data.append(item)
+
+
+        elif self.split in ["adversarial", "popular", "random"]:
+
+            split = self.split
+            if self.dataset_size > 0:
+                dataset_size = self.dataset_size
+                positive_answers = dataset_size//2
+                negative_answers = dataset_size - positive_answers
+                
+
+            positive_samples_picked = 0
+            negative_samples_picked = 0
+
+            for datum in annotations:
+
+                image_name = datum["filename"]
+
+                source = "images"
+                
+                image_path = os.path.join(self.data_dir, source, image_name)
+
+                instruction = datum["instruction"].split("Answer with just one word.")[0].strip()
+                response = datum["response"].strip()
+                sample_subset = datum["subset"].strip()
+
+                item = {
+                    "instruction": instruction,
+                    "response": response,
+                    "image": image_path,
+                    "targets": "$$".join([datum["response"]]),
+                }
+
+
+                if dataset_size>0:
+                    if response=="yes" and positive_samples_picked<positive_answers:
+                        data.append(item)
+                        positive_samples_picked += 1
+
+                    elif sample_subset==split and negative_samples_picked<negative_answers:
+                        data.append(item)
+                        negative_samples_picked += 1
+     
+                else:
+                    data.append(item)
+
+        else:
+            NotImplementedError
+
+
+        self.data = data
+
+
+

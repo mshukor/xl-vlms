@@ -9,6 +9,7 @@ from typing import Any, Callable, Dict, List, Tuple, Union
 
 import numpy as np
 import torch
+import torch.nn as nn
 from tqdm import tqdm
 
 import metrics
@@ -94,6 +95,19 @@ def get_start_idx_generated_tokens(tokens: List[torch.Tensor]) -> int:
     return idx  # generated tokens start after the prompt, count from last
 
 
+class SteeringNet(nn.Module):
+    def __init__(self, input_size, output_size, hidden_size=10):
+        super().__init__()
+        self.hidden_size = hidden_size
+        self.encoder = nn.Linear(input_size, hidden_size, bias=True)
+        self.decoder = nn.Linear(hidden_size, output_size, bias=False)
+        self.activ = nn.Tanh()
+        
+    def forward(self, inp):
+        embed = self.activ(self.encoder(inp))
+        shift = self.decoder(embed)
+        return shift, embed
+
 def save_hidden_states(module_name: str = "", **kwargs: Any):
     """
     Save module output hidden states. In case of autoregressive, make sure the kv caching is enabled.
@@ -112,6 +126,7 @@ def save_hidden_states(module_name: str = "", **kwargs: Any):
     return hook
 
 
+global SAMPLE_COUNTER
 def apply_steering_vector(
     x: torch.Tensor,
     vector: torch.Tensor,
@@ -119,8 +134,14 @@ def apply_steering_vector(
     only_generated_tokens: bool = False,
     include_last_prompt_token: bool = False,
     start_prompt_token_idx: int = 0,
+    individual_shift: bool = False,
 ) -> torch.Tensor:
+    global SAMPLE_COUNTER
+
     if x.shape[1] > 1:
+        if individual_shift: # when the vector is composed of #samples vectors, and for each samples a different steering vector is to be picked
+            SAMPLE_COUNTER += 1
+            vector = vector[SAMPLE_COUNTER-1]
         if only_generated_tokens:
             return x
         if include_last_prompt_token:
@@ -130,8 +151,49 @@ def apply_steering_vector(
             x_ = x_ + alpha * vector.to(x_.device).to(x_.dtype)
             x[:, start_prompt_token_idx:, :] = x_
             return x
+        
+    if individual_shift:
+        if vector.shape[0] > 1:
+            vector = vector[SAMPLE_COUNTER-1]
     x = x + alpha * vector.to(x.device).to(x.dtype)
     # import ipdb; ipdb.set_trace()
+    return x
+
+
+
+global PREDICTED_STEER
+def apply_learned_steering_vector_steer(
+    x: torch.Tensor,
+    model: Any,
+    alpha: float = 1,
+    only_generated_tokens: bool = False,
+    include_last_prompt_token: bool = False,
+    start_prompt_token_idx: int = 0,
+) -> torch.Tensor:
+    global PREDICTED_STEER
+    
+    
+    if x.shape[1] > 1:
+        
+        last_input_tokens = x[:,-1,:]
+        last_input_tokens = last_input_tokens.to(dtype=torch.float16)
+
+        PREDICTED_STEER = model(last_input_tokens)[0]
+        vector = PREDICTED_STEER
+
+        if only_generated_tokens:
+            return x
+        if include_last_prompt_token:
+            start_prompt_token_idx = -1
+        if start_prompt_token_idx > 0 or start_prompt_token_idx == -1:
+            x_ = x[:, start_prompt_token_idx:, :]
+            x_ = x_ + alpha * vector.to(x_.device).to(x_.dtype)
+            x[:, start_prompt_token_idx:, :] = x_
+            return x
+        
+    vector = PREDICTED_STEER
+    x = x + alpha * vector.to(x.device).to(x.dtype)
+
     return x
 
 
@@ -142,6 +204,7 @@ def shift_hidden_states(
     only_generated_tokens: bool = False,
     include_last_prompt_token: bool = False,
     start_prompt_token_idx: int = 0,
+    individual_shift: bool = False,
     **kwargs: Any,
 ):
     """
@@ -158,6 +221,7 @@ def shift_hidden_states(
                     only_generated_tokens=only_generated_tokens,
                     include_last_prompt_token=include_last_prompt_token,
                     start_prompt_token_idx=start_prompt_token_idx,
+                    individual_shift=individual_shift,
                 )
                 return (output_,) + output[1:]
             else:
@@ -168,8 +232,34 @@ def shift_hidden_states(
                     only_generated_tokens=only_generated_tokens,
                     include_last_prompt_token=include_last_prompt_token,
                     start_prompt_token_idx=start_prompt_token_idx,
+                    individual_shift=individual_shift,
                 )
                 return output
+            
+    elif "learned_steer" in operation:
+
+        def hook(module, input, output):
+            if isinstance(output, tuple):  # e.g. in the residual stream
+                output_ = apply_learned_steering_vector_steer(
+                    output[0],
+                    model=vector,
+                    alpha=alpha,
+                    only_generated_tokens=only_generated_tokens,
+                    include_last_prompt_token=include_last_prompt_token,
+                    start_prompt_token_idx=start_prompt_token_idx,
+                )
+                return (output_,) + output[1:]
+            else:
+                output = apply_learned_steering_vector_steer(
+                    output,
+                    model=vector,
+                    alpha=alpha,
+                    only_generated_tokens=only_generated_tokens,
+                    include_last_prompt_token=include_last_prompt_token,
+                    start_prompt_token_idx=start_prompt_token_idx,
+                )
+                return output
+            
 
     else:
         raise NotImplementedError(
@@ -404,6 +494,9 @@ def register_hooks(
     logger: Callable = None,
     args: argparse.Namespace = None,
 ) -> Callable:
+    global SAMPLE_COUNTER
+    SAMPLE_COUNTER = 0
+    
     hook_function, hook_return_function = None, None
     if "save_hidden_states" == hook_name:
         # Save the hidden states of all tokens in the sequence
@@ -491,6 +584,8 @@ def register_hooks(
         operation = ""
         if "add" in hook_name:
             operation = "add"
+        elif "learned_steer" in hook_name:
+            operation = "learned_steer"
         else:
             raise NotImplementedError(
                 f"Please provide a valid operation. Got {hook_name}"
@@ -499,7 +594,25 @@ def register_hooks(
         only_generated_tokens = "only_generated" in hook_name
         include_last_prompt_token = "last_prompt_token" in hook_name
 
-        vector = torch.load(args.shift_vector_path)[args.shift_vector_key]
+
+        if "learned_steer" in hook_name:
+
+            # Re-create the model architecture (same input/output/hidden sizes)
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            print(model.config)
+            input_size, output_size, hidden_size = model.config.text_config.max_position_embeddings, model.config.text_config.max_position_embeddings, args.hidden_size
+            model_steering = SteeringNet(input_size=input_size, output_size=output_size, hidden_size=hidden_size).to(device)
+
+            model_steering.load_state_dict(torch.load(args.shift_vector_path[0]))
+            dtype = next(model.parameters()).dtype
+            model_steering = model_steering.to(dtype)
+
+            model_steering.eval()
+            vector = model_steering
+
+        else:
+            vector = torch.load(args.shift_vector_path[0])[args.shift_vector_key]
+
         hook_function = partial(
             shift_hidden_states,
             vector=vector,
@@ -508,6 +621,7 @@ def register_hooks(
             only_generated_tokens=only_generated_tokens,
             include_last_prompt_token=include_last_prompt_token,
             start_prompt_token_idx=args.start_prompt_token_idx_steering,
+            individual_shift=args.individual_shift
         )
     else:
         warnings.warn(f"{hook_name} is not supported. No hooks attached to model.")

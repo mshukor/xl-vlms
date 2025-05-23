@@ -6,6 +6,7 @@ from typing import Any, Callable, Dict, List, Tuple
 import torch
 
 from datasets import get_dataset_loader
+from datasets.constants import SAME_ANSWERS, OPPOSITE_ANSWERS
 from helpers.arguments import get_arguments
 from helpers.logger import log_args, setup_logger
 from helpers.utils import (clear_forward_hooks, clear_hooks_variables,
@@ -33,12 +34,35 @@ def inference(
 
         text = item["text"][0]  # for now we support batch size = 1
         image_path = item["image"][0]
-        inputs = model_class.preprocessor(
-            instruction=text,
-            image_file=image_path,
-            response="",
-            generation_mode=args.generation_mode,
-        )
+
+        if args.force_answer and ("Qwen" in args.model_name_or_path or "qwen" in args.model_name_or_path or "llava" in args.model_name_or_path or "LLaVA" in args.model_name_or_path):
+            if args.forced_answer_true:
+                inputs = model_class.preprocessor(
+                    instruction=text,
+                    image_file=image_path,
+                    response=SAME_ANSWERS[item["response"][0]] + ", the image",
+                    generation_mode=args.generation_mode,
+                    continue_final_message=True,
+                )
+            else:
+                inputs = model_class.preprocessor(
+                    instruction=text,
+                    image_file=image_path,
+                    response=OPPOSITE_ANSWERS[item["response"][0]] + ", the image",
+                    generation_mode=args.generation_mode,
+                    continue_final_message=True,
+                )
+
+        else:
+            if args.descriptive_answer:
+                text = "Describe the image in detail."
+            inputs = model_class.preprocessor(
+                instruction=text,
+                image_file=image_path,
+                response="",
+                generation_mode=args.generation_mode,
+            )
+
 
         if args.generation_mode:
             out = model.generate(
@@ -57,7 +81,6 @@ def inference(
         item["model_predictions"] = model_class.get_tokenizer().batch_decode(
             out[:, input_len:], skip_special_tokens=True
         )
-
         if hook_return_functions is not None:
             for func in hook_return_functions:
                 if func is not None:

@@ -73,19 +73,28 @@ class LLaVA(ImageTextModel):
 
         return conversation
 
+
     def preprocess_text(
         self,
         instruction: str = "What are these?",
         response: str = "",
         generation_mode: bool = False,
+        continue_final_message: bool = False,
         **kwargs: Any,
     ) -> str:
 
         conversation = self.get_conversation_round(
             instruction=instruction, response=response
         )
+ 
+        add_generation_prompt = generation_mode if not continue_final_message else False
+
+
         prompt = self.processor_.apply_chat_template(
-            conversation, add_generation_prompt=generation_mode
+            conversation,
+            add_generation_prompt=add_generation_prompt,
+            continue_final_message=continue_final_message,
+            tokenize=False,
         )
 
         return prompt
