@@ -42,6 +42,29 @@ class LLaVA(ImageTextModel):
         )
         self.tokenizer_ = self.processor_.tokenizer
 
+
+    def preprocess_input(
+        self,
+        instruction: str = "What are these?",
+        image_file: str = None,
+        response: str = "",
+        generation_mode: bool = False,
+        continue_final_message: bool = False,
+        **kwargs: Any,
+    ) -> Dict[str, Any]:
+
+        image = self.preprocess_images(image_file)
+        text = self.preprocess_text(
+            instruction=instruction,
+            response=response,
+            generation_mode=generation_mode,
+            continue_final_message=continue_final_message
+        )
+
+        inputs = self.processor_(images=image, text=text, return_tensors="pt")
+
+        return inputs
+
     def set_preprocessor(
         self,
     ) -> None:

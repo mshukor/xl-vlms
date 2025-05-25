@@ -2,7 +2,7 @@ import argparse
 import os
 import time
 from typing import Any, Callable, Dict, List, Tuple
-
+from torch.utils.data import DataLoader, Dataset
 import torch
 
 from datasets import get_dataset_loader
@@ -18,7 +18,8 @@ from models.image_text_model import ImageTextModel
 
 @torch.no_grad()
 def inference(
-    loader: Callable,
+    loader: DataLoader,
+    dataset: Dataset,
     model_class: ImageTextModel,
     hook_return_function: Callable,
     device: torch.device,
@@ -34,34 +35,21 @@ def inference(
 
         text = item["text"][0]  # for now we support batch size = 1
         image_path = item["image"][0]
+        response = item["response"][0]
 
-        if args.force_answer and ("Qwen" in args.model_name_or_path or "qwen" in args.model_name_or_path or "llava" in args.model_name_or_path or "LLaVA" in args.model_name_or_path):
-            if args.forced_answer_true:
-                inputs = model_class.preprocessor(
-                    instruction=text,
-                    image_file=image_path,
-                    response=SAME_ANSWERS[item["response"][0]] + ", the image",
-                    generation_mode=args.generation_mode,
-                    continue_final_message=True,
-                )
-            else:
-                inputs = model_class.preprocessor(
-                    instruction=text,
-                    image_file=image_path,
-                    response=OPPOSITE_ANSWERS[item["response"][0]] + ", the image",
-                    generation_mode=args.generation_mode,
-                    continue_final_message=True,
-                )
-
-        else:
-            if args.descriptive_answer:
-                text = "Describe the image in detail."
-            inputs = model_class.preprocessor(
-                instruction=text,
-                image_file=image_path,
-                response="",
-                generation_mode=args.generation_mode,
-            )
+        instruction_, response_, continue_final_message_ = dataset.construct_input(text=text,
+                                                                                   response=response,
+                                                                                   force_answer=args.force_answer,
+                                                                                   forced_answer_true=args.forced_answer_true,
+                                                                                   descriptive_answer=args.descriptive_answer,)
+                                
+        inputs = model_class.preprocessor(
+            instruction=instruction_,
+            image_file=image_path,
+            response=response_,
+            generation_mode=args.generation_mode,
+            continue_final_message=continue_final_message_,
+        )
 
 
         if args.generation_mode:
@@ -127,12 +115,13 @@ if __name__ == "__main__":
         logger=logger,
         args=args,
     )
-    loader = get_dataset_loader(
+    loader, dataset = get_dataset_loader(
         dataset_name=args.dataset_name, logger=logger, args=args
     )
 
     hook_data = inference(
         loader=loader,
+        dataset=dataset,
         model_class=model_class,
         device=device,
         hook_return_function=hook_return_functions,

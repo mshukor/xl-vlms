@@ -345,6 +345,13 @@ def get_arguments():
         default=False,
         help="Whether an answer shall be forced to the assistant. In this case, the message_format should be none.",
     )
+    
+    parser.add_argument(
+        "--forced_answer_true",
+        action="store_true",
+        default=False,
+        help="If force_answer is true, then this answer can be the true answer, or a false one.",
+    )
 
     parser.add_argument(
         "--descriptive_answer",

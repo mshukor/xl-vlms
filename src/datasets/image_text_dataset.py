@@ -5,8 +5,9 @@ from typing import Any, Callable, Dict, List
 import numpy as np
 from torch.utils.data import Dataset
 
-from datasets.constants import WORDS
+from datasets.constants import WORDS, SAME_ANSWERS, OPPOSITE_ANSWERS
 from models.constants import TASK_PROMPTS
+
 
 __all__ = ["COCODataset"]
 
@@ -50,7 +51,18 @@ class ImageTextDataset(Dataset):
         raise NotImplementedError(
             f"create_dataset() is not defined from dataset: {self.dataset_name}"
         )
-
+    def construct_input(
+        self,
+        text: str = "",
+        response: str = "",
+        force_answer: bool = False,
+        forced_answer_true: bool = True,
+        descriptive_answer: bool = False,
+    ) -> tuple[str, str, bool]:
+        raise NotImplementedError(
+            f"create_dataset() is not defined from dataset: {self.dataset_name}"
+        )
+    
     def apply_prompt(self, item: Dict[str, Any], mode: str = "train") -> str:
         if "train" in mode:
             text = f"{item['instruction']}{item['response']}"
@@ -317,12 +329,42 @@ class POPE_test_Dataset(ImageTextDataset):
             # data = self.rng.choice(data, size=self.dataset_size, replace=False)
 
         self.data = data
+    
 
+    def construct_input(
+        self,
+        text: str = "",
+        response: str = "",
+        force_answer: bool = False,
+        forced_answer_true: bool = True,
+        descriptive_answer: bool = False,
+    ) -> tuple[str, str, bool]:
+        
+        if force_answer:
+            if forced_answer_true:
+                instruction=text
+                response=SAME_ANSWERS[response] + ", the image"
+                continue_final_message=True
+            else:
+                instruction=text
+                response=OPPOSITE_ANSWERS[response] + ", the image"
+                continue_final_message=True
 
+        else:
+            if descriptive_answer:
+                instruction = "Describe the image in detail."
+                response = ""
+                continue_final_message = False
 
+            else:
+                instruction = text
+                response = ""
+                continue_final_message = False
 
+        
+        return instruction, response, continue_final_message
 
-class POPE_train_Dataset(ImageTextDataset):
+class POPE_train_Dataset(POPE_test_Dataset):
     def create_dataset(
         self,
     ) -> None:

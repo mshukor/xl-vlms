@@ -23,7 +23,7 @@ for subset in adversarial popular random; do
     for steering_alpha in 1; do
 
         for i in 14; do
-            shift_vector_path=${YOUR_SHIFTS_PATH}
+            shift_vector_path=/data/khayatan/Hallucination/POPE/hallucination/shift_vectors/llava_${i}_average_${subset}_test_all.pth
             save_filename="${model}_${dataset_name}_steer_${i}_yes_no_${subset}_${steering_alpha}_p2s"
             modules_to_hook="language_model.model.layers.${i}"
 

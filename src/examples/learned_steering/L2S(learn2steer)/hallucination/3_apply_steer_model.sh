@@ -3,8 +3,7 @@ model=llava
 
 YOUR_DATA_DIR=/data/khayatan/datasets/POPE/test
 YOUR_SAVE_DIR=/data/khayatan/Hallucination/POPE/hallucination
-YOUR_SHIFTS_PATH=/home/khayatan/bias_discovery/train_steering/best_model_5e-05_1_0.0001_last_input_average_100_14_llava_1200_0.8.pt
-STEER_MODEL_NAME=best_model_5e-05_1_0.0001_last_input_average_100_14_llava_1200_0.8.pt
+STEER_MODEL_NAME=/home/khayatan/bias_discovery/train_steering/best_model_5e-05_1_0.0001_last_input_average_100_14_llava_1200_0.8.pt
 
 
 data_dir=${YOUR_DATA_DIR}
@@ -25,7 +24,7 @@ for subset in adversarial popular random; do
     for steering_alpha in 1; do
 
         for i in 14; do
-            shift_vector_path=${YOUR_SHIFTS_PATH}
+            shift_vector_path=${STEER_MODEL_NAME}
             save_filename="${model}_${dataset_name}_steer_${i}_yes_no_${subset}_${steering_alpha}_${STEER_MODEL_NAME}"
             modules_to_hook="language_model.model.layers.${i}"
 
