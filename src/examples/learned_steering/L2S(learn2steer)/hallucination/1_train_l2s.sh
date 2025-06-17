@@ -15,12 +15,12 @@ for split in adversarial; do
 
     for i in 14; do
 
-        pos_features_name=save_hidden_states_for_l2s_llava_pope_test_features_pos_answers_14_${split}_-1.pth
-        neg_features_name=save_hidden_states_for_l2s_llava_pope_test_features_neg_answers_14_${split}_-1.pth
+        pos_features_name=save_hidden_states_for_l2s_llava_pope_train_features_pos_answers_14_adversarial_all_train_600.pth
+        neg_features_name=save_hidden_states_for_l2s_llava_pope_train_features_neg_answers_14_adversarial_all_train_600.pth
 
 
         modules_to_hook="language_model.model.layers.${i}"
-        save_filename=${split}_pope_test_-1
+        save_filename=${split}_pope_train_-1
 
 
         python src/analyse_features.py \

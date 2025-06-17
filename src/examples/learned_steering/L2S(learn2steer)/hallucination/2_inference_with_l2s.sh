@@ -12,10 +12,9 @@ save_dir=${YOUR_SAVE_DIR}
 
 dataset_name=pope_test
 dataset_size=-1
-max_new_tokens=100
+max_new_tokens=128
 steering_alpha=1
 hook_names=("shift_hidden_states_learned_steer" "captioning_metrics")
-shift_vector_key=steering_vector
 
 
 
@@ -43,7 +42,6 @@ for subset in adversarial popular random; do
                 --local_files_only \
                 --exact_match_modules_to_hook \
                 --shift_vector_path $shift_vector_path \
-                --shift_vector_key $shift_vector_key \
                 --steering_alpha $steering_alpha \
                 --individual_shift \
                 --max_new_tokens $max_new_tokens

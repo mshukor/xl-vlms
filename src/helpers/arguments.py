@@ -319,6 +319,12 @@ def get_arguments():
         help="Path to steering vector.",
     )
     parser.add_argument(
+        "--shift_type",
+        type=str,
+        default="steering_vector",
+        help="Path to steering vector.",
+    )
+    parser.add_argument(
         "--start_prompt_token_idx_steering",
         type=int,
         default=0,

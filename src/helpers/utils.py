@@ -390,6 +390,7 @@ def get_hidden_states(
     extract_token_of_interest: bool = False,
     token_of_interest_start_token: int = 0,
     extract_before_special_tokens: bool = False,
+    extract_l2s_input_output: bool = False,
     save_only_generated_tokens: bool = False,
     **kwargs: Any,
 ) -> Dict[str, Any]:
@@ -435,8 +436,27 @@ def get_hidden_states(
                 token_of_interest_mask
             ).bool()
             output["image"] = kwargs["image"]
+
+        elif extract_l2s_input_output:
+            # end_of_raw_input_index corresponds to ":" after "ASSISTANT" token
+            # it is used to extract the input and output representations from the right tokens, which does not include the forced answer
+            end_of_raw_input_index = kwargs["end_of_raw_input_index"]
+            end_of_input_index = kwargs["end_of_input_index"]
+
+            # extracting the l2s inputs
+            inputs = {"last_raw_input": v[:, end_of_raw_input_index, :].clone()}
+
+            # extracting the l2s outputs
+            average_tokens = torch.mean(v[:, end_of_raw_input_index+1:, :].clone(), dim=1).clone()
+            last_tokens = v[:, -1, :].clone()
+            # ASK JAYNEEL: should the following be end_of_input_index or end_of_input_index+1?
+            last_input_tokens = v[:, end_of_input_index+1, :].clone()
+            outputs = {"average" : average_tokens, "last_generated" : last_tokens, "last_input": last_input_tokens}
+
+            v = {"inputs": inputs, "outputs": outputs}
         else:
             pass
+
         hidden_states[k] = v
     output["hidden_states"] = hidden_states
     return output
@@ -580,6 +600,14 @@ def register_hooks(
             tokenizer=tokenizer,
             save_only_generated_tokens=args.save_only_generated_tokens,
         )
+
+
+    elif "save_hidden_states_for_l2s" == hook_name:
+        hook_function = save_hidden_states
+        hook_return_function = partial(
+            get_hidden_states,
+            extract_l2s_input_output=True,
+        )
     elif "shift_hidden_states" in hook_name:
         operation = ""
         if "add" in hook_name:
@@ -599,7 +627,6 @@ def register_hooks(
 
             # Re-create the model architecture (same input/output/hidden sizes)
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-            print(model.config)
             input_size, output_size, hidden_size = model.config.text_config.max_position_embeddings, model.config.text_config.max_position_embeddings, args.hidden_size
             model_steering = SteeringNet(input_size=input_size, output_size=output_size, hidden_size=hidden_size).to(device)
 

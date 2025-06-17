@@ -36,12 +36,14 @@ def inference(
         text = item["text"][0]  # for now we support batch size = 1
         image_path = item["image"][0]
         response = item["response"][0]
+        scenario = item["scenario"][0]
 
         instruction_, response_, continue_final_message_ = dataset.construct_input(text=text,
                                                                                    response=response,
                                                                                    force_answer=args.force_answer,
                                                                                    forced_answer_true=args.forced_answer_true,
-                                                                                   descriptive_answer=args.descriptive_answer,)
+                                                                                   descriptive_answer=args.descriptive_answer,
+                                                                                   scenario=scenario,)
                                 
         inputs = model_class.preprocessor(
             instruction=instruction_,
@@ -69,6 +71,12 @@ def inference(
         item["model_predictions"] = model_class.get_tokenizer().batch_decode(
             out[:, input_len:], skip_special_tokens=True
         )
+
+        encoded_response = model_class.get_tokenizer()(response_, add_special_tokens=False)
+        item["end_of_raw_input_index"] = input_len-len(encoded_response["input_ids"])-1
+        item["end_of_input_index"] = input_len-1
+
+
         if hook_return_functions is not None:
             for func in hook_return_functions:
                 if func is not None:
