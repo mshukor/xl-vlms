@@ -595,7 +595,8 @@ class MMSafetyBench(ImageTextDataset):
 
         else:
             # ASK JAYNEEL: should the "instruction_suffix" be added when the answer is not forced?
-            instruction = text.strip() + instruction_suffix
+            # No
+            instruction = text.strip()
             response = ""
             continue_final_message = False
 

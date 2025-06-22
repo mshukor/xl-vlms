@@ -5,7 +5,7 @@ from typing import Any, Callable, Tuple
 from torch.utils.data import DataLoader, Subset, Dataset
 
 from datasets.image_text_dataset import (COCODataset, VQAv2Dataset,
-                                         POPE_test_Dataset, POPE_train_Dataset,)
+                                         POPE_test_Dataset, POPE_train_Dataset, MMSafetyBench)
 
 __all__ = ["get_dataset_loader"]
 
@@ -39,6 +39,8 @@ def get_dataset_loader(
         dataset_cls = POPE_test_Dataset
     elif dataset_name == "pope_train":
         dataset_cls = POPE_train_Dataset
+    elif dataset_name == "mmsb":
+        dataset_cls = MMSafetyBench
     else:
         raise NotImplementedError(f"{dataset_name} is not implemented.")
 
