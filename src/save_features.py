@@ -55,26 +55,28 @@ def inference(
             continue_final_message=continue_final_message_,
         )
 
-        print (i, inputs['input_ids'][:, -30:])
+        #logger.info (f"Last 30 input token ids: Iteration: {i}, {inputs['input_ids'][:, -30:]}")
+        #logger.info (f"Logging message for Memory available: Iteration: {i}, Memory: {psutil.virtual_memory().available}")
 
         if args.generation_mode:
             out = model.generate(
                 **inputs, max_new_tokens=args.max_new_tokens, do_sample=False
             )
+            item["model_output"] = out # Don't use this for inference mode, consumes lot more memory then
+            item["model_generated_output"] = out[:, input_len:]
+            item["model_predictions"] = model_class.get_tokenizer().batch_decode(
+                out[:, input_len:], skip_special_tokens=True
+            )
+
         else:
             out = model(**inputs).logits
 
-        #item["model_output"] = out
         input_len = (
             inputs["input_ids"].shape[1]
             if inputs["input_ids"].ndim > 1
             else inputs["input_ids"].shape[0]
         )
-        #item["model_generated_output"] = out[:, input_len:]
-        #item["model_predictions"] = model_class.get_tokenizer().batch_decode(
-        #    out[:, input_len:], skip_special_tokens=True
-        #)
-
+        
         encoded_response = model_class.get_tokenizer()(response_, add_special_tokens=False)
         item["end_of_raw_input_index"] = input_len-len(encoded_response["input_ids"])-1
         item["end_of_input_index"] = input_len-1
@@ -94,7 +96,6 @@ def inference(
             logger.info(
                 f"Iteration: {i}/{num_iterations},  Estimated time left: {time_left:.2f} mins"
             )
-            print ("A print message before forward pass, Memory available:", psutil.virtual_memory().available)
     return hook_data
 
 
