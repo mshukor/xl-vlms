@@ -26,8 +26,13 @@ for split in multi; do
 
         modules_to_hook="model.layers.${i}"
         modules_to_hook="language_model.model.layers.${i}"
-        save_filename="${model}_${dataset_name}_features_pos_answers_${i}_${split}_all_train_${dataset_size}"
+        save_pos_filename="${model}_${dataset_name}_features_pos_answers_${i}_${split}_all_${dataset_size}"
+        save_neg_filename="${model}_${dataset_name}_features_neg_answers_${i}_${split}_all_${dataset_size}"
+        save_cxt_filename="${model}_${dataset_name}_features_context_${i}_${split}_all_${dataset_size}"
 
+        # First command computes positive answer representations
+        # Second command computes negative answer representations
+        # Third command computes input context representations
 
         python src/save_features.py \
             --model_name_or_path $model_name_or_path \
@@ -41,26 +46,13 @@ for split in multi; do
             --hook_names $hook_names \
             --modules_to_hook $modules_to_hook \
             --generation_mode \
-            --save_filename ${save_filename} \
+            --save_filename ${save_pos_filename} \
             --local_files_only \
             --force_answer \
             --forced_answer_true \
             --exact_match_modules_to_hook \
             --end_special_tokens "</s>"
-    done
-done
-
-
-
-for split in multi; do
-
-    for i in 15; do
-
-        modules_to_hook="model.layers.${i}"
-        modules_to_hook="language_model.model.layers.${i}"
-        save_filename="${model}_${dataset_name}_features_neg_answers_${i}_${split}_all_train_${dataset_size}"
-
-
+        
         python src/save_features.py \
             --model_name_or_path $model_name_or_path \
             --data_dir $data_dir \
@@ -72,13 +64,27 @@ for split in multi; do
             --hook_names $hook_names \
             --modules_to_hook $modules_to_hook \
             --generation_mode \
-            --save_filename ${save_filename} \
+            --save_filename ${save_neg_filename} \
             --local_files_only \
             --force_answer \
             --exact_match_modules_to_hook \
             --end_special_tokens "</s>"
+        
+        python src/save_features.py \
+            --model_name_or_path $model_name_or_path \
+            --data_dir $data_dir \
+            --dataset_name $dataset_name \
+            --dataset_size $dataset_size \
+            --split $split \
+            --save_dir $save_dir \
+            --max_new_tokens $max_new_tokens \
+            --hook_names $hook_names \
+            --modules_to_hook $modules_to_hook \
+            --generation_mode \
+            --save_filename ${save_cxt_filename} \
+            --local_files_only \
+            --exact_match_modules_to_hook \
+            --end_special_tokens "</s>"
     done
 done
-
-
 
