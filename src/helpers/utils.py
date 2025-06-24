@@ -450,14 +450,21 @@ def get_hidden_states(
             average_tokens = torch.mean(v[:, end_of_raw_input_index+1:, :].clone(), dim=1).clone()
             last_tokens = v[:, -1, :].clone()
             # ASK JAYNEEL: should the following be end_of_input_index or end_of_input_index+1?
-            last_input_tokens = v[:, end_of_input_index+1, :].clone()
+            # JAYNEEL: TO BE CHECKED. end_of_input_index also needs to be determined in some different fashion
+            last_input_tokens = v[:, end_of_input_index, :].clone()
             outputs = {"average" : average_tokens, "last_generated" : last_tokens, "last_input": last_input_tokens}
 
             v = {"inputs": inputs, "outputs": outputs}
         else:
             pass
+        
+        if isinstance(v, dict):
+            hidden_states[k] = v
+        else:
+            # v must be a torch tensor based on the above code. 
+            # Clone to avoid memory leakage by keeping any reference to full original tensor
+            hidden_states[k] = v.clone()
 
-        hidden_states[k] = v
     output["hidden_states"] = hidden_states
     return output
 

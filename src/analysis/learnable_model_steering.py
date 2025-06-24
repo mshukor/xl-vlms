@@ -129,7 +129,7 @@ class LearnableSteering:
         torch.save({"steering_vector": individual_shifts},
                    os.path.join(self.save_dir, self.steering_file_base + ".pth"))
         
-        self.logger.info(f"Saving individual shift vectors in : {os.path.join(self.save_dir, self.steering_file_base + ".pth")}")
+        self.logger.info(f"Saving individual shift vectors in : {os.path.join(self.save_dir, self.steering_file_base + '.pth')}")
 
 
         # Save mean-based vector
@@ -140,7 +140,7 @@ class LearnableSteering:
         torch.save({"steering_vector": mean_shift.repeat(n_samples, 1)},
                    os.path.join(self.save_dir, self.steering_file_base + "_mean.pth"))
         
-        self.logger.info(f"Saving mean shift vectors in : {os.path.join(self.save_dir, self.steering_file_base + "_mean.pth")}")
+        self.logger.info(f"Saving mean shift vectors in : {os.path.join(self.save_dir, self.steering_file_base + '_mean.pth')}")
 
 
     def train_model(self):

@@ -552,6 +552,7 @@ class MMSafetyBench(ImageTextDataset):
                     "question_id": question_id,
                     "key_phrase": datum["Key Phrase"],
                     "phrase_type": datum["Phrase Type"],
+                    "response": "",
                 }
                 data.append(item)
 
@@ -587,15 +588,15 @@ class MMSafetyBench(ImageTextDataset):
             if forced_answer_true:
                 instruction=text.strip() + instruction_suffix
                 response=pos_completion
-                continue_final_message=True
+                continue_final_message=False
             else:
                 instruction=text.strip() + instruction_suffix
                 response=neg_completion
-                continue_final_message=True
+                continue_final_message=False
 
         else:
             # ASK JAYNEEL: should the "instruction_suffix" be added when the answer is not forced?
-            # No
+            # JAYNEEL: No
             instruction = text.strip()
             response = ""
             continue_final_message = False

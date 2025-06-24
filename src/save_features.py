@@ -14,6 +14,7 @@ from helpers.utils import (clear_forward_hooks, clear_hooks_variables,
                            update_dict_of_list)
 from models import get_model_class
 from models.image_text_model import ImageTextModel
+import gc, psutil
 
 
 @torch.no_grad()
@@ -44,7 +45,8 @@ def inference(
                                                                                    forced_answer_true=args.forced_answer_true,
                                                                                    descriptive_answer=args.descriptive_answer,
                                                                                    scenario=scenario,)
-                                
+        
+        args.generation_mode = False
         inputs = model_class.preprocessor(
             instruction=instruction_,
             image_file=image_path,
@@ -53,6 +55,7 @@ def inference(
             continue_final_message=continue_final_message_,
         )
 
+        print (i, inputs['input_ids'][:, -30:])
 
         if args.generation_mode:
             out = model.generate(
@@ -61,16 +64,16 @@ def inference(
         else:
             out = model(**inputs).logits
 
-        item["model_output"] = out
+        #item["model_output"] = out
         input_len = (
             inputs["input_ids"].shape[1]
             if inputs["input_ids"].ndim > 1
             else inputs["input_ids"].shape[0]
         )
-        item["model_generated_output"] = out[:, input_len:]
-        item["model_predictions"] = model_class.get_tokenizer().batch_decode(
-            out[:, input_len:], skip_special_tokens=True
-        )
+        #item["model_generated_output"] = out[:, input_len:]
+        #item["model_predictions"] = model_class.get_tokenizer().batch_decode(
+        #    out[:, input_len:], skip_special_tokens=True
+        #)
 
         encoded_response = model_class.get_tokenizer()(response_, add_special_tokens=False)
         item["end_of_raw_input_index"] = input_len-len(encoded_response["input_ids"])-1
@@ -91,6 +94,7 @@ def inference(
             logger.info(
                 f"Iteration: {i}/{num_iterations},  Estimated time left: {time_left:.2f} mins"
             )
+            print ("A print message before forward pass, Memory available:", psutil.virtual_memory().available)
     return hook_data
 
 
