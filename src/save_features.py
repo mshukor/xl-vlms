@@ -55,7 +55,7 @@ def inference(
             continue_final_message=continue_final_message_,
         )
 
-        #logger.info (f"Last 30 input token ids: Iteration: {i}, {inputs['input_ids'][:, -30:]}")
+        #logger.info (f"Last 30 input token ids: Iteration: {i}, {inputs['input_ids'][:, -50:]}")
         #logger.info (f"Logging message for Memory available: Iteration: {i}, Memory: {psutil.virtual_memory().available}")
 
         if args.generation_mode:

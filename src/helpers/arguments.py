@@ -13,7 +13,7 @@ def get_arguments():
     parser = argparse.ArgumentParser(description="XL-VLMs arguments parser")
 
     # General
-    parser.add_argument("--seed", type=int, default=0, help="Global seed.")
+    parser.add_argument("--seed", type=int, default=21, help="Global seed.")
 
     # Model
     parser.add_argument(

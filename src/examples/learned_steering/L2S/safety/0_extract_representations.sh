@@ -52,33 +52,33 @@ done
 
 
 
-for split in multi; do
+# for split in multi; do
 
-    for i in 15; do
+#     for i in 15; do
 
-        modules_to_hook="model.layers.${i}"
-        modules_to_hook="language_model.model.layers.${i}"
-        save_filename="${model}_${dataset_name}_features_neg_answers_${i}_${split}_all_train_${dataset_size}"
+#         modules_to_hook="model.layers.${i}"
+#         modules_to_hook="language_model.model.layers.${i}"
+#         save_filename="${model}_${dataset_name}_features_neg_answers_${i}_${split}_all_train_${dataset_size}"
 
 
-        python src/save_features.py \
-            --model_name_or_path $model_name_or_path \
-            --data_dir $data_dir \
-            --dataset_name $dataset_name \
-            --dataset_size $dataset_size \
-            --split $split \
-            --save_dir $save_dir \
-            --max_new_tokens $max_new_tokens \
-            --hook_names $hook_names \
-            --modules_to_hook $modules_to_hook \
-            --generation_mode \
-            --save_filename ${save_filename} \
-            --local_files_only \
-            --force_answer \
-            --exact_match_modules_to_hook \
-            --end_special_tokens "</s>"
-    done
-done
+#         python src/save_features.py \
+#             --model_name_or_path $model_name_or_path \
+#             --data_dir $data_dir \
+#             --dataset_name $dataset_name \
+#             --dataset_size $dataset_size \
+#             --split $split \
+#             --save_dir $save_dir \
+#             --max_new_tokens $max_new_tokens \
+#             --hook_names $hook_names \
+#             --modules_to_hook $modules_to_hook \
+#             --generation_mode \
+#             --save_filename ${save_filename} \
+#             --local_files_only \
+#             --force_answer \
+#             --exact_match_modules_to_hook \
+#             --end_special_tokens "</s>"
+#     done
+# done
 
 
 
