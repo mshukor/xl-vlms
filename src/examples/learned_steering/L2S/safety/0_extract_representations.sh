@@ -45,7 +45,6 @@ for split in multi; do
             --max_new_tokens $max_new_tokens \
             --hook_names $hook_names \
             --modules_to_hook $modules_to_hook \
-            --generation_mode \
             --save_filename ${save_pos_filename} \
             --local_files_only \
             --force_answer \
@@ -63,7 +62,6 @@ for split in multi; do
             --max_new_tokens $max_new_tokens \
             --hook_names $hook_names \
             --modules_to_hook $modules_to_hook \
-            --generation_mode \
             --save_filename ${save_neg_filename} \
             --local_files_only \
             --force_answer \
@@ -80,7 +78,6 @@ for split in multi; do
             --max_new_tokens $max_new_tokens \
             --hook_names $hook_names \
             --modules_to_hook $modules_to_hook \
-            --generation_mode \
             --save_filename ${save_cxt_filename} \
             --local_files_only \
             --exact_match_modules_to_hook \

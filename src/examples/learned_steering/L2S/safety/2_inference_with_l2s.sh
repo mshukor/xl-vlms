@@ -3,7 +3,7 @@ model=llava
 
 YOUR_DATA_DIR=/data/khayatan/datasets/POPE/test
 YOUR_SAVE_DIR=/data/khayatan/Hallucination/POPE/hallucination
-STEER_MODEL_NAME=/home/khayatan/bias_discovery/train_steering/best_model_5e-05_1_0.0001_last_input_average_100_14_llava_1200_0.8.pt
+STEER_MODEL_NAME=/home/parekh/id_steering/mmsb_steering_nets/steering_net_v3_multi_nobias_K100.pt
 
 
 data_dir=${YOUR_DATA_DIR}

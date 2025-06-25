@@ -10,19 +10,19 @@ data_dir=${YOUR_DATA_DIR}
 save_dir=${YOUR_SAVE_DIR}
 
 
-dataset_name=pope_test
+dataset_name=mmsb
 dataset_size=-1
-max_new_tokens=128
+max_new_tokens=200
 steering_alpha=1
 hook_names=("shift_hidden_states_learned_steer" "captioning_metrics")
 
 
 
-for subset in adversarial popular random; do
+for split in multi; do
 
-    for steering_alpha in 1; do
+    for steering_alpha in {2.0,2.2,2.5,3.0}; do
 
-        for i in 14; do
+        for i in 15; do
             shift_vector_path=${STEER_MODEL_NAME}
             save_filename="${model}_${dataset_name}_steer_${i}_yes_no_${subset}_${steering_alpha}_${STEER_MODEL_NAME}"
             modules_to_hook="language_model.model.layers.${i}"

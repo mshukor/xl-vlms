@@ -46,7 +46,6 @@ def inference(
                                                                                    descriptive_answer=args.descriptive_answer,
                                                                                    scenario=scenario,)
         
-        args.generation_mode = False
         inputs = model_class.preprocessor(
             instruction=instruction_,
             image_file=image_path,
