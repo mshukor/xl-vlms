@@ -34,39 +34,39 @@ for split in multi; do
         # Second command computes negative answer representations
         # Third command computes input context representations
 
-        python src/save_features.py \
-            --model_name_or_path $model_name_or_path \
-            --data_dir $data_dir \
-            --dataset_name $dataset_name \
-            --split $split \
-            --annotation_file annotations.json \
-            --dataset_size $dataset_size \
-            --save_dir $save_dir \
-            --max_new_tokens $max_new_tokens \
-            --hook_names $hook_names \
-            --modules_to_hook $modules_to_hook \
-            --save_filename ${save_pos_filename} \
-            --local_files_only \
-            --force_answer \
-            --forced_answer_true \
-            --exact_match_modules_to_hook \
-            --end_special_tokens "</s>"
+        # python src/save_features.py \
+        #     --model_name_or_path $model_name_or_path \
+        #     --data_dir $data_dir \
+        #     --dataset_name $dataset_name \
+        #     --split $split \
+        #     --annotation_file annotations.json \
+        #     --dataset_size $dataset_size \
+        #     --save_dir $save_dir \
+        #     --max_new_tokens $max_new_tokens \
+        #     --hook_names $hook_names \
+        #     --modules_to_hook $modules_to_hook \
+        #     --save_filename ${save_pos_filename} \
+        #     --local_files_only \
+        #     --force_answer \
+        #     --forced_answer_true \
+        #     --exact_match_modules_to_hook \
+        #     --end_special_tokens "</s>"
         
-        python src/save_features.py \
-            --model_name_or_path $model_name_or_path \
-            --data_dir $data_dir \
-            --dataset_name $dataset_name \
-            --dataset_size $dataset_size \
-            --split $split \
-            --save_dir $save_dir \
-            --max_new_tokens $max_new_tokens \
-            --hook_names $hook_names \
-            --modules_to_hook $modules_to_hook \
-            --save_filename ${save_neg_filename} \
-            --local_files_only \
-            --force_answer \
-            --exact_match_modules_to_hook \
-            --end_special_tokens "</s>"
+        # python src/save_features.py \
+        #     --model_name_or_path $model_name_or_path \
+        #     --data_dir $data_dir \
+        #     --dataset_name $dataset_name \
+        #     --dataset_size $dataset_size \
+        #     --split $split \
+        #     --save_dir $save_dir \
+        #     --max_new_tokens $max_new_tokens \
+        #     --hook_names $hook_names \
+        #     --modules_to_hook $modules_to_hook \
+        #     --save_filename ${save_neg_filename} \
+        #     --local_files_only \
+        #     --force_answer \
+        #     --exact_match_modules_to_hook \
+        #     --end_special_tokens "</s>"
         
         python src/save_features.py \
             --model_name_or_path $model_name_or_path \

@@ -96,17 +96,29 @@ def get_start_idx_generated_tokens(tokens: List[torch.Tensor]) -> int:
 
 
 class SteeringNet(nn.Module):
-    def __init__(self, input_size, output_size, hidden_size=10):
+    def __init__(self, input_size, output_size, hidden_size=10, use_output_bias=False):
         super().__init__()
         self.hidden_size = hidden_size
         self.encoder = nn.Linear(input_size, hidden_size, bias=True)
-        self.decoder = nn.Linear(hidden_size, output_size, bias=False)
+        self.decoder = nn.Linear(hidden_size, output_size, bias=use_output_bias)
         self.activ = nn.Tanh()
         
     def forward(self, inp):
         embed = self.activ(self.encoder(inp))
         shift = self.decoder(embed)
         return shift, embed
+
+def load_steering_model(model_path: str="", hidden_size=100, input_output_size=4096):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    input_size, output_size = input_output_size, input_output_size
+    model_steering = SteeringNet(input_size=input_size, output_size=output_size, hidden_size=hidden_size).to(device)
+    try:
+        model_steering.load_state_dict(torch.load(model_path))
+    except:
+        model_steering.load_state_dict(torch.load(model_path)['steering_model'])
+    model_steering.eval()
+    return model_steering
+
 
 def save_hidden_states(module_name: str = "", **kwargs: Any):
     """
@@ -172,13 +184,12 @@ def apply_learned_steering_vector_steer(
 ) -> torch.Tensor:
     global PREDICTED_STEER
     
-    
     if x.shape[1] > 1:
         
         last_input_tokens = x[:,-1,:]
         last_input_tokens = last_input_tokens.to(dtype=torch.float16)
 
-        PREDICTED_STEER = model(last_input_tokens)[0]
+        #PREDICTED_STEER = model(last_input_tokens)[0]
         vector = PREDICTED_STEER
 
         if only_generated_tokens:
@@ -195,6 +206,20 @@ def apply_learned_steering_vector_steer(
     x = x + alpha * vector.to(x.device).to(x.dtype)
 
     return x
+
+def set_steering_vector(vector: torch.Tensor = None):
+    global PREDICTED_STEER
+    PREDICTED_STEER = vector
+
+def load_steering_vectors(args, mmsb_multi_normalize=False):
+    diff_gt_dict = torch.load(args.steer_features_path)[args.module_to_steer]
+    diff_gt = diff_gt_dict['pos_repr'] - diff_gt_dict['neg_repr']
+    if mmsb_multi_normalize:
+        coeff1 = torch.norm(diff_gt[:1125], dim=1).mean() / torch.norm(diff_gt[1125:1422], dim=1).mean()
+        coeff2 = torch.norm(diff_gt[:1125], dim=1).mean() / torch.norm(diff_gt[1422:1531], dim=1).mean()
+        diff_gt[1125:1422] = coeff1*diff_gt[1125:1422]
+        diff_gt[1422:1531] = coeff2*diff_gt[1422:1531]
+    return diff_gt
 
 
 def shift_hidden_states(
@@ -635,7 +660,10 @@ def register_hooks(
             input_size, output_size, hidden_size = model.config.text_config.max_position_embeddings, model.config.text_config.max_position_embeddings, args.hidden_size
             model_steering = SteeringNet(input_size=input_size, output_size=output_size, hidden_size=hidden_size).to(device)
 
-            model_steering.load_state_dict(torch.load(args.shift_vector_path[0]))
+            try:
+                model_steering.load_state_dict(torch.load(args.shift_vector_path[0]))
+            except:
+                model_steering.load_state_dict(torch.load(args.shift_vector_path[0])['steering_model'])
             dtype = next(model.parameters()).dtype
             model_steering = model_steering.to(dtype)
 
@@ -737,6 +765,7 @@ def setup_hooks(
                 logger=logger,
                 args=args,
             )
+            logger.info(f"Hook name: {hook_name}, hooked module: {modules_to_hook_}")
         else:
             hook_return_function = None
         hook_postprocessing_function = hooks_postprocessing(

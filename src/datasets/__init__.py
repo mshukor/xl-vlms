@@ -39,7 +39,7 @@ def get_dataset_loader(
         dataset_cls = POPE_test_Dataset
     elif dataset_name == "pope_train":
         dataset_cls = POPE_train_Dataset
-    elif dataset_name == "mmsb":
+    elif "mmsb" in dataset_name:
         dataset_cls = MMSafetyBench
     else:
         raise NotImplementedError(f"{dataset_name} is not implemented.")
