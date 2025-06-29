@@ -28,7 +28,6 @@ for split in multi; do
         modules_to_hook="language_model.model.layers.${i}"
         save_pos_filename="${model}_${dataset_name}_features_pos_answers_${i}_${split}_all_${dataset_size}"
         save_neg_filename="${model}_${dataset_name}_features_neg_answers_${i}_${split}_all_${dataset_size}"
-        save_cxt_filename="${model}_${dataset_name}_features_context_${i}_${split}_all_${dataset_size}"
 
         # First command computes positive answer representations
         # Second command computes negative answer representations
@@ -67,7 +66,14 @@ for split in multi; do
         #     --force_answer \
         #     --exact_match_modules_to_hook \
         #     --end_special_tokens "</s>"
-        
+    done
+
+
+    for i in 30; do
+
+        modules_to_hook="language_model.model.layers.${i}"
+        save_cxt_filename="${model}_${dataset_name}_features_context_${i}_${split}_all_${dataset_size}"
+
         python src/save_features.py \
             --model_name_or_path $model_name_or_path \
             --data_dir $data_dir \

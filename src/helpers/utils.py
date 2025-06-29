@@ -211,16 +211,6 @@ def set_steering_vector(vector: torch.Tensor = None):
     global PREDICTED_STEER
     PREDICTED_STEER = vector
 
-def load_steering_vectors(args, mmsb_multi_normalize=False):
-    diff_gt_dict = torch.load(args.steer_features_path)[args.module_to_steer]
-    diff_gt = diff_gt_dict['pos_repr'] - diff_gt_dict['neg_repr']
-    if mmsb_multi_normalize:
-        coeff1 = torch.norm(diff_gt[:1125], dim=1).mean() / torch.norm(diff_gt[1125:1422], dim=1).mean()
-        coeff2 = torch.norm(diff_gt[:1125], dim=1).mean() / torch.norm(diff_gt[1422:1531], dim=1).mean()
-        diff_gt[1125:1422] = coeff1*diff_gt[1125:1422]
-        diff_gt[1422:1531] = coeff2*diff_gt[1422:1531]
-    return diff_gt
-
 
 def shift_hidden_states(
     vector: torch.Tensor = None,

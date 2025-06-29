@@ -8,7 +8,8 @@ features_dir=/home/parekh/id_steering/test_code/features
 shift_type=last_input
 save_dir=/home/parekh/id_steering/test_code/
 
-analysis_name=learnable_steering
+analysis_name=learnable_steering_train
+dataset_name=mmsb
 
 
 for split in multi; do
@@ -20,15 +21,17 @@ for split in multi; do
         cxt_features_name=save_hidden_states_for_l2s_llava_mmsb_features_context_30_multi_all_-1.pth
 
 
-        modules_to_hook="language_model.model.layers.${i}"
+        modules_to_hook="language_model.model.layers.${i};language_model.model.layers.30"
         save_filename=${split}_mmsb_train_-1
 
 
         python src/analyse_features.py \
             --model_name_or_path $model_name_or_path \
+            --dataset_name $dataset_name \
             --save_dir $save_dir \
+            --split $split \
             --analysis_name $analysis_name \
-            --modules_to_hook $modules_to_hook \
+            --modules_to_hook "$modules_to_hook" \
             --save_filename ${save_filename} \
             --local_files_only \
             --shift_type $shift_type \

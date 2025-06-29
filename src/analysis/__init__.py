@@ -186,13 +186,20 @@ def analyse_features(
 
         pos_path = [p for p in args.features_path if "pos" in p][0]
         neg_path = [p for p in args.features_path if "neg" in p][0]
+        cxt_path = [p for p in args.features_path if (not "neg" in p) and (not "pos" in p)]
+        if len(cxt_path) > 0:
+            cxt_path = cxt_path[0]
+        else:
+            cxt_path = pos_path
 
         model_name_str = model_name(args.model_name_or_path)
 
         learnable_steering = LearnableSteering(
             pos_path=pos_path,
             neg_path=neg_path,
+            cxt_path=cxt_path,
             module=args.modules_to_hook[0][0],
+            input_module=args.modules_to_hook[1][0],
             shift_type=args.shift_type,
             save_dir=args.save_dir,
             save_name=args.save_filename,
@@ -204,7 +211,7 @@ def analyse_features(
 
         learnable_steering.compute_contrastive_vectors()
 
-        if "train" in pos_path:
+        if "train" in pos_path or "train" in analysis_name:
             with torch.enable_grad():
                 learnable_steering.train_model()
 
