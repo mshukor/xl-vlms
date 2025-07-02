@@ -127,7 +127,7 @@ If you find this repo useful, you can cite our works as follows:
 ```bibtex
 @article{khayatan2025analyzing,
   title={Analyzing Fine-tuning Representation Shift for Multimodal LLMs Steering alignment},
-  author={Khayatan, Pegah and Shukor, Mustafa and Parekh, Jayneel and Cord, Matthieu},
+  author={Khayatan, Pegah and Shukor, Mustafa and Parekh, Jayneel and Dapogny, Arnaud and Cord, Matthieu},
   journal={arXiv preprint arXiv:2501.03012},
   year={2025}
 }
