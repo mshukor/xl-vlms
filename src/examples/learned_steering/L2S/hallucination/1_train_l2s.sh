@@ -1,7 +1,16 @@
 model_name_or_path=llava-hf/llava-1.5-7b-hf
 model=llava
+YOUR_DATA_DIR=/data/khayatan/datasets/POPE/train
+YOUR_SAVE_DIR=/data/khayatan/Hallucination/POPE/hallucination
+YOUR_SHIFTS_PATH="/data/khayatan/Hallucination/POPE/hallucination/shift_vectors/llava_${i}_average_${subset}_train_all.pth"
 
 
+data_dir=${YOUR_DATA_DIR}
+save_dir=${YOUR_SAVE_DIR}
+
+
+dataset_name=pope_train
+dataset_size=-1
 
 features_dir=/data/khayatan/Hallucination/POPE/hallucination/features
 
@@ -11,7 +20,7 @@ save_dir=/data/khayatan/Hallucination/POPE/hallucination/shift_vectors
 analysis_name=learnable_steering
 
 
-for split in adversarial; do
+for split in adversarial popular random; do
 
     for i in 14; do
 
@@ -35,4 +44,3 @@ for split in adversarial; do
     done
 done
 
-# popular random

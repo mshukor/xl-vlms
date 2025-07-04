@@ -11,7 +11,7 @@ save_dir=/data/khayatan/Hallucination/POPE/hallucination/shift_vectors
 analysis_name=learnable_steering
 
 
-for split in adversarial; do
+for split in adversarial popular random; do
 
     for i in 14; do
 
@@ -35,4 +35,3 @@ for split in adversarial; do
     done
 done
 
-# popular random

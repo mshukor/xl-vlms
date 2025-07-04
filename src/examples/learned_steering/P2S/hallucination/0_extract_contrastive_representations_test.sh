@@ -17,7 +17,7 @@ max_new_tokens=100
 hook_names=("save_hidden_states_for_l2s")
 
 
-for split in adversarial; do
+for split in adversarial popular random; do
 
     for i in 14; do
 
@@ -50,7 +50,7 @@ done
 
 
 
-for split in adversarial; do
+for split in adversarial popular random; do
 
     for i in 14; do
 
@@ -80,4 +80,3 @@ done
 
 
 
-# popular random

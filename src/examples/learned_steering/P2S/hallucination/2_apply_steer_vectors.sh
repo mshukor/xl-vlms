@@ -10,6 +10,8 @@ data_dir=${YOUR_DATA_DIR}
 save_dir=${YOUR_SAVE_DIR}
 
 
+# should figure out two separate evaluations: one for p2s and one for mean
+
 dataset_name=pope_test
 dataset_size=-1
 max_new_tokens=100

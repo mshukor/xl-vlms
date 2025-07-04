@@ -4,6 +4,7 @@ model=llava
 YOUR_DATA_DIR=/home/parekh/MM-SafetyBench/data/
 YOUR_SAVE_DIR=/home/parekh/id_steering/test_code/
 STEER_MODEL_NAME=/home/parekh/id_steering/mmsb_steering_nets/steering_net_v3_multi_nobias_K100.pt
+steer_model_base=$(basename "$STEER_MODEL_NAME" .pt)
 
 
 data_dir=${YOUR_DATA_DIR}
@@ -23,7 +24,7 @@ for split in multi; do
 
         for i in 15; do
             shift_vector_path=${STEER_MODEL_NAME}
-            save_filename="${model}_${dataset_name}_steer_${i}_${split}_${steering_alpha}_${STEER_MODEL_NAME}"
+            save_filename="${model}_${dataset_name}_steer_${i}_${split}_${steering_alpha}_${steer_model_base}"
             modules_to_hook="language_model.model.layers.30;language_model.model.layers.${i}"
 
             python src/save_features.py \

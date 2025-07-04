@@ -61,10 +61,11 @@ class SteeringDataset(Dataset):
     def _prepare_dataloaders(self):
         total_size = len(self)
 
-        if self.dataset_name == "pope":
-            train_ratio = 1100 / 1200
+        if "pope" in self.dataset_name:
+            train_ratio, seed = 1100 / 1200, 2
             train_size = int(total_size * train_ratio)
             indices = list(range(total_size))
+            np.random.seed(seed) # the indices are already shuffled in pope_train (the results might be a bit different in this implementation, since in the original one we apply shuffling after extracting validation indices, to make sure to have same proportion of + and - in both train and validation.)
             self.train_indices = indices[:train_size]
             self.val_indices = indices[train_size:]
         elif "mmsb" in self.dataset_name:
@@ -168,7 +169,7 @@ class LearnableSteering:
 
         dataset_name = None
         if "pope" in self.pos_path:
-            dataset_name = "pope"
+            dataset_name = "pope_train"
         elif "mmsb" in self.args.dataset_name:
             dataset_name = "mmsb"
         else:
