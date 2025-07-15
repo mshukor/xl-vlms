@@ -76,6 +76,7 @@ class ImageTextModel:
         image_file: str = None,
         response: str = "",
         generation_mode: bool = False,
+        continue_final_message: bool = False,
         **kwargs: Any,
     ) -> Dict[str, Any]:
 
@@ -96,6 +97,7 @@ class ImageTextModel:
         image_file: str = "",
         response: str = "",
         generation_mode: bool = False,
+        continue_final_message: bool = False,
         **kwargs: Any,
     ):
         preprocessor = self.get_preprocessor()
@@ -105,6 +107,7 @@ class ImageTextModel:
                 image_file=image_file,
                 response=response,
                 generation_mode=generation_mode,
+                continue_final_message=continue_final_message,
             )
             .to(self.get_model().device)
             .to(self.get_model().dtype)

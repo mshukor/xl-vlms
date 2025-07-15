@@ -9,6 +9,7 @@ from analysis.cluster_analysis import analyse_clusters
 from analysis.feature_decomposition import (decompose_and_ground_activations,
                                             get_feature_matrix)
 from analysis.model_steering import get_steering_vector
+from analysis.learnable_model_steering import LearnableSteering
 from analysis.utils import (get_matched_token_of_interest_mask,
                             get_token_of_interest_features)
 
@@ -21,13 +22,23 @@ SUPPORTED_ANALYSIS = [
 ]
 
 
+
+def model_name(
+    model_name_or_path: str = None,
+) -> str:
+    if model_name_or_path=="llava-hf/llava-1.5-7b-hf":
+        return "llava"
+    else:
+        NotImplementedError
+
+
 def load_features(
     features_path: Union[str, List[str]],
     logger: Callable = None,
     feature_key: str = "hidden_states",
     args: argparse.Namespace = None,
     keep_only_token_of_interest: bool = True,
-) -> List[Dict[str, Any]]:  #
+) -> List[Dict[str, Any]]:
 
     if isinstance(features_path, str):
         features_path = [features_path]
@@ -66,6 +77,37 @@ def load_features(
     return features, meta_data
 
 
+def load_features_helper(
+    logger: Callable = None,
+    args: argparse.Namespace = None,
+) -> Any:
+    
+    if args.features_path is not None:
+        features, metadata = load_features(
+            features_path=args.features_path,
+            logger=logger,
+            args=args,
+        )
+    else:
+        assert (args.origin_model_feature_path is not None) and (
+            args.dest_model_feature_path is not None
+        ), "features_path and base_features_key should be provided when analyzing features from a single model"
+
+        features, metadata = load_features(
+            features_path=[
+                args.origin_model_feature_path,
+                args.dest_model_feature_path,
+            ],
+            args=args,
+        )
+    
+
+    return features, metadata
+
+
+
+    
+
 def load_analysis(
     analysis_path: str,
     logger: Callable = None,
@@ -96,28 +138,13 @@ def analyse_features(
     **kwargs: Any,
 ) -> None:
 
-    if args.features_path is not None:
-        features, metadata = load_features(
-            features_path=args.features_path,
-            logger=logger,
-            args=args,
-        )
-    else:
-        assert (args.origin_model_feature_path is not None) and (
-            args.dest_model_feature_path is not None
-        ), "features_path and base_features_key should be provided when analyzing features from a single model"
-
-        features, metadatas = load_features(
-            features_path=[
-                args.origin_model_feature_path,
-                args.dest_model_feature_path,
-            ],
-            args=args,
-        )
-
+    
     num_concepts = [int(n) for n in args.num_concepts] if args.num_concepts else None
     results_dict = {}
     if "decompose_activations" in analysis_name:
+
+        features, metadata = load_features_helper(logger=logger, args=args)
+
         results_dict = decompose_and_ground_activations(
             features,
             metadata,
@@ -127,6 +154,9 @@ def analyse_features(
             args=args,
         )
     elif "concept_dictionary_evaluation" in analysis_name:
+
+        features, metadata = load_features_helper(logger=logger, args=args)
+
         results_dict = metrics.concept_dictionary_evaluation(
             metric_name=analysis_name,
             features=features,
@@ -138,6 +168,9 @@ def analyse_features(
             device=device,
         )
     elif "steering_vector" in analysis_name:
+
+        features, metadata = load_features_helper(logger=logger, args=args)
+
         get_steering_vector(
             features=features,
             steering_method=args.steering_method,
@@ -149,7 +182,43 @@ def analyse_features(
             args=args,
         )
 
+    elif "learnable_steering" in analysis_name:
+
+        pos_path = [p for p in args.features_path if "pos" in p][0]
+        neg_path = [p for p in args.features_path if "neg" in p][0]
+        cxt_path = [p for p in args.features_path if (not "neg" in p) and (not "pos" in p)]
+        if len(cxt_path) > 0:
+            cxt_path = cxt_path[0]
+        else:
+            cxt_path = pos_path
+
+        model_name_str = model_name(args.model_name_or_path)
+
+        learnable_steering = LearnableSteering(
+            pos_path=pos_path,
+            neg_path=neg_path,
+            cxt_path=cxt_path,
+            module=args.modules_to_hook[0][0],
+            input_module=args.modules_to_hook[1][0],
+            shift_type=args.shift_type,
+            save_dir=args.save_dir,
+            save_name=args.save_filename,
+            model_name=model_name_str,
+            model_class=model_class,
+            args=args,
+            logger=logger,
+        )
+
+        learnable_steering.compute_contrastive_vectors()
+
+        if "train" in pos_path or "train" in analysis_name:
+            with torch.enable_grad():
+                learnable_steering.train_model()
+
+
     elif "analyse_clusters" in analysis_name:
+
+        features, metadata = load_features_helper(logger=logger, args=args)
 
         # Load analysis data for origin model if the path is provided, else pass None
         if args.origin_model_analysis_path:
@@ -168,7 +237,7 @@ def analyse_features(
 
         analyse_clusters(
             features=features,
-            metadatas=metadatas,
+            metadatas=metadata,
             analysis_data_original=analysis_data_original,
             model_class=model_class,
             analysis_name=analysis_name,

@@ -2,9 +2,10 @@ import argparse
 import pickle
 from typing import Any, Callable, Tuple
 
-from torch.utils.data import DataLoader, Subset
+from torch.utils.data import DataLoader, Subset, Dataset
 
-from datasets.image_text_dataset import COCODataset, VQAv2Dataset
+from datasets.image_text_dataset import (COCODataset, VQAv2Dataset,
+                                         POPE_test_Dataset, POPE_train_Dataset, MMSafetyBench)
 
 __all__ = ["get_dataset_loader"]
 
@@ -14,7 +15,7 @@ def get_dataset_loader(
     args: argparse.Namespace = None,
     logger: Callable = None,
     **kwargs: Any,
-) -> Tuple[Callable, list]:
+) -> Tuple[DataLoader, Dataset]:
     """
     General function to return a DataLoader for a given dataset.
 
@@ -26,7 +27,6 @@ def get_dataset_loader(
 
     Returns:
         loader (DataLoader): The DataLoader object for the (subset of) dataset.
-        indices (list): The indices of the subset (if applicable) or an empty list.
     """
 
     batch_size = getattr(args, "batch_size", 1)
@@ -35,6 +35,12 @@ def get_dataset_loader(
         dataset_cls = COCODataset
     elif dataset_name == "vqav2":
         dataset_cls = VQAv2Dataset
+    elif dataset_name == "pope_test":
+        dataset_cls = POPE_test_Dataset
+    elif dataset_name == "pope_train":
+        dataset_cls = POPE_train_Dataset
+    elif "mmsb" in dataset_name:
+        dataset_cls = MMSafetyBench
     else:
         raise NotImplementedError(f"{dataset_name} is not implemented.")
 
@@ -52,6 +58,7 @@ def get_dataset_loader(
     )
 
     loader = None
+    final_dataset = None
     token_of_interest_indices = []
 
     if logger is not None:
@@ -74,6 +81,7 @@ def get_dataset_loader(
             num_workers=4,
             pin_memory=True,
         )
+        final_dataset = dataset_subset
     elif args.select_samples_from_ids:
 
         assert (
@@ -92,6 +100,7 @@ def get_dataset_loader(
             num_workers=4,
             pin_memory=True,
         )
+        final_dataset = dataset_subset
     else:
         loader = DataLoader(
             dataset,
@@ -100,8 +109,11 @@ def get_dataset_loader(
             num_workers=4,
             pin_memory=True,
         )
+        final_dataset = dataset
+
+        
     if logger is not None:
         logger.info(f"Reading dataset: {dataset_name} of size: {len(loader)}")
     assert len(loader) > 0, f"loader is empty"
 
-    return loader
+    return loader, final_dataset
