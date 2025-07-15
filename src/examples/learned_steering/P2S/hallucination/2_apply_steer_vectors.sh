@@ -3,8 +3,6 @@ model=llava
 
 YOUR_DATA_DIR=/data/khayatan/datasets/POPE/test
 YOUR_SAVE_DIR=/data/khayatan/Hallucination/POPE/hallucination
-YOUR_SHIFTS_PATH="/data/khayatan/Hallucination/POPE/hallucination/shift_vectors/llava_${i}_average_${subset}_test_all.pth"
-
 
 data_dir=${YOUR_DATA_DIR}
 save_dir=${YOUR_SAVE_DIR}
@@ -14,9 +12,9 @@ save_dir=${YOUR_SAVE_DIR}
 
 dataset_name=pope_test
 dataset_size=-1
-max_new_tokens=100
+max_new_tokens=128
 steering_alpha=1
-hook_names=("shift_hidden_states_add" "captioning_metrics")
+hook_names=("shift_hidden_states_add" "hallucination_metrics")
 shift_vector_key=steering_vector
 
 
@@ -25,7 +23,7 @@ for subset in adversarial popular random; do
     for steering_alpha in 1; do
 
         for i in 14; do
-            shift_vector_path=/data/khayatan/Hallucination/POPE/hallucination/shift_vectors/llava_${i}_average_${subset}_test_all.pth
+            shift_vector_path=/data/khayatan/Hallucination/POPE/hallucination/shift_vectors/llava_${i}_average_${subset}_${dataset_name}_${dataset_size}.pth
             save_filename="${model}_${dataset_name}_steer_${i}_yes_no_${subset}_${steering_alpha}_p2s"
             modules_to_hook="language_model.model.layers.${i}"
 
@@ -41,13 +39,26 @@ for subset in adversarial popular random; do
                 --modules_to_hook $modules_to_hook \
                 --generation_mode \
                 --save_filename $save_filename \
+                --save_predictions \
                 --local_files_only \
                 --exact_match_modules_to_hook \
                 --shift_vector_path $shift_vector_path \
                 --shift_vector_key $shift_vector_key \
                 --steering_alpha $steering_alpha \
                 --individual_shift \
-                --max_new_tokens $max_new_tokens
+                --max_new_tokens $max_new_tokens \
+                --seed 0
         done
     done
 done
+
+
+
+
+
+"""
+Saving data to: 
+/data/khayatan/Hallucination/POPE/hallucination/hallucination_metrics_llava_pope_test_steer_14_yes_no_random_1_p2s.json
+Saving 643 predictions to: 
+/data/khayatan/Hallucination/POPE/hallucination/hallucination_metrics_llava_pope_test_steer_14_yes_no_random_1_p2s_model_prediction.json
+"""

@@ -14,7 +14,7 @@ dataset_name=pope_test
 dataset_size=-1
 
 max_new_tokens=100
-hook_names=("captioning_metrics")
+hook_names=("hallucination_metrics")
 
 
 
@@ -32,9 +32,17 @@ for split in adversarial popular random; do
         --hook_names $hook_names \
         --generation_mode \
         --save_filename ${save_filename} \
+        --save_predictions \
         --local_files_only \
-        --descriptive_answer \
-        --end_special_tokens "</s>"
+        --end_special_tokens "</s>" \
+        --seed 0
 done
 
 
+"""
+Saving data to: 
+/data/khayatan/Hallucination/POPE/hallucination/hallucination_metrics_llava_pope_test_eval_no_steer_random_-1.json
+Saving 643 predictions to: 
+/data/khayatan/Hallucination/POPE/hallucination/hallucination_metrics_llava_pope_test_eval_no_steer_random_-1_model_prediction.json
+
+"""

@@ -48,7 +48,8 @@ for split in all; do
             --force_answer \
             --forced_answer_true \
             --exact_match_modules_to_hook \
-            --end_special_tokens "</s>"
+            --end_special_tokens "</s>" \
+            --seed 0
     done
 done
 
@@ -78,7 +79,8 @@ for split in all; do
             --local_files_only \
             --force_answer \
             --exact_match_modules_to_hook \
-            --end_special_tokens "</s>"
+            --end_special_tokens "</s>" \
+            --seed 0
     done
 done
 

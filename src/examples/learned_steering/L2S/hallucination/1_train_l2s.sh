@@ -38,7 +38,8 @@ for split in all; do
             --save_filename ${save_filename} \
             --local_files_only \
             --shift_type $shift_type \
-            --features_path ${features_dir}/${pos_features_name} ${features_dir}/${neg_features_name}
+            --features_path ${features_dir}/${pos_features_name} ${features_dir}/${neg_features_name} \
+            --seed 0
     done
 done
 

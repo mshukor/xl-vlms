@@ -189,7 +189,7 @@ def apply_learned_steering_vector_steer(
         last_input_tokens = x[:,-1,:]
         last_input_tokens = last_input_tokens.to(dtype=torch.float16)
 
-        #PREDICTED_STEER = model(last_input_tokens)[0]
+        PREDICTED_STEER = model(last_input_tokens)[0]
         vector = PREDICTED_STEER
 
         if only_generated_tokens:
@@ -459,7 +459,8 @@ def get_hidden_states(
             end_of_input_index = kwargs["end_of_input_index"]
 
             # extracting the l2s inputs
-            inputs = {"last_raw_input": v[:, end_of_raw_input_index, :].clone()}
+            # inputs = {"last_raw_input": v[:, end_of_raw_input_index, :].clone()}
+            inputs = {"last_raw_input": v[:, end_of_raw_input_index+1, :].clone()}
 
             # extracting the l2s outputs
             average_tokens = torch.mean(v[:, end_of_raw_input_index+1:, :].clone(), dim=1).clone()
@@ -715,6 +716,12 @@ def hooks_postprocessing(
         hook_postprocessing_function = metrics.get_metric(
             metric_name="captioning_metrics", args=args
         )
+
+    elif "hallucination_metrics" in hook_name:
+        hook_postprocessing_function = metrics.get_metric(
+            metric_name="hallucination_metrics", args=args
+        )
+
     else:
         warnings.warn(f"{hook_name} is not supported. No hooks attached to model.")
 

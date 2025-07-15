@@ -205,12 +205,10 @@ def inference(
             if inputs["input_ids"].ndim > 1
             else inputs["input_ids"].shape[0]
         )
-        #logger.info (f"Last 30 input token ids: Iteration: {i}, {inputs['input_ids'][:, -30:]}")
-        #logger.info (f"Logging message for Memory available: Iteration: {i}, Memory: {psutil.virtual_memory().available}")        
-
+       
         if args.generation_mode:
             out = model.generate(
-                **inputs, max_new_tokens=args.max_new_tokens, do_sample=False
+                **inputs, max_new_tokens=args.max_new_tokens, do_sample=True
             )
             item["model_output"] = out # Don't use this for inference mode, consumes lot more memory then
             item["model_generated_output"] = out[:, input_len:]
@@ -224,8 +222,11 @@ def inference(
         encoded_response = model_class.get_tokenizer()(response_, add_special_tokens=False)
         item["end_of_raw_input_index"] = input_len-len(encoded_response["input_ids"])-1
         item["end_of_input_index"] = input_len-1
-        #item["end_of_input_index"] = input_len-1-extra_generation_tokens+1
 
+
+        # print(model_class.get_tokenizer().batch_decode(out[:, item["end_of_raw_input_index"]:], skip_special_tokens=True)) # [',']
+
+        # nehjkbd
 
         if hook_return_functions is not None:
             for func in hook_return_functions:
@@ -291,6 +292,7 @@ if __name__ == "__main__":
         clear_forward_hooks(model_class.model_)
 
     else:    
+
         hook_data = inference(
             loader=loader,
             dataset=dataset,

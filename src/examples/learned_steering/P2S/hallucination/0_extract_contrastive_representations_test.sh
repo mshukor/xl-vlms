@@ -43,8 +43,8 @@ for split in adversarial popular random; do
             --force_answer \
             --forced_answer_true \
             --exact_match_modules_to_hook \
-            --end_special_tokens "</s>"
-
+            --end_special_tokens "</s>" \
+            --seed 0
     done
 done
 
@@ -74,7 +74,8 @@ for split in adversarial popular random; do
             --local_files_only \
             --force_answer \
             --exact_match_modules_to_hook \
-            --end_special_tokens "</s>"
+            --end_special_tokens "</s>" \
+            --seed 0
     done
 done
 

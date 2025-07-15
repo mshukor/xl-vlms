@@ -15,11 +15,11 @@ for split in adversarial popular random; do
 
     for i in 14; do
 
-        pos_features_name=save_hidden_states_for_l2s_llava_pope_test_features_pos_answers_14_${split}_-1.pth
-        neg_features_name=save_hidden_states_for_l2s_llava_pope_test_features_neg_answers_14_${split}_-1.pth
+        pos_features_name=save_hidden_states_for_l2s_llava_pope_test_features_pos_answers_${i}_${split}_-1.pth
+        neg_features_name=save_hidden_states_for_l2s_llava_pope_test_features_neg_answers_${i}_${split}_-1.pth
 
 
-        modules_to_hook="language_model.model.layers.${i}"
+        modules_to_hook="language_model.model.layers.${i};language_model.model.layers.${i}"
         save_filename=${split}_pope_test_-1
 
 
@@ -31,7 +31,12 @@ for split in adversarial popular random; do
             --save_filename ${save_filename} \
             --local_files_only \
             --shift_type $shift_type \
-            --features_path ${features_dir}/${pos_features_name} ${features_dir}/${neg_features_name}
+            --features_path ${features_dir}/${pos_features_name} ${features_dir}/${neg_features_name} \
+            --seed 0
     done
 done
 
+"""
+Saving individual shift vectors in : 
+/data/khayatan/Hallucination/POPE/hallucination/shift_vectors/llava_14_average_random_pope_test_-1.pth
+"""
