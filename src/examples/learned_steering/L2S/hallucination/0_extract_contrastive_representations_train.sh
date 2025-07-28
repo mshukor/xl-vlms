@@ -115,45 +115,43 @@ max_new_tokens=100
 hook_names=("save_hidden_states_for_l2s")
 modules_to_hook=""
 
-# # individual splits of the pope dataset adversarial popular random
-# for split in all; do
+# individual splits of the pope dataset adversarial popular random
+for split in all; do
 
-#     # for i in 17; do
-#     for i in 27; do
+    for i in 17; do
 
-#         modules_to_hook="model.layers.${i}"
-#         save_filename="${model}_${dataset_name}_features_pos_answers_${i}_${split}_all_train_${dataset_size}"
+        modules_to_hook="model.layers.${i}"
+        save_filename="${model}_${dataset_name}_features_pos_answers_${i}_${split}_all_train_${dataset_size}"
 
 
-#         python src/save_features.py \
-#             --model_name_or_path $model_name_or_path \
-#             --cache_dir $cache_dir \
-#             --data_dir $data_dir \
-#             --dataset_name $dataset_name \
-#             --split $split \
-#             --annotation_file annotations.json \
-#             --dataset_size $dataset_size \
-#             --save_dir $save_dir \
-#             --max_new_tokens $max_new_tokens \
-#             --hook_names $hook_names \
-#             --modules_to_hook $modules_to_hook \
-#             --generation_mode \
-#             --save_filename ${save_filename} \
-#             --local_files_only \
-#             --force_answer \
-#             --forced_answer_true \
-#             --exact_match_modules_to_hook \
-#             --end_special_tokens "</s>" \
-#             --seed 0
-#     done
-# done
+        python src/save_features.py \
+            --model_name_or_path $model_name_or_path \
+            --cache_dir $cache_dir \
+            --data_dir $data_dir \
+            --dataset_name $dataset_name \
+            --split $split \
+            --annotation_file annotations.json \
+            --dataset_size $dataset_size \
+            --save_dir $save_dir \
+            --max_new_tokens $max_new_tokens \
+            --hook_names $hook_names \
+            --modules_to_hook $modules_to_hook \
+            --generation_mode \
+            --save_filename ${save_filename} \
+            --local_files_only \
+            --force_answer \
+            --forced_answer_true \
+            --exact_match_modules_to_hook \
+            --end_special_tokens "</s>" \
+            --seed 0
+    done
+done
 
 
 
 for split in all; do
 
-    # for i in 17; do
-    for i in 27; do
+    for i in 17; do
 
         modules_to_hook="model.layers.${i}"
         save_filename="${model}_${dataset_name}_features_neg_answers_${i}_${split}_all_train_${dataset_size}"

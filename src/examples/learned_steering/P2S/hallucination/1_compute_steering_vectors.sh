@@ -61,7 +61,6 @@ analysis_name=learnable_steering
 
 for split in adversarial popular random; do
 
-    # for i in 14; do
     for i in 17; do
 
         pos_features_name=save_hidden_states_for_l2s_qwen2vlinstruct_pope_test_features_pos_answers_${i}_${split}_-1.pth
@@ -85,7 +84,3 @@ for split in adversarial popular random; do
     done
 done
 
-"""
-Saving individual shift vectors in : 
-/data/khayatan/Hallucination/POPE/hallucination/shift_vectors/llava_14_average_random_pope_test_-1.pth
-"""

@@ -88,7 +88,6 @@ hook_names=("shift_hidden_states_add" "hallucination_metrics") # should add the 
 for split in adversarial popular random; do
 
 
-    # for i in 14; do
     for i in 17; do
         shift_vector_path=${STEERING_VECTORS}
         save_filename="${model}_${dataset_name}_steer_${i}_yes_no_${split}_${steering_alpha}_${steering_vectors_base_name}"

@@ -91,10 +91,8 @@ hook_names=("shift_hidden_states_learned_steer" "hallucination_metrics") # shoul
 
 
 
-# for split in adversarial popular random; do
-# for split in popular random; do
-# for split in random; do
-for split in adversarial popular; do
+for split in adversarial popular random; do
+
 
 
     # for i in 14; do

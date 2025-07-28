@@ -80,7 +80,6 @@ analysis_name=learnable_steering
 
 for split in all; do
 
-    # for i in 14; do
     for i in 17; do
         pos_features_name=save_hidden_states_for_l2s_${model}_pope_train_features_pos_answers_${i}_${split}_all_train_${dataset_size}.pth
         neg_features_name=save_hidden_states_for_l2s_${model}_pope_train_features_neg_answers_${i}_${split}_all_train_${dataset_size}.pth
