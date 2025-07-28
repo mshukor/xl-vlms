@@ -13,6 +13,7 @@ class QwenVL(ImageTextModel):
 
     def set_model(
         self,
+        cache_dir:str = None,
     ) -> None:
 
         self.model_ = Qwen2VLForConditionalGeneration.from_pretrained(
@@ -20,6 +21,7 @@ class QwenVL(ImageTextModel):
             torch_dtype=torch.float16,
             low_cpu_mem_usage=True,
             local_files_only=self.local_files_only,
+            cache_dir=cache_dir,
         )
 
     def get_language_model(
@@ -41,6 +43,7 @@ class QwenVL(ImageTextModel):
         self.processor_ = AutoProcessor.from_pretrained(
             self.processor_name,
             local_files_only=self.local_files_only,
+            cache_dir=self.cache_dir,
         )
         self.tokenizer_ = self.processor_.tokenizer
 
@@ -96,16 +99,21 @@ class QwenVL(ImageTextModel):
         )
         return conversation
 
+
     def preprocess_text(
         self,
         conversation,
         generation_mode: bool = False,
+        continue_final_message: bool = False,
         **kwargs: Any,
     ) -> str:
+        add_generation_prompt = generation_mode if not continue_final_message else False
+
 
         prompt = self.processor_.apply_chat_template(
             conversation,
-            add_generation_prompt=generation_mode,
+            add_generation_prompt=add_generation_prompt,
+            continue_final_message=continue_final_message,
             tokenize=False,
         )
 
@@ -127,6 +135,7 @@ class QwenVL(ImageTextModel):
         image_file: str = None,
         response: str = "",
         generation_mode: bool = False,
+        continue_final_message: bool = False,
         **kwargs: Any,
     ) -> Dict[str, Any]:
 
@@ -140,6 +149,7 @@ class QwenVL(ImageTextModel):
         text = self.preprocess_text(
             conversation,
             generation_mode=generation_mode,
+            continue_final_message=continue_final_message,
         )
 
         inputs = self.processor_(
@@ -151,3 +161,13 @@ class QwenVL(ImageTextModel):
         )
 
         return inputs
+
+
+
+    def get_hidden_size(
+        self,
+    ) -> Callable:
+
+        return self.model_.config.get_text_config().hidden_size    
+
+

@@ -22,6 +22,8 @@ def get_arguments():
         default="facebook/opt-125m",
         help="The path or name of the pre-trained model.",
     )
+    parser.add_argument("--cache_dir", type=str, help="Where to load the model from.")
+
 
     parser.add_argument(
         "--processor_name",
@@ -36,7 +38,6 @@ def get_arguments():
         default=False,
         help="Load HF models from local.",
     )
-    parser.add_argument("--cache_dir", type=str, help="Where to load the model from.")
 
     parser.add_argument(
         "--prompt_template",

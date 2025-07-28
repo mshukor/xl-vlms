@@ -168,7 +168,7 @@ def inference(
     loader: DataLoader,
     dataset: Dataset,
     model_class: ImageTextModel,
-    hook_return_function: Callable,
+    hook_return_functions: Callable,
     device: torch.device,
     logger: Callable = None,
     args: argparse.Namespace = None,
@@ -216,6 +216,12 @@ def inference(
                 out[:, input_len:], skip_special_tokens=True
             )
 
+            # print(model_class.get_tokenizer().batch_decode(
+            #     out[:, :], skip_special_tokens=True
+            # ))
+            # print(item["response"])
+
+
         else:
             out = model(**inputs).logits
         
@@ -223,10 +229,34 @@ def inference(
         item["end_of_raw_input_index"] = input_len-len(encoded_response["input_ids"])-1
         item["end_of_input_index"] = input_len-1
 
+        # print()
+        # print(model_class.get_tokenizer().batch_decode(out[:, item["end_of_raw_input_index"]-1], skip_special_tokens=False))
+        # print(model_class.get_tokenizer().batch_decode(out[:, item["end_of_raw_input_index"]], skip_special_tokens=False))
+        # print(model_class.get_tokenizer().batch_decode(out[:, item["end_of_raw_input_index"]+1], skip_special_tokens=False))
+        # print()
 
-        # print(model_class.get_tokenizer().batch_decode(out[:, item["end_of_raw_input_index"]:], skip_special_tokens=True)) # [',']
+        """
+        ['assistant']                                                                                                      
+        ['\n']                                                                                                             
+        ['No'] 
+        """
 
-        # nehjkbd
+
+        # print()
+        # print(model_class.get_tokenizer().batch_decode(out[:, input_len-2], skip_special_tokens=False))
+        # print(model_class.get_tokenizer().batch_decode(out[:, input_len-1], skip_special_tokens=False))
+        # print(model_class.get_tokenizer().batch_decode(out[:, input_len], skip_special_tokens=False))
+        # print(model_class.get_tokenizer().batch_decode(out[:, input_len+1], skip_special_tokens=False))
+        # print()
+
+
+        """
+        ['assistant'] 
+        ['\n']                                                                                                             
+        ['No']                                                                                                             
+        [','] 
+        """
+
 
         if hook_return_functions is not None:
             for func in hook_return_functions:
@@ -267,7 +297,7 @@ if __name__ == "__main__":
     )
 
     hook_return_functions, hook_postprocessing_functions = setup_hooks(
-        model=model_class.model_,
+        model=model_class,
         modules_to_hook=args.modules_to_hook,
         hook_names=args.hook_names,
         tokenizer=model_class.get_tokenizer(),
@@ -298,7 +328,7 @@ if __name__ == "__main__":
             dataset=dataset,
             model_class=model_class,
             device=device,
-            hook_return_function=hook_return_functions,
+            hook_return_functions=hook_return_functions,
             logger=logger,
             args=args,
         )

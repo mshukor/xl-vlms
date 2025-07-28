@@ -93,7 +93,7 @@ def compute_hallucination_metrics(
         if logger is not None:
             logger.info(f"Saving data to: {save_filename}")
         if save_predictions:
-            to_save = {"predictions": data["model_predictions"]}
+            to_save = {"predictions": data["model_predictions"], "response": data["response"], "images": data["image"], "instructions": data["instruction"]}
 
             save_filename = save_filename.split(".json")[0] + "_model_prediction.json"
             with open(save_filename, "w") as json_file:

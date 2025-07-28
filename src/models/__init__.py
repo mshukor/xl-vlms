@@ -38,6 +38,7 @@ def get_model_class(
             model_name_or_path=model_name_or_path,
             processor_name=processor_name,
             local_files_only=args.local_files_only,
+            cache_dir=args.cache_dir,
         )
     elif "idefics" in model_name_or_path:
         from models.idefics2 import IDEFICS
@@ -46,6 +47,7 @@ def get_model_class(
             model_name_or_path=model_name_or_path,
             processor_name=processor_name,
             local_files_only=args.local_files_only,
+            cache_dir=args.cache_dir,
         )
     elif "Molmo" in model_name_or_path:
         from models.molmo import Molmo
@@ -54,6 +56,8 @@ def get_model_class(
             model_name_or_path=model_name_or_path,
             processor_name=processor_name,
             local_files_only=args.local_files_only,
+            message_format=args.message_format,
+            cache_dir=args.cache_dir,
         )
     else:
         raise NotImplementedError(

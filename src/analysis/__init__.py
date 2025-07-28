@@ -28,6 +28,8 @@ def model_name(
 ) -> str:
     if model_name_or_path=="llava-hf/llava-1.5-7b-hf":
         return "llava"
+    elif model_name_or_path=="Qwen/Qwen2-VL-7B-Instruct":
+        return "qwen2vlinstruct"
     else:
         NotImplementedError
 
@@ -190,7 +192,7 @@ def analyse_features(
         if len(cxt_path) > 0:
             cxt_path = cxt_path[0]
         else:
-            cxt_path = pos_path
+            cxt_path = args.features_path[-1]
 
         model_name_str = model_name(args.model_name_or_path)
 

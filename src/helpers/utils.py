@@ -459,8 +459,7 @@ def get_hidden_states(
             end_of_input_index = kwargs["end_of_input_index"]
 
             # extracting the l2s inputs
-            # inputs = {"last_raw_input": v[:, end_of_raw_input_index, :].clone()}
-            inputs = {"last_raw_input": v[:, end_of_raw_input_index+1, :].clone()}
+            inputs = {"last_raw_input": v[:, end_of_raw_input_index, :].clone()}
 
             # extracting the l2s outputs
             average_tokens = torch.mean(v[:, end_of_raw_input_index+1:, :].clone(), dim=1).clone()
@@ -647,14 +646,14 @@ def register_hooks(
 
             # Re-create the model architecture (same input/output/hidden sizes)
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-            input_size, output_size, hidden_size = model.config.text_config.max_position_embeddings, model.config.text_config.max_position_embeddings, args.hidden_size
+            input_size, output_size, hidden_size = model.get_hidden_size(), model.get_hidden_size(), args.hidden_size
             model_steering = SteeringNet(input_size=input_size, output_size=output_size, hidden_size=hidden_size).to(device)
 
             try:
                 model_steering.load_state_dict(torch.load(args.shift_vector_path[0]))
             except:
                 model_steering.load_state_dict(torch.load(args.shift_vector_path[0])['steering_model'])
-            dtype = next(model.parameters()).dtype
+            dtype = next(model.model_.parameters()).dtype
             model_steering = model_steering.to(dtype)
 
             model_steering.eval()
@@ -677,7 +676,7 @@ def register_hooks(
         warnings.warn(f"{hook_name} is not supported. No hooks attached to model.")
     if hook_function is not None:
         hooked_modules = []
-        for name, module in model.named_modules():
+        for name, module in model.model_.named_modules():
             if fmatch(
                 name, modules_to_hook, exact_match=args.exact_match_modules_to_hook
             ):
@@ -697,7 +696,7 @@ def hooks_postprocessing(
 
         data_keys = ["hidden_states", "image"]
         # temp change
-        data_keys = ["hidden_states", "image", "model_predictions"]
+        data_keys = ["hidden_states", "image", "model_predictions", "response"]
 
         if "token_of_interest" in hook_name:
             data_keys.append("token_of_interest_mask")

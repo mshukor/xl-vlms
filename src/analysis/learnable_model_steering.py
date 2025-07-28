@@ -42,10 +42,14 @@ class SteeringNet(nn.Module):
 
 
 class SteeringDataset(Dataset):
-    def __init__(self, inputs, targets, dataset_name="pope"):
+    def __init__(self, inputs, targets, dataset_name="pope", responses=None):
         assert len(inputs) == len(targets), "Inputs and targets must be the same length"
         self.inputs = [torch.tensor(inp, dtype=torch.float32).squeeze(0) for inp in inputs]
         self.targets = [torch.tensor(tgt, dtype=torch.float32).squeeze(0) for tgt in targets]
+        self.responses = responses
+        if self.responses is None:
+            self.responses = ["yes" for _ in range(len(self.targets))]
+        
         self.dataset_name = dataset_name  # Store dataset name for splitting logic
         self._prepare_dataloaders()       # Automatically prepare loaders after initialization
 
@@ -53,7 +57,7 @@ class SteeringDataset(Dataset):
         return len(self.inputs)
 
     def __getitem__(self, idx):
-        return self.inputs[idx], self.targets[idx]
+        return self.inputs[idx], self.targets[idx], self.responses[idx]
     
     def get_train_shifts(self):
         return np.array([self.targets[i] for i in self.train_indices])
@@ -175,7 +179,7 @@ class LearnableSteering:
         else:
             NotImplementedError
 
-        input_inf = torch.load(self.cxt_path, map_location="cpu")["hidden_states"]
+        input_inf = torch.load(self.cxt_path, map_location="cpu")
 
         output_data = torch.load(
             os.path.join(self.save_dir, self.steering_file_base + ".pth"),
@@ -184,17 +188,25 @@ class LearnableSteering:
 
         if "pope" in dataset_name:
             input_data = [
-                input_inf[i][self.module]["inputs"]["last_raw_input"]
-                for i in range(len(input_inf))
+                input_inf["hidden_states"][i][self.input_module]["inputs"]["last_raw_input"]
+                for i in range(len(input_inf["hidden_states"]))
+            ]
+
+            responses = [
+                input_inf["response"][i][0]
+                for i in range(len(input_inf["response"]))
             ]
         elif "mmsb" in dataset_name:
             input_data = [
-                input_inf[i][self.input_module]["outputs"]["last_input"]
-                for i in range(len(input_inf))
+                input_inf["hidden_states"][i][self.input_module]["outputs"]["last_input"]
+                for i in range(len(input_inf["hidden_states"]))
             ]
-        steering_dataset = SteeringDataset(input_data, output_data, dataset_name=dataset_name)
+            
+            responses = None
+        steering_dataset = SteeringDataset(input_data, output_data, dataset_name=dataset_name, responses=responses)
+
         
-        input_size, output_size, hidden_size = self.model_class.model_.config.text_config.max_position_embeddings, self.model_class.model_.config.text_config.max_position_embeddings, self.hidden_size
+        input_size, output_size, hidden_size = self.model_class.get_hidden_size(), self.model_class.get_hidden_size(), self.hidden_size
         net = SteeringNet(input_size, output_size, hidden_size).to(self.device)
 
         steering_trainer = SteeringTrainer(
@@ -219,10 +231,10 @@ class SteeringTrainer:
         device,
         hidden_size=100,
         alpha=1,
-        weight_decay=0.0,
-        lr=5e-5,
+        weight_decay=0.0001, # 0.0 
+        lr=5e-5, # 
         batch_size=64,
-        num_epochs=100,
+        num_epochs=100, # 
         model_name="llava",
         best_model_path="best_model.pt",
         logger: Callable = None,
@@ -274,17 +286,16 @@ class SteeringTrainer:
         #self.model.decoder.weight = nn.Parameter(torch.tensor(init_comp.T, dtype=torch.float32, requires_grad=True).to(self.device))
         self.model.decoder.weight = nn.Parameter(torch.tensor(init_comp.T).to(self.device)*1.0)
 
-        #self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr)
 
         self.warmup_steps = 5 * len(self.train_loader)
+        self.warmup_steps = 50 * len(self.train_loader)
         self.total_steps = self.num_epochs * len(self.train_loader)
 
         if "pope" in self.dataset_name:
             self.scheduler = get_cosine_schedule_with_warmup(
                 self.optimizer, num_warmup_steps=self.warmup_steps, num_training_steps=self.total_steps
             )
-            self.scheduler_1 = ReduceLROnPlateau(self.optimizer, mode='min', factor=0.5, patience=5, verbose=True)
 
     def train(self):
 
@@ -296,7 +307,7 @@ class SteeringTrainer:
             total_samples = 0
             cosine_sim_train = 0
 
-            for inputs, targets in self.train_loader:
+            for inputs, targets, responses in self.train_loader:
                 
                 inputs, targets = inputs.to(self.device).float(), targets.to(self.device).float()
                 self.model.zero_grad()
@@ -310,20 +321,38 @@ class SteeringTrainer:
                 cosine_weight = min(1.0, epoch / 100) * 0.1
                 if "mmsb" in self.dataset_name:
                     cosine_weight = 0.1
+
                 total_losses = rec_losses + l1_losses - cosine_weight * cos_losses
 
                 loss = total_losses.mean()
 
-                if epoch > self.num_epochs / 2 and not "mmsb" in self.dataset_name:
-                    top_k = int(0.8 * total_losses.size(0))
-                    batch_loss = total_losses.topk(top_k).values.mean()
+
+                if "pope" in self.dataset_name:
+
+                    yes_mask = np.array(responses) == "yes"
+                    no_mask = np.array(responses) == "no"
+
+                    if yes_mask.any():
+                        yes_loss = total_losses[yes_mask].mean()
+                    else:
+                        yes_loss = torch.tensor(0.0, device=self.device)
+                
+                    if no_mask.any():
+                        no_loss = total_losses[no_mask].mean()
+                    else:
+                        no_loss = torch.tensor(0.0, device=self.device)
+
+
+                
+                    batch_loss = (yes_loss + no_loss) / 2
                 else:
+
                     batch_loss = total_losses.mean()
 
 
                 batch_loss.backward()
                 self.optimizer.step()
-                if not "mmsb" in self.dataset_name:
+                if "pope" in self.dataset_name:
                     self.scheduler.step()
 
                 running_loss += loss.item()
@@ -334,12 +363,11 @@ class SteeringTrainer:
 
             val_loss, val_cos_sim = self._evaluate(self.val_loader)
 
-            # Scheduler step and model checkpoint
-            if not "mmsb" in self.dataset_name:
-                self.scheduler_1.step(val_loss)
+            if "pope" in self.dataset_name:
                 if val_loss < best_val_loss:
                     best_val_loss = val_loss
                     torch.save(self.model.state_dict(), self.best_model_path)
+                    print(self.best_model_path)
                     self.logger.info(f"✅ New best model saved with val loss: {best_val_loss:.4f} at epoch {epoch + 1}")
 
             self.logger.info(
@@ -361,7 +389,7 @@ class SteeringTrainer:
         total_samples = 0
 
         with torch.no_grad():
-            for inputs, targets in loader:
+            for inputs, targets, _ in loader:
                 inputs, targets = inputs.float().to(self.device), targets.float().to(self.device)
                 pred_shift = self.model(inputs)
                 pred_shift, targets = pred_shift.squeeze(1), targets.squeeze(1)

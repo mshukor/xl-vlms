@@ -12,6 +12,7 @@ class LLaVA(ImageTextModel):
 
     def set_model(
         self,
+        cache_dir:str = None,
     ) -> None:
 
         self.model_ = LlavaForConditionalGeneration.from_pretrained(
@@ -19,6 +20,7 @@ class LLaVA(ImageTextModel):
             torch_dtype=torch.float16,
             low_cpu_mem_usage=True,
             local_files_only=self.local_files_only,
+            cache_dir=cache_dir,
         )
 
     def get_language_model(
@@ -38,7 +40,9 @@ class LLaVA(ImageTextModel):
     ) -> None:
 
         self.processor_ = AutoProcessor.from_pretrained(
-            self.processor_name, local_files_only=self.local_files_only
+            self.processor_name, 
+            local_files_only=self.local_files_only,             
+            cache_dir=self.cache_dir,
         )
         self.tokenizer_ = self.processor_.tokenizer
 
@@ -121,3 +125,12 @@ class LLaVA(ImageTextModel):
         )
 
         return prompt
+    
+
+    def get_hidden_size(
+        self,
+    ) -> Callable:
+
+        return self.model_.config.text_config.max_position_embeddings    
+
+
