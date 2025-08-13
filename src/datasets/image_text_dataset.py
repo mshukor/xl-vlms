@@ -602,8 +602,6 @@ class MMSafetyBench(ImageTextDataset):
                 continue_final_message=False
 
         else:
-            # ASK JAYNEEL: should the "instruction_suffix" be added when the answer is not forced?
-            # JAYNEEL: No
             instruction = text.strip()
             response = ""
             continue_final_message = False
