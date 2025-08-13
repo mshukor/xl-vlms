@@ -217,6 +217,14 @@ def analyse_features(
             with torch.enable_grad():
                 learnable_steering.train_model()
 
+    elif "safety_metrics" in analysis_name:
+        results_dict = metrics.safety_metrics.compute_safety_metrics(
+            data = {},
+            predictions_path = args.predictions_path,
+            logger=logger,
+        )
+
+
 
     elif "analyse_clusters" in analysis_name:
 

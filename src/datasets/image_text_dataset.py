@@ -341,6 +341,7 @@ class POPE_test_Dataset(ImageTextDataset):
         forced_answer_true: bool = True,
         descriptive_answer: bool = False,
         scenario: bool = None,
+        **kwargs: Any,
     ) -> tuple[str, str, bool]:
         
         if force_answer:
@@ -495,7 +496,7 @@ class POPE_train_Dataset(POPE_test_Dataset):
 
 
 class MMSafetyBench(ImageTextDataset):
-    def generate_completion(self, scenario=None):
+    def generate_completion(self, scenario=None, model_name=None):
         if not ("dual" in self.split or "multi" in self.split):
             scenario = "Default"
 
@@ -579,6 +580,7 @@ class MMSafetyBench(ImageTextDataset):
         forced_answer_true: bool = True,
         descriptive_answer: bool = False,
         scenario: bool = None,
+        **kwargs: Any,
     ) -> tuple[str, str, bool]:
         
 

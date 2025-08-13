@@ -721,6 +721,11 @@ def hooks_postprocessing(
             metric_name="hallucination_metrics", args=args
         )
 
+    elif "safety_metrics" in hook_name:
+        hook_postprocessing_function = metrics.get_metric(
+            metric_name="safety_metrics", args=args
+        )
+
     else:
         warnings.warn(f"{hook_name} is not supported. No hooks attached to model.")
 

@@ -100,7 +100,7 @@ def compute_hallucination_metrics(
                 json.dump(to_save, json_file, indent=4)
             if logger is not None:
                 logger.info(
-                    f"Saving {len(data["model_predictions"])} predictions to: {save_filename}"
+                    f"Saving {len(data['model_predictions'])} predictions to: {save_filename}"
                 )
 
     return results
