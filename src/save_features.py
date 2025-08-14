@@ -35,7 +35,8 @@ def inference_safety_steering(
 
     train_idx, test_idx = loader.dataset.get_splits()
     num_iterations = len(test_idx)
-    steering_model = load_steering_model(model_path=args.shift_vector_path[0])
+    steering_model = load_steering_model(model_path=args.shift_vector_path[0], input_output_size=model_class.get_hidden_size())
+    
     repr_size = steering_model.decoder.weight.shape[0]
     set_steering_vector(vector=torch.tensor([0]*repr_size).to(device))
 
@@ -234,7 +235,7 @@ def inference(
         item["end_of_raw_input_index"] = input_len-len(encoded_response["input_ids"])-1
         item["end_of_input_index"] = input_len-1
         if "qwen" in args.model_name_or_path and "mmsb" in args.dataset_name and args.force_answer and args.split == "multi" and scenario in ["10-Legal_Opinion", "11-Financial_Advice", "12-Health_Consultation"]: 
-            # For special case of qwen on MMSafety, the steering vector for legal/financial/healthcare scenarios is extracted from second-last token
+            # For Qwen on MMSafety, the steering vector for legal/financial/healthcare scenarios is extracted from second-last token
             item["end_of_input_index"] = input_len-1-1
 
         # print()
