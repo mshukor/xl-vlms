@@ -15,7 +15,7 @@ dataset_name=mmsb_test
 dataset_size=-1
 max_new_tokens=200
 steering_alpha=2.2
-hook_names=("save_hidden_states_given_token_idx" "shift_hidden_states_learned_steer")
+hook_names=("save_hidden_states_given_token_idx" "shift_hidden_states_learned_steer_no_implicit_model")
 
 
 for split in multi; do

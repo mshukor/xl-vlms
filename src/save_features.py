@@ -29,6 +29,7 @@ def inference_safety_steering(
     module_to_hook: str = "",
     steering_method: str = "",
     perplexity_flag: bool = False,
+    logger: Callable = None,
 ):
     model = model_class.get_model()
 
@@ -38,8 +39,8 @@ def inference_safety_steering(
     repr_size = steering_model.decoder.weight.shape[0]
     set_steering_vector(vector=torch.tensor([0]*repr_size).to(device))
 
-    print (f"\nSteering method used: {steering_method}")
-    print (f"Module to hook: {module_to_hook}")
+    logger.info(f"\nSteering method used: {steering_method}")
+    logger.info(f"Module to hook: {module_to_hook}")
 
     start_time = time.time()
     count = 0
@@ -49,8 +50,6 @@ def inference_safety_steering(
         if args.dataset_name == 'mmsb_test':
             if i in train_idx: # These two lines are standard and always used for testing except when ablation or quick check-ups with P2S
                 continue
-        
-        print (i)
 
         text = item["text"][0]  # for now we support batch size = 1
         image_path = item["image"][0]
@@ -62,7 +61,9 @@ def inference_safety_steering(
                                                                                    force_answer=args.force_answer,
                                                                                    forced_answer_true=args.forced_answer_true,
                                                                                    descriptive_answer=args.descriptive_answer,
-                                                                                   scenario=scenario,)
+                                                                                   scenario=scenario,
+                                                                                   **{'model_name':args.model_name_or_path},
+                                                                                   )
         inputs = model_class.preprocessor(
             instruction=instruction_,
             image_file=image_path,
@@ -99,6 +100,8 @@ def inference_safety_steering(
         elif steering_method == "l2s":
             out = model(**inputs_extract).logits
 
+            #print (inputs_extract['input_ids'][0, 0:], inputs_extract['input_ids'].shape)
+
             if hook_return_function is not None:
                 for func in hook_return_function:
                     if func is not None:
@@ -114,10 +117,10 @@ def inference_safety_steering(
             elif steering_method == "p2s":
                 steering_vector = 1.0*diff_gt[i].float().to(device)
             elif steering_method == "l2s":
-                #print (repr[0, :5])
+                #print ("Extracted Representation:", repr[0, :5])
                 steering_vector, embed = steering_model(repr.float()[0])
                 steering_vector = 1.0*steering_vector.to(device)
-        
+                
             set_steering_vector(vector=steering_vector)
 
             # Perform generation again
@@ -153,9 +156,9 @@ def inference_safety_steering(
             logger.info(
                 f"Iteration: {i}/{num_iterations},  Estimated time left: {time_left:.2f} mins"
             )
-        logger.info(f"Sample {i}: Response: {cur_output}")
+            logger.info(f"Sample {i}: Response: {cur_output}")
 
-    print (f"'Harmful'/'Illegal'/'Not safe' count ({steering_method}):", count)    
+    logger.info(f"'Harmful'/'Illegal'/'Not safe' count ({steering_method}): {count}")    
     if perplexity_flag:
         return responses, perplexity_scores
     return responses
@@ -190,7 +193,9 @@ def inference(
                                                                                    force_answer=args.force_answer,
                                                                                    forced_answer_true=args.forced_answer_true,
                                                                                    descriptive_answer=args.descriptive_answer,
-                                                                                   scenario=scenario,)
+                                                                                   scenario=scenario,
+                                                                                   kwargs={'model_name':args.model_name_or_path},
+                                                                                   )
         
         inputs = model_class.preprocessor(
             instruction=instruction_,
@@ -228,6 +233,9 @@ def inference(
         encoded_response = model_class.get_tokenizer()(response_, add_special_tokens=False)
         item["end_of_raw_input_index"] = input_len-len(encoded_response["input_ids"])-1
         item["end_of_input_index"] = input_len-1
+        if "qwen" in args.model_name_or_path and "mmsb" in args.dataset_name and args.force_answer and args.split == "multi" and scenario in ["10-Legal_Opinion", "11-Financial_Advice", "12-Health_Consultation"]: 
+            # For special case of qwen on MMSafety, the steering vector for legal/financial/healthcare scenarios is extracted from second-last token
+            item["end_of_input_index"] = input_len-1-1
 
         # print()
         # print(model_class.get_tokenizer().batch_decode(out[:, item["end_of_raw_input_index"]-1], skip_special_tokens=False))
@@ -316,7 +324,8 @@ if __name__ == "__main__":
                 device=device,
                 args=args,
                 module_to_hook=args.modules_to_hook[0][0],
-                steering_method="l2s"
+                steering_method="l2s",
+                logger=logger,
             )
         torch.save(responses, args.save_filename)
         clear_forward_hooks(model_class.model_)

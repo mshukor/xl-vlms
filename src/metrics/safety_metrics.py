@@ -165,7 +165,7 @@ def compute_safety_metrics(
     n_test = len(data)
 
     # Harmfulness eval
-    scores = harmfulness_eval(data, n_test=n_test)
+    scores = harmfulness_eval(data)
     for thresh in [0.5, 0.7, 0.9]:
         cur_unsafe = unsafe_score_mean(scores, thresh_min=thresh)
         print (thresh, cur_unsafe)

@@ -181,6 +181,7 @@ def apply_learned_steering_vector_steer(
     only_generated_tokens: bool = False,
     include_last_prompt_token: bool = False,
     start_prompt_token_idx: int = 0,
+    no_implicit_model: bool = False,
 ) -> torch.Tensor:
     global PREDICTED_STEER
     
@@ -189,7 +190,9 @@ def apply_learned_steering_vector_steer(
         last_input_tokens = x[:,-1,:]
         last_input_tokens = last_input_tokens.to(dtype=torch.float16)
 
-        PREDICTED_STEER = model(last_input_tokens)[0]
+        if not no_implicit_model:
+            PREDICTED_STEER = model(last_input_tokens)[0]
+            
         vector = PREDICTED_STEER
 
         if only_generated_tokens:
@@ -220,6 +223,7 @@ def shift_hidden_states(
     include_last_prompt_token: bool = False,
     start_prompt_token_idx: int = 0,
     individual_shift: bool = False,
+    no_implicit_model: bool = False,
     **kwargs: Any,
 ):
     """
@@ -262,6 +266,7 @@ def shift_hidden_states(
                     only_generated_tokens=only_generated_tokens,
                     include_last_prompt_token=include_last_prompt_token,
                     start_prompt_token_idx=start_prompt_token_idx,
+                    no_implicit_model=no_implicit_model,
                 )
                 return (output_,) + output[1:]
             else:
@@ -272,6 +277,7 @@ def shift_hidden_states(
                     only_generated_tokens=only_generated_tokens,
                     include_last_prompt_token=include_last_prompt_token,
                     start_prompt_token_idx=start_prompt_token_idx,
+                    no_implicit_model=no_implicit_model
                 )
                 return output
             
@@ -640,6 +646,7 @@ def register_hooks(
 
         only_generated_tokens = "only_generated" in hook_name
         include_last_prompt_token = "last_prompt_token" in hook_name
+        no_implicit_model = "no_implicit_model" in hook_name
 
 
         if "learned_steer" in hook_name:
@@ -670,7 +677,8 @@ def register_hooks(
             only_generated_tokens=only_generated_tokens,
             include_last_prompt_token=include_last_prompt_token,
             start_prompt_token_idx=args.start_prompt_token_idx_steering,
-            individual_shift=args.individual_shift
+            individual_shift=args.individual_shift,
+            no_implicit_model=no_implicit_model
         )
     else:
         warnings.warn(f"{hook_name} is not supported. No hooks attached to model.")
