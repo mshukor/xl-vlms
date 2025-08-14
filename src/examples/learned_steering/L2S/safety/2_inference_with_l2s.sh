@@ -10,7 +10,7 @@ model=qwen
 
 YOUR_DATA_DIR=/home/parekh/MM-SafetyBench/data/
 YOUR_SAVE_DIR=/home/parekh/id_steering/test_code/
-STEER_MODEL_NAME=/home/parekh/id_steering/mmsb_steering_nets/steering_net_v3_multi_nobias_K100.pt
+STEER_MODEL_NAME=/home/parekh/id_steering/mmsb_steering_nets/llava_mmsb_steering_net_v3_multi_nobias_K100.pt
 STEER_MODEL_NAME=/home/parekh/id_steering/mmsb_steering_nets/qwen_14_last_input_multi_mmsb_train_-1_v2.pt
 steer_model_base=$(basename "$STEER_MODEL_NAME" .pt)
 
