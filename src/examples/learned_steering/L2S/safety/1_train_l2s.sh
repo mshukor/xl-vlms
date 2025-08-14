@@ -38,5 +38,3 @@ for split in multi; do
             --features_path ${features_dir}/${pos_features_name} ${features_dir}/${neg_features_name} ${features_dir}/${cxt_features_name}
     done
 done
-
-# popular random

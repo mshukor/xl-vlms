@@ -22,57 +22,59 @@ modules_to_hook=""
 
 for split in multi; do
 
-    for i in 15; do
+    #for i in 15; do                            # Used for LLaVA
+    for i in 14; do
 
-        modules_to_hook="model.layers.${i}"
-        modules_to_hook="language_model.model.layers.${i}"
-        save_pos_filename="${model}_${dataset_name}_features_pos_answers_${i}_${split}_all_${dataset_size}"
-        save_neg_filename="${model}_${dataset_name}_features_neg_answers_${i}_${split}_all_${dataset_size}"
+        modules_to_hook="model.layers.${i}". # Layer name for Qwen
+        #modules_to_hook="language_model.model.layers.${i}" # Layer name for LLaVA
+        save_pos_filename="${model}_${dataset_name}_features_pos_answers_${i}_${split}_all_${dataset_size}_test"
+        save_neg_filename="${model}_${dataset_name}_features_neg_answers_${i}_${split}_all_${dataset_size}_test"
 
         # First command computes positive answer representations
         # Second command computes negative answer representations
         # Third command computes input context representations
 
-        # python src/save_features.py \
-        #     --model_name_or_path $model_name_or_path \
-        #     --data_dir $data_dir \
-        #     --dataset_name $dataset_name \
-        #     --split $split \
-        #     --annotation_file annotations.json \
-        #     --dataset_size $dataset_size \
-        #     --save_dir $save_dir \
-        #     --max_new_tokens $max_new_tokens \
-        #     --hook_names $hook_names \
-        #     --modules_to_hook $modules_to_hook \
-        #     --save_filename ${save_pos_filename} \
-        #     --local_files_only \
-        #     --force_answer \
-        #     --forced_answer_true \
-        #     --exact_match_modules_to_hook \
-        #     --end_special_tokens "</s>"
+        python src/save_features.py \
+            --model_name_or_path $model_name_or_path \
+            --data_dir $data_dir \
+            --dataset_name $dataset_name \
+            --split $split \
+            --annotation_file annotations.json \
+            --dataset_size $dataset_size \
+            --save_dir $save_dir \
+            --max_new_tokens $max_new_tokens \
+            --hook_names $hook_names \
+            --modules_to_hook $modules_to_hook \
+            --save_filename ${save_pos_filename} \
+            --local_files_only \
+            --force_answer \
+            --forced_answer_true \
+            --exact_match_modules_to_hook \
+            --end_special_tokens "</s>"
         
-        # python src/save_features.py \
-        #     --model_name_or_path $model_name_or_path \
-        #     --data_dir $data_dir \
-        #     --dataset_name $dataset_name \
-        #     --dataset_size $dataset_size \
-        #     --split $split \
-        #     --save_dir $save_dir \
-        #     --max_new_tokens $max_new_tokens \
-        #     --hook_names $hook_names \
-        #     --modules_to_hook $modules_to_hook \
-        #     --save_filename ${save_neg_filename} \
-        #     --local_files_only \
-        #     --force_answer \
-        #     --exact_match_modules_to_hook \
-        #     --end_special_tokens "</s>"
+        python src/save_features.py \
+            --model_name_or_path $model_name_or_path \
+            --data_dir $data_dir \
+            --dataset_name $dataset_name \
+            --dataset_size $dataset_size \
+            --split $split \
+            --save_dir $save_dir \
+            --max_new_tokens $max_new_tokens \
+            --hook_names $hook_names \
+            --modules_to_hook $modules_to_hook \
+            --save_filename ${save_neg_filename} \
+            --local_files_only \
+            --force_answer \
+            --exact_match_modules_to_hook \
+            --end_special_tokens "</s>"
     done
 
+    #for i in 30; do
+    for i in 14; do
 
-    for i in 30; do
-
-        modules_to_hook="language_model.model.layers.${i}"
-        save_cxt_filename="${model}_${dataset_name}_features_context_${i}_${split}_all_${dataset_size}"
+        modules_to_hook="language_model.model.layers.${i}" # For LLaVA
+        modules_to_hook="model.layers.${i}" # For Qwen
+        save_cxt_filename="${model}_${dataset_name}_features_context_${i}_${split}_all_${dataset_size}_test"
 
         python src/save_features.py \
             --model_name_or_path $model_name_or_path \
@@ -90,4 +92,3 @@ for split in multi; do
             --end_special_tokens "</s>"
     done
 done
-
