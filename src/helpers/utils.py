@@ -471,6 +471,7 @@ def get_hidden_states(
             average_tokens = torch.mean(v[:, end_of_raw_input_index+1:, :].clone(), dim=1).clone()
             last_input_tokens = v[:, end_of_input_index, :].clone()
             outputs = {"average" : average_tokens, "last_input": last_input_tokens}
+            print (end_of_raw_input_index, v.shape, end_of_input_index)
 
             v = {"inputs": inputs, "outputs": outputs}
         else:

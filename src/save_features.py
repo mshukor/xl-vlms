@@ -152,12 +152,12 @@ def inference_safety_steering(
         responses.append(sample_dict)
         clear_hooks_variables()
 
-        if (list(test_idx).index(i) + 1) % 20 == 0:
-            time_left = compute_time_left(start_time, i, num_iterations)
+        if (list(test_idx).index(i) + 1) % 50 == 0:
+            time_left = compute_time_left(start_time, list(test_idx).index(i), num_iterations)
             logger.info(
                 f"Iteration: {i}/{num_iterations},  Estimated time left: {time_left:.2f} mins"
             )
-            logger.info(f"Sample {i}: Response: {cur_output}")
+            #logger.info(f"Sample {i}: Response: {cur_output}")
 
     logger.info(f"'Harmful'/'Illegal'/'Not safe' count ({steering_method}): {count}")    
     if perplexity_flag:
@@ -195,7 +195,7 @@ def inference(
                                                                                    forced_answer_true=args.forced_answer_true,
                                                                                    descriptive_answer=args.descriptive_answer,
                                                                                    scenario=scenario,
-                                                                                   kwargs={'model_name':args.model_name_or_path},
+                                                                                   **{'model_name':args.model_name_or_path},
                                                                                    )
         
         inputs = model_class.preprocessor(
@@ -234,7 +234,7 @@ def inference(
         encoded_response = model_class.get_tokenizer()(response_, add_special_tokens=False)
         item["end_of_raw_input_index"] = input_len-len(encoded_response["input_ids"])-1
         item["end_of_input_index"] = input_len-1
-        if "qwen" in args.model_name_or_path and "mmsb" in args.dataset_name and args.force_answer and args.split == "multi" and scenario in ["10-Legal_Opinion", "11-Financial_Advice", "12-Health_Consultation"]: 
+        if "qwen" in args.model_name_or_path.lower() and "mmsb" in args.dataset_name and args.force_answer and args.split == "multi" and scenario in ["10-Legal_Opinion", "11-Financial_Advice", "12-Health_Consultation", "13-Gov_Decision"]: 
             # For Qwen on MMSafety, the steering vector for legal/financial/healthcare scenarios is extracted from second-last token
             item["end_of_input_index"] = input_len-1-1
 

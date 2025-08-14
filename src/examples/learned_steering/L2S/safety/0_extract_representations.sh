@@ -1,6 +1,9 @@
 model_name_or_path=llava-hf/llava-1.5-7b-hf
 model=llava
 
+model_name_or_path=Qwen/Qwen2-VL-7B-Instruct
+model=qwen
+
 YOUR_DATA_DIR=/home/parekh/MM-SafetyBench/data/
 YOUR_SAVE_DIR=/home/parekh/id_steering/test_code/
 
@@ -25,10 +28,10 @@ for split in multi; do
     #for i in 15; do                            # Used for LLaVA
     for i in 14; do
 
-        modules_to_hook="model.layers.${i}". # Layer name for Qwen
+        modules_to_hook="model.layers.${i}" # Layer name for Qwen
         #modules_to_hook="language_model.model.layers.${i}" # Layer name for LLaVA
-        save_pos_filename="${model}_${dataset_name}_features_pos_answers_${i}_${split}_all_${dataset_size}_test"
-        save_neg_filename="${model}_${dataset_name}_features_neg_answers_${i}_${split}_all_${dataset_size}_test"
+        save_pos_filename="${model}_${dataset_name}_features_pos_answers_${i}_${split}_all_${dataset_size}"
+        save_neg_filename="${model}_${dataset_name}_features_neg_answers_${i}_${split}_all_${dataset_size}"
 
         # First command computes positive answer representations
         # Second command computes negative answer representations
@@ -39,7 +42,6 @@ for split in multi; do
             --data_dir $data_dir \
             --dataset_name $dataset_name \
             --split $split \
-            --annotation_file annotations.json \
             --dataset_size $dataset_size \
             --save_dir $save_dir \
             --max_new_tokens $max_new_tokens \
@@ -76,19 +78,19 @@ for split in multi; do
         modules_to_hook="model.layers.${i}" # For Qwen
         save_cxt_filename="${model}_${dataset_name}_features_context_${i}_${split}_all_${dataset_size}_test"
 
-        python src/save_features.py \
-            --model_name_or_path $model_name_or_path \
-            --data_dir $data_dir \
-            --dataset_name $dataset_name \
-            --dataset_size $dataset_size \
-            --split $split \
-            --save_dir $save_dir \
-            --max_new_tokens $max_new_tokens \
-            --hook_names $hook_names \
-            --modules_to_hook $modules_to_hook \
-            --save_filename ${save_cxt_filename} \
-            --local_files_only \
-            --exact_match_modules_to_hook \
-            --end_special_tokens "</s>"
+        # python src/save_features.py \
+        #     --model_name_or_path $model_name_or_path \
+        #     --data_dir $data_dir \
+        #     --dataset_name $dataset_name \
+        #     --dataset_size $dataset_size \
+        #     --split $split \
+        #     --save_dir $save_dir \
+        #     --max_new_tokens $max_new_tokens \
+        #     --hook_names $hook_names \
+        #     --modules_to_hook $modules_to_hook \
+        #     --save_filename ${save_cxt_filename} \
+        #     --local_files_only \
+        #     --exact_match_modules_to_hook \
+        #     --end_special_tokens "</s>"
     done
 done
