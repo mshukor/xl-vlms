@@ -324,7 +324,7 @@ if __name__ == "__main__":
                 device=device,
                 args=args,
                 module_to_hook=args.modules_to_hook[0][0],
-                steering_method="l2s",
+                steering_method=args.steering_method,
                 logger=logger,
             )
         torch.save(responses, args.save_filename)
