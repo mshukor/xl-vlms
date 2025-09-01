@@ -25,8 +25,8 @@ modules_to_hook=""
 
 for split in multi; do
 
-    #for i in 15; do                            # Used for LLaVA
-    for i in 14; do
+    #for i in 15; do                            # Steering layer Used for LLaVA
+    for i in 14; do                             # Steering layer Used for Qwen
 
         modules_to_hook="model.layers.${i}" # Layer name for Qwen
         #modules_to_hook="language_model.model.layers.${i}" # Layer name for LLaVA
@@ -71,26 +71,26 @@ for split in multi; do
             --end_special_tokens "</s>"
     done
 
-    #for i in 30; do
-    for i in 14; do
+    #for i in 30; do                            # Context layer Used for LLaVA
+    for i in 14; do                             # Context layer Used for Qwen
 
         modules_to_hook="language_model.model.layers.${i}" # For LLaVA
         modules_to_hook="model.layers.${i}" # For Qwen
         save_cxt_filename="${model}_${dataset_name}_features_context_${i}_${split}_all_${dataset_size}_test"
 
-        # python src/save_features.py \
-        #     --model_name_or_path $model_name_or_path \
-        #     --data_dir $data_dir \
-        #     --dataset_name $dataset_name \
-        #     --dataset_size $dataset_size \
-        #     --split $split \
-        #     --save_dir $save_dir \
-        #     --max_new_tokens $max_new_tokens \
-        #     --hook_names $hook_names \
-        #     --modules_to_hook $modules_to_hook \
-        #     --save_filename ${save_cxt_filename} \
-        #     --local_files_only \
-        #     --exact_match_modules_to_hook \
-        #     --end_special_tokens "</s>"
+        python src/save_features.py \
+            --model_name_or_path $model_name_or_path \
+            --data_dir $data_dir \
+            --dataset_name $dataset_name \
+            --dataset_size $dataset_size \
+            --split $split \
+            --save_dir $save_dir \
+            --max_new_tokens $max_new_tokens \
+            --hook_names $hook_names \
+            --modules_to_hook $modules_to_hook \
+            --save_filename ${save_cxt_filename} \
+            --local_files_only \
+            --exact_match_modules_to_hook \
+            --end_special_tokens "</s>"
     done
 done
