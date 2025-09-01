@@ -157,7 +157,7 @@ def inference_safety_steering(
             logger.info(
                 f"Iteration: {i}/{num_iterations},  Estimated time left: {time_left:.2f} mins"
             )
-            #logger.info(f"Sample {i}: Response: {cur_output}")
+            logger.info(f"Sample {i}: Response: {cur_output}")
 
     logger.info(f"'Harmful'/'Illegal'/'Not safe' count ({steering_method}): {count}")    
     if perplexity_flag:

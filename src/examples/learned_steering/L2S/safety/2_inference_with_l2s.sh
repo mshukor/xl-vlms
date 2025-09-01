@@ -1,8 +1,8 @@
-#model_name_or_path=llava-hf/llava-1.5-7b-hf
-#model=llava
+model_name_or_path=llava-hf/llava-1.5-7b-hf
+model=llava
 
-model_name_or_path=Qwen/Qwen2-VL-7B-Instruct
-model=qwen
+#model_name_or_path=Qwen/Qwen2-VL-7B-Instruct
+#model=qwen
 
 # YOUR_DATA_DIR=/home/parekh/VLGuard/
 # YOUR_SAVE_DIR=/home/parekh/id_steering/test_code/
@@ -11,7 +11,7 @@ model=qwen
 YOUR_DATA_DIR=/home/parekh/MM-SafetyBench/data/
 YOUR_SAVE_DIR=/home/parekh/id_steering/test_code/
 STEER_MODEL_NAME=/home/parekh/id_steering/mmsb_steering_nets/llava_mmsb_steering_net_v3_multi_nobias_K100.pt
-STEER_MODEL_NAME=/home/parekh/id_steering/mmsb_steering_nets/qwen_14_last_input_multi_mmsb_train_-1_v2.pt
+#STEER_MODEL_NAME=/home/parekh/id_steering/mmsb_steering_nets/qwen_14_last_input_multi_mmsb_train_-1_v2.pt
 steer_model_base=$(basename "$STEER_MODEL_NAME" .pt)
 
 
@@ -33,11 +33,11 @@ for split in multi; do
 
     for steering_alpha in 2.2; do
 
-        for method in l2s; do
+        for method in default; do
             shift_vector_path=${STEER_MODEL_NAME}
-            save_filename="${model}_${dataset_name}_steer_${i}_${split}_${steering_alpha}_${steer_model_base}.pth"
+            save_filename="${model}_${dataset_name}_steer_${method}_${split}_${steering_alpha}_${steer_model_base}.pth"
             modules_to_hook="language_model.model.layers.30;language_model.model.layers.15" # Used for LLaVA experiments (MMSafety)
-            modules_to_hook="model.layers.14;model.layers.14" # Used for Qwen experiments (MMSafety)
+            #modules_to_hook="model.layers.14;model.layers.14" # Used for Qwen experiments (MMSafety)
             #modules_to_hook="language_model.model.layers.15;language_model.model.layers.15" # Used for LLaVA with VLGuard exps
 
             python src/save_features.py \
