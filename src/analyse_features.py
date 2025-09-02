@@ -16,6 +16,7 @@ if __name__ == "__main__":
 
     device = torch.device("cpu")
 
+    
     model_class = get_model_class(
         args.model_name_or_path,
         args.processor_name,
@@ -23,6 +24,7 @@ if __name__ == "__main__":
         logger=logger,
         args=args,
     )
+    
 
     analyse_features(
         analysis_name=args.analysis_name,

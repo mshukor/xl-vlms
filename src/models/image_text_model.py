@@ -12,10 +12,13 @@ class ImageTextModel:
         model_name_or_path: str = "llava-hf/llava-1.5-7b-hf",
         processor_name: str = "llava-hf/llava-1.5-7b-hf",
         local_files_only: bool = False,
+        message_format: str = "role",
         **kwargs: Any,
     ):
 
         self.model_name_or_path = model_name_or_path
+        self.cache_dir = kwargs.get("cache_dir", None)
+        self.message_format = message_format
 
         self.processor_name = processor_name
         self.local_files_only = local_files_only
@@ -23,7 +26,7 @@ class ImageTextModel:
         if processor_name is None:
             self.processor_name = model_name_or_path
 
-        self.set_model()
+        self.set_model(cache_dir=self.cache_dir)
         self.set_processor()
         self.set_preprocessor()
 
@@ -76,6 +79,7 @@ class ImageTextModel:
         image_file: str = None,
         response: str = "",
         generation_mode: bool = False,
+        continue_final_message: bool = False,
         **kwargs: Any,
     ) -> Dict[str, Any]:
 
@@ -96,6 +100,7 @@ class ImageTextModel:
         image_file: str = "",
         response: str = "",
         generation_mode: bool = False,
+        continue_final_message: bool = False,
         **kwargs: Any,
     ):
         preprocessor = self.get_preprocessor()
@@ -105,6 +110,7 @@ class ImageTextModel:
                 image_file=image_file,
                 response=response,
                 generation_mode=generation_mode,
+                continue_final_message=continue_final_message,
             )
             .to(self.get_model().device)
             .to(self.get_model().dtype)
@@ -147,3 +153,10 @@ class ImageTextModel:
     ) -> Callable:
 
         return self.tokenizer_
+    
+
+    def get_hidden_size(
+        self,
+    ) -> Callable:
+
+        NotImplementedError    

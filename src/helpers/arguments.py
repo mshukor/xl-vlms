@@ -13,7 +13,7 @@ def get_arguments():
     parser = argparse.ArgumentParser(description="XL-VLMs arguments parser")
 
     # General
-    parser.add_argument("--seed", type=int, default=0, help="Global seed.")
+    parser.add_argument("--seed", type=int, default=21, help="Global seed.")
 
     # Model
     parser.add_argument(
@@ -22,6 +22,8 @@ def get_arguments():
         default="facebook/opt-125m",
         help="The path or name of the pre-trained model.",
     )
+    parser.add_argument("--cache_dir", type=str, help="Where to load the model from.")
+
 
     parser.add_argument(
         "--processor_name",
@@ -36,7 +38,6 @@ def get_arguments():
         default=False,
         help="Load HF models from local.",
     )
-    parser.add_argument("--cache_dir", type=str, help="Where to load the model from.")
 
     parser.add_argument(
         "--prompt_template",
@@ -308,12 +309,18 @@ def get_arguments():
     )
     parser.add_argument(
         "--shift_vector_path",
-        type=str,
-        default="",
-        help="Path to steering vector.",
+        nargs="+",
+        help="list of paths to features.",
+        default=None,
     )
     parser.add_argument(
         "--shift_vector_key",
+        type=str,
+        default="steering_vector",
+        help="Path to steering vector.",
+    )
+    parser.add_argument(
+        "--shift_type",
         type=str,
         default="steering_vector",
         help="Path to steering vector.",
@@ -324,6 +331,44 @@ def get_arguments():
         default=0,
         help="Apply steering starting from this token idx of the prompt.",
     )
+
+    # Learned steering (L2S) and P2S
+    parser.add_argument(
+        "--hidden_size",
+        type=int,
+        default=100,
+        help="The size of the learned steering mode that is to be loaded.",
+    )
+    parser.add_argument(
+        "--individual_shift",
+        default=False,
+        action="store_true",
+        help="The input specific shift (P2S). When this argument is given, the given shift vector should be a list of vectors! each vector being a sample specific shift!",
+    )
+
+    parser.add_argument(
+        "--force_answer",
+        action="store_true",
+        default=False,
+        help="Whether an answer shall be forced to the assistant. In this case, the message_format should be none.",
+    )
+    
+    parser.add_argument(
+        "--forced_answer_true",
+        action="store_true",
+        default=False,
+        help="If force_answer is true, then this answer can be the true answer, or a false one.",
+    )
+
+    parser.add_argument(
+        "--descriptive_answer",
+        action="store_true",
+        default=False,
+        help="Whether the instruction should ask for more than just yes/no answer.",
+    )
+
+
+
     # Evaluation
     parser.add_argument(
         "--captioning_metrics",

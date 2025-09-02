@@ -6,6 +6,8 @@ from typing import Any, Callable, Dict
 import torch
 
 from metrics.captioning_metrics import compute_captioning_metrics
+from metrics.hallucination_metrics import compute_hallucination_metrics
+from metrics.safety_metrics import compute_safety_metrics
 from metrics.dictionary_learning_metrics import (
     compute_grounding_words_overlap, get_clip_score)
 from metrics.vqa_accuracy import compute_vqav2_accuracy
@@ -101,6 +103,24 @@ def get_metric(
             save_filename=save_filename,
             save_predictions=args.save_predictions,
             predictions_path=args.predictions_path,
+        )
+
+    elif "hallucination_metrics" in metric_name:
+        metric = partial(
+            compute_hallucination_metrics,
+            save_filename=save_filename,
+            save_predictions=args.save_predictions,
+            predictions_path=args.predictions_path,
+            model_name=args.model_name_or_path,
+        )
+    
+    elif "safety_metrics" in metric_name:
+        metric = partial(
+            compute_safety_metrics,
+            save_filename=save_filename,
+            save_predictions=args.save_predictions,
+            predictions_path=args.predictions_path,
+            model_name=args.model_name_or_path,
         )
 
     return metric

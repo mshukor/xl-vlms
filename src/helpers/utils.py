@@ -9,6 +9,7 @@ from typing import Any, Callable, Dict, List, Tuple, Union
 
 import numpy as np
 import torch
+import torch.nn as nn
 from tqdm import tqdm
 
 import metrics
@@ -94,6 +95,31 @@ def get_start_idx_generated_tokens(tokens: List[torch.Tensor]) -> int:
     return idx  # generated tokens start after the prompt, count from last
 
 
+class SteeringNet(nn.Module):
+    def __init__(self, input_size, output_size, hidden_size=10, use_output_bias=False):
+        super().__init__()
+        self.hidden_size = hidden_size
+        self.encoder = nn.Linear(input_size, hidden_size, bias=True)
+        self.decoder = nn.Linear(hidden_size, output_size, bias=use_output_bias)
+        self.activ = nn.Tanh()
+        
+    def forward(self, inp):
+        embed = self.activ(self.encoder(inp))
+        shift = self.decoder(embed)
+        return shift, embed
+
+def load_steering_model(model_path: str="", hidden_size=100, input_output_size=4096):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    input_size, output_size = input_output_size, input_output_size
+    model_steering = SteeringNet(input_size=input_size, output_size=output_size, hidden_size=hidden_size).to(device)
+    try:
+        model_steering.load_state_dict(torch.load(model_path))
+    except:
+        model_steering.load_state_dict(torch.load(model_path)['steering_model'])
+    model_steering.eval()
+    return model_steering
+
+
 def save_hidden_states(module_name: str = "", **kwargs: Any):
     """
     Save module output hidden states. In case of autoregressive, make sure the kv caching is enabled.
@@ -112,6 +138,7 @@ def save_hidden_states(module_name: str = "", **kwargs: Any):
     return hook
 
 
+global SAMPLE_COUNTER
 def apply_steering_vector(
     x: torch.Tensor,
     vector: torch.Tensor,
@@ -119,8 +146,14 @@ def apply_steering_vector(
     only_generated_tokens: bool = False,
     include_last_prompt_token: bool = False,
     start_prompt_token_idx: int = 0,
+    individual_shift: bool = False,
 ) -> torch.Tensor:
+    global SAMPLE_COUNTER
+
     if x.shape[1] > 1:
+        if individual_shift: # when the vector is composed of #samples vectors, and for each samples a different steering vector is to be picked
+            SAMPLE_COUNTER += 1
+            vector = vector[SAMPLE_COUNTER-1]
         if only_generated_tokens:
             return x
         if include_last_prompt_token:
@@ -130,9 +163,56 @@ def apply_steering_vector(
             x_ = x_ + alpha * vector.to(x_.device).to(x_.dtype)
             x[:, start_prompt_token_idx:, :] = x_
             return x
+        
+    if individual_shift:
+        if vector.shape[0] > 1:
+            vector = vector[SAMPLE_COUNTER-1]
     x = x + alpha * vector.to(x.device).to(x.dtype)
     # import ipdb; ipdb.set_trace()
     return x
+
+
+
+global PREDICTED_STEER
+def apply_learned_steering_vector_steer(
+    x: torch.Tensor,
+    model: Any,
+    alpha: float = 1,
+    only_generated_tokens: bool = False,
+    include_last_prompt_token: bool = False,
+    start_prompt_token_idx: int = 0,
+    no_implicit_model: bool = False,
+) -> torch.Tensor:
+    global PREDICTED_STEER
+    
+    if x.shape[1] > 1:
+        
+        last_input_tokens = x[:,-1,:]
+        last_input_tokens = last_input_tokens.to(dtype=torch.float16)
+
+        if not no_implicit_model:
+            PREDICTED_STEER = model(last_input_tokens)[0]
+            
+        vector = PREDICTED_STEER
+
+        if only_generated_tokens:
+            return x
+        if include_last_prompt_token:
+            start_prompt_token_idx = -1
+        if start_prompt_token_idx > 0 or start_prompt_token_idx == -1:
+            x_ = x[:, start_prompt_token_idx:, :]
+            x_ = x_ + alpha * vector.to(x_.device).to(x_.dtype)
+            x[:, start_prompt_token_idx:, :] = x_
+            return x
+        
+    vector = PREDICTED_STEER
+    x = x + alpha * vector.to(x.device).to(x.dtype)
+
+    return x
+
+def set_steering_vector(vector: torch.Tensor = None):
+    global PREDICTED_STEER
+    PREDICTED_STEER = vector
 
 
 def shift_hidden_states(
@@ -142,6 +222,8 @@ def shift_hidden_states(
     only_generated_tokens: bool = False,
     include_last_prompt_token: bool = False,
     start_prompt_token_idx: int = 0,
+    individual_shift: bool = False,
+    no_implicit_model: bool = False,
     **kwargs: Any,
 ):
     """
@@ -158,6 +240,7 @@ def shift_hidden_states(
                     only_generated_tokens=only_generated_tokens,
                     include_last_prompt_token=include_last_prompt_token,
                     start_prompt_token_idx=start_prompt_token_idx,
+                    individual_shift=individual_shift,
                 )
                 return (output_,) + output[1:]
             else:
@@ -168,8 +251,36 @@ def shift_hidden_states(
                     only_generated_tokens=only_generated_tokens,
                     include_last_prompt_token=include_last_prompt_token,
                     start_prompt_token_idx=start_prompt_token_idx,
+                    individual_shift=individual_shift,
                 )
                 return output
+            
+    elif "learned_steer" in operation:
+
+        def hook(module, input, output):
+            if isinstance(output, tuple):  # e.g. in the residual stream
+                output_ = apply_learned_steering_vector_steer(
+                    output[0],
+                    model=vector,
+                    alpha=alpha,
+                    only_generated_tokens=only_generated_tokens,
+                    include_last_prompt_token=include_last_prompt_token,
+                    start_prompt_token_idx=start_prompt_token_idx,
+                    no_implicit_model=no_implicit_model,
+                )
+                return (output_,) + output[1:]
+            else:
+                output = apply_learned_steering_vector_steer(
+                    output,
+                    model=vector,
+                    alpha=alpha,
+                    only_generated_tokens=only_generated_tokens,
+                    include_last_prompt_token=include_last_prompt_token,
+                    start_prompt_token_idx=start_prompt_token_idx,
+                    no_implicit_model=no_implicit_model
+                )
+                return output
+            
 
     else:
         raise NotImplementedError(
@@ -300,6 +411,7 @@ def get_hidden_states(
     extract_token_of_interest: bool = False,
     token_of_interest_start_token: int = 0,
     extract_before_special_tokens: bool = False,
+    extract_l2s_input_output: bool = False,
     save_only_generated_tokens: bool = False,
     **kwargs: Any,
 ) -> Dict[str, Any]:
@@ -345,9 +457,33 @@ def get_hidden_states(
                 token_of_interest_mask
             ).bool()
             output["image"] = kwargs["image"]
+
+        elif extract_l2s_input_output:
+            # end_of_raw_input_index corresponds to ":" after "ASSISTANT" token
+            # it is used to extract the input representations from the right tokens, which does not include the forced answer
+            end_of_raw_input_index = kwargs["end_of_raw_input_index"]
+            end_of_input_index = kwargs["end_of_input_index"]
+
+            # extracting the l2s inputs
+            inputs = {"last_raw_input": v[:, end_of_raw_input_index, :].clone()}
+
+            # extracting the l2s outputs
+            average_tokens = torch.mean(v[:, end_of_raw_input_index+1:, :].clone(), dim=1).clone()
+            last_input_tokens = v[:, end_of_input_index, :].clone()
+            outputs = {"average" : average_tokens, "last_input": last_input_tokens}
+            print (end_of_raw_input_index, v.shape, end_of_input_index)
+
+            v = {"inputs": inputs, "outputs": outputs}
         else:
             pass
-        hidden_states[k] = v
+
+        if isinstance(v, dict):
+            hidden_states[k] = v
+        else:
+            # v must be a torch tensor based on the above code. 
+            # Clone to avoid memory leakage by keeping any reference to full original tensor
+            hidden_states[k] = v.clone()
+
     output["hidden_states"] = hidden_states
     return output
 
@@ -404,6 +540,9 @@ def register_hooks(
     logger: Callable = None,
     args: argparse.Namespace = None,
 ) -> Callable:
+    global SAMPLE_COUNTER
+    SAMPLE_COUNTER = 0
+    
     hook_function, hook_return_function = None, None
     if "save_hidden_states" == hook_name:
         # Save the hidden states of all tokens in the sequence
@@ -487,10 +626,20 @@ def register_hooks(
             tokenizer=tokenizer,
             save_only_generated_tokens=args.save_only_generated_tokens,
         )
+
+
+    elif "save_hidden_states_for_l2s" == hook_name:
+        hook_function = save_hidden_states
+        hook_return_function = partial(
+            get_hidden_states,
+            extract_l2s_input_output=True,
+        )
     elif "shift_hidden_states" in hook_name:
         operation = ""
         if "add" in hook_name:
             operation = "add"
+        elif "learned_steer" in hook_name:
+            operation = "learned_steer"
         else:
             raise NotImplementedError(
                 f"Please provide a valid operation. Got {hook_name}"
@@ -498,8 +647,29 @@ def register_hooks(
 
         only_generated_tokens = "only_generated" in hook_name
         include_last_prompt_token = "last_prompt_token" in hook_name
+        no_implicit_model = "no_implicit_model" in hook_name
 
-        vector = torch.load(args.shift_vector_path)[args.shift_vector_key]
+
+        if "learned_steer" in hook_name:
+
+            # Re-create the model architecture (same input/output/hidden sizes)
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            input_size, output_size, hidden_size = model.get_hidden_size(), model.get_hidden_size(), args.hidden_size
+            model_steering = SteeringNet(input_size=input_size, output_size=output_size, hidden_size=hidden_size).to(device)
+
+            try:
+                model_steering.load_state_dict(torch.load(args.shift_vector_path[0]))
+            except:
+                model_steering.load_state_dict(torch.load(args.shift_vector_path[0])['steering_model'])
+            dtype = next(model.model_.parameters()).dtype
+            model_steering = model_steering.to(dtype)
+
+            model_steering.eval()
+            vector = model_steering
+
+        else:
+            vector = torch.load(args.shift_vector_path[0])[args.shift_vector_key]
+
         hook_function = partial(
             shift_hidden_states,
             vector=vector,
@@ -508,12 +678,14 @@ def register_hooks(
             only_generated_tokens=only_generated_tokens,
             include_last_prompt_token=include_last_prompt_token,
             start_prompt_token_idx=args.start_prompt_token_idx_steering,
+            individual_shift=args.individual_shift,
+            no_implicit_model=no_implicit_model
         )
     else:
         warnings.warn(f"{hook_name} is not supported. No hooks attached to model.")
     if hook_function is not None:
         hooked_modules = []
-        for name, module in model.named_modules():
+        for name, module in model.model_.named_modules():
             if fmatch(
                 name, modules_to_hook, exact_match=args.exact_match_modules_to_hook
             ):
@@ -533,7 +705,7 @@ def hooks_postprocessing(
 
         data_keys = ["hidden_states", "image"]
         # temp change
-        data_keys = ["hidden_states", "image", "model_predictions"]
+        data_keys = ["hidden_states", "image", "model_predictions", "response"]
 
         if "token_of_interest" in hook_name:
             data_keys.append("token_of_interest_mask")
@@ -552,6 +724,17 @@ def hooks_postprocessing(
         hook_postprocessing_function = metrics.get_metric(
             metric_name="captioning_metrics", args=args
         )
+
+    elif "hallucination_metrics" in hook_name:
+        hook_postprocessing_function = metrics.get_metric(
+            metric_name="hallucination_metrics", args=args
+        )
+
+    elif "safety_metrics" in hook_name:
+        hook_postprocessing_function = metrics.get_metric(
+            metric_name="safety_metrics", args=args
+        )
+
     else:
         warnings.warn(f"{hook_name} is not supported. No hooks attached to model.")
 
@@ -591,6 +774,7 @@ def setup_hooks(
                 logger=logger,
                 args=args,
             )
+            logger.info(f"Hook name: {hook_name}, hooked module: {modules_to_hook_}")
         else:
             hook_return_function = None
         hook_postprocessing_function = hooks_postprocessing(
@@ -601,3 +785,7 @@ def setup_hooks(
         hook_postprocessing_functions.append(hook_postprocessing_function)
 
     return hook_return_functions, hook_postprocessing_functions
+
+
+
+
